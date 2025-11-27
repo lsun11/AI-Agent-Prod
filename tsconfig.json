@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "rootDir": "./static",
+    "outDir": "./static_build",   // ⬅️ changed from "./static"
+    "allowJs": true,
+
+    "target": "ES2017",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "types": [],
+
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "strict": true,
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  },
+  "include": ["static/**/*"]
+}

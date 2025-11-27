@@ -1,0 +1,265 @@
+# src/topics/base_workflow.py
+from __future__ import annotations
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait, TimeoutError
+from typing import Type, TypeVar, Generic, Dict, Any, List, Callable, Optional
+from langgraph.graph import StateGraph, END
+from langchain_core.messages import HumanMessage, SystemMessage
+from .base_prompts import BaseCSResearchPrompts
+from .base_models import BaseResearchState, BaseCompanyInfo, BaseCompanyAnalysis
+
+StateT = TypeVar("StateT", bound=BaseResearchState)
+CompanyT = TypeVar("CompanyT", bound=BaseCompanyInfo)
+AnalysisT = TypeVar("AnalysisT", bound=BaseCompanyAnalysis)
+PromptsT = TypeVar("PromptsT", bound=BaseCSResearchPrompts)
+from ..root_workflow import RootWorkflow
+
+class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
+    """
+    Generic workflow for CS-product research topics.
+
+    Shared behavior:
+    - Search + scrape with Firecrawl
+    - Extract product/tool/service names
+    - Research specific companies/tools
+    - Analyze company content into structured fields
+    - Produce final recommendations via LLM
+    """
+
+    # Subclasses must override these:
+    state_model: Type[StateT]
+    company_model: Type[CompanyT]
+    analysis_model: Type[AnalysisT]
+    prompts_cls: Type[PromptsT] = BaseCSResearchPrompts  # default
+    topic_label: str = "Tool Search"
+    # How to search for comparison articles given the query
+    article_query_template: str = "{query} comparison best alternatives"
+
+    def __init__(
+        self,
+        default_model: str = "gpt-4o-mini",
+        default_temperature: float = 0.1,
+    ) -> None:
+        # initialize RootWorkflow (sets self.llm and _log_callback)
+        super().__init__(
+            default_model=default_model,
+            default_temperature=default_temperature,
+        )
+        self.prompts: PromptsT = self.prompts_cls()
+        self.workflow = self._build_workflow()
+
+
+    # ------------------------------------------------------------------ #
+    # Graph setup
+    # ------------------------------------------------------------------ #
+    def _build_workflow(self):
+        graph = StateGraph(self.state_model)
+        graph.add_node("extract_tools", self._extract_tools_step)
+        graph.add_node("research", self._research_step)
+        graph.add_node("analyze", self._analyze_step)
+        graph.set_entry_point("extract_tools")
+        graph.add_edge("extract_tools", "research")
+        graph.add_edge("research", "analyze")
+        graph.add_edge("analyze", END)
+        return graph.compile()
+
+    # ------------------------------------------------------------------ #
+    # Node: extract_tools
+    # ------------------------------------------------------------------ #
+    def _extract_tools_step(self, state: StateT) -> Dict[str, Any]:
+        self._log(f"Finding articles/resources about: {state.query}")
+
+        article_query = self.article_query_template.format(query=state.query)
+        print("Done article_query", article_query)
+        search_results = self.firecrawl.search_companies(article_query, num_results=3)
+        print("_extract_tools_step, check0")
+        web_results = self._get_web_results(search_results)
+        print("_extract_tools_step, check1")
+        all_content, _ = self._collect_content_from_web_results(web_results)
+
+        print("_extract_tools_step, check2")
+        messages = [
+            SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
+            HumanMessage(content=self.prompts.tool_extraction_user(state.query, all_content)),
+        ]
+
+        try:
+            response = self.llm.invoke(messages)
+            tool_names = [
+                name.strip()
+                for name in response.content.strip().split("\n")
+                if name.strip()
+            ]
+
+            if tool_names:
+                self._log(f"Extracted tools/platforms: {', '.join(tool_names[:5])}")
+            return {"extracted_tools": tool_names}
+        except Exception as e:
+            self._log(f"Extraction error: {e}")
+            return {"extracted_tools": []}
+
+    # ------------------------------------------------------------------ #
+    # Helper: analyze one company's content into structured fields
+    # ------------------------------------------------------------------ #
+    def _analyze_company_content(self, company_name: str, content: str) -> AnalysisT:
+        snippet = content[:3000]
+
+        structured_llm = self.llm.with_structured_output(self.analysis_model)
+        print("Done structured_llm")
+        messages = [
+            SystemMessage(content=self.prompts.TOOL_ANALYSIS_SYSTEM),
+            HumanMessage(content=self.prompts.tool_analysis_user(company_name, content)),
+        ]
+
+        try:
+            print("before structured_llm.invoke")
+            analysis: AnalysisT = structured_llm.invoke(messages)
+            print("Done structured_llm analysis")
+            return analysis
+        except Exception as e:
+            print(f"{self.topic_label} Error analyzing company content: {company_name}", e)
+            # Fall back to a minimal object
+            return self.analysis_model(
+                pricing_model="Unknown",
+                pricing_details="Unknown",
+                is_open_source=None,
+                tech_stack=[],
+                description="Analysis failed",
+                api_available=None,
+                language_support=[],
+                integration_capabilities=[],
+            )
+
+    # ------------------------------------------------------------------ #
+    # Node: research
+    # ------------------------------------------------------------------ #
+    def _research_single_tool(self, tool_name: str) -> Optional[CompanyT]:
+        self._log(f"researching: {tool_name}")
+        tool_query = f"{tool_name} official site"
+
+        tool_search_results = self.firecrawl.search_companies(tool_query, num_results=1)
+        #print("Pre-pre-pre checking", tool_name)
+        web_results = self._get_web_results(tool_search_results)
+        if not web_results:
+            self._log(f"no web results for {tool_name}")
+            return None
+        #print("Pre-pre checking", tool_name)
+        doc = web_results[0]
+
+        url = getattr(doc, "url", "") or ""
+        desc = ""
+        meta = getattr(doc, "metadata", None)
+        if meta:
+            desc = getattr(meta, "description", "") or desc
+            if not url:
+                url = getattr(meta, "url", "") or url
+
+        if not url:
+            self._log(f"no URL for {tool_name}, skipping")
+            return None
+        company: CompanyT = self.company_model(
+            name=tool_name,
+            description=desc,
+            website=url,
+            tech_stack=[],
+            competitors=[],
+        )
+        print("Pre checking", company.name)
+        # Prefer search markdown if available
+        content = getattr(doc, "markdown", None)
+        if not content:
+            self._log(f"no markdown in search result for {tool_name}, scraping {url}")
+            scraped = self.firecrawl.scrape_company_pages(url)
+            if scraped and getattr(scraped, "markdown", None):
+                content = scraped.markdown
+
+        if content:
+            analysis = self._analyze_company_content(company.name, content)
+            print("Done checking:", company.name)
+            company.pricing_model = analysis.pricing_model
+            company.pricing_details = analysis.pricing_details
+            company.is_open_source = analysis.is_open_source
+            company.tech_stack = analysis.tech_stack
+            company.description = analysis.description
+            company.api_available = analysis.api_available
+            company.language_support = analysis.language_support
+            company.integration_capabilities = analysis.integration_capabilities
+        else:
+            self._log(f"no content (markdown/scrape) for {tool_name}, skipping analysis")
+        print("Finished:", company.name)
+        return company
+
+    def _research_step(self, state: StateT) -> Dict[str, Any]:
+        log_messages = list(getattr(state, "log_messages", []) or [])
+        extracted_tools = getattr(state, "extracted_tools", [])
+
+        if not extracted_tools:
+            self._log("⚠️ No extracted names found, falling back to direct search")
+            search_results = self.firecrawl.search_companies(state.query, num_results=4)
+            web_results = self._get_web_results(search_results)
+
+            tool_names: List[str] = []
+            for doc in web_results:
+                meta = getattr(doc, "metadata", None)
+                if meta and getattr(meta, "title", None):
+                    tool_names.append(meta.title)
+            if not tool_names:
+                tool_names = ["Unknown"]
+        else:
+            tool_names = extracted_tools[:4]
+
+        self._log(f"{self.topic_label} 🔬 Researching specific tools/products: {', '.join(tool_names)}")
+
+        companies: List[CompanyT] = []
+
+        max_workers = min(2, len(tool_names))  # cap to avoid too many parallel calls
+        RESEARCH_TIMEOUT = 60
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_name = {
+                executor.submit(self._research_single_tool, name): name
+                for name in tool_names
+            }
+
+            try:
+                # Wait at most RESEARCH_TIMEOUT seconds for all futures
+                done, not_done = wait(future_to_name.keys(), timeout=RESEARCH_TIMEOUT)
+            except TimeoutError:
+                done = set()
+                not_done = set(future_to_name.keys())
+
+            for fut in as_completed(future_to_name):
+                tool_name = future_to_name[fut]
+                try:
+                    comp = fut.result()
+                    if comp is not None:
+                        companies.append(comp)
+                except Exception as e:
+                    self._log(f"error while researching {tool_name}: {e}")
+
+        return {"companies": companies}
+
+    # ------------------------------------------------------------------ #
+    # Node: analyze (final recommendations)
+    # ------------------------------------------------------------------ #
+    def _analyze_step(self, state: StateT) -> Dict[str, Any]:
+        self._log("Generating recommendations")
+
+        company_data = ", ".join(
+            [company.model_dump_json() for company in state.companies]
+        )
+
+        messages = [
+            SystemMessage(content=self.prompts.RECOMMENDATIONS_SYSTEM),
+            HumanMessage(content=self.prompts.recommendations_user(state.query, company_data)),
+        ]
+
+        response = self.llm.invoke(messages)
+        return {"analysis": response.content}
+
+    # ------------------------------------------------------------------ #
+    # Public API
+    # ------------------------------------------------------------------ #
+    def run(self, query: str) -> StateT:
+        initial_state = self.state_model(query=query)
+        final_state = self.workflow.invoke(initial_state)
+        return self.state_model(**final_state)

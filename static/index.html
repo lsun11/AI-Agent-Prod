@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Research Assistant</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="chat-container">
+      <div class="header-row">
+        <h2 id="app-title">AI Research Assistant</h2>
+        <div id="dropdown-container" class="dropdown-container"></div>
+      </div>
+    <div id="messages" class="messages"></div>
+    <form id="chat-form" class="input-row">
+        <label for="chat-input"></label><input
+        id="chat-input"
+        type="text"
+        placeholder="Ask about dev tools, pricing, alternatives..."
+        autocomplete="off"
+      />
+      <button type="submit">Send</button>
+    </form>
+      <div id="download-container" class="download-container"></div>
+  </div>
+
+  <!-- Load the compiled JS (from main.ts) -->
+  <script type="module" src="../static_build/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+📊 Results for: **Airbnb alternatives**. Click a bubble to open the links
+
+1. 🏢 **Vrbo**
+   🌐 Website: https://www.vrbo.com/
+
+2. 🏢 **hostFront**
+   🌐 Website: https://front.com/
+   💰 Pricing: **Freemium**
+   💰 Pricing Details: Free trial available; pricing details not specified
+   📖 Open Source: **False**
+   🔗 Integrations: **Email**, **AI automation tools**, **Ticketing systems**
+   📝 Description: A platform that integrates shared inbox, ticketing, AI agents, automation, and insights to enhance customer support operations.
+
+3. 🏢 **Lodgify**
+   🌐 Website: https://www.lodgify.com/
+   💰 Pricing: **Paid**
+   💰 Pricing Details: 7-day free trial, no credit card required
+   📖 Open Source: **False**
+   💻 Language Support: **English**
+   🔗 Integrations: **Booking.com**, **Expedia**, **Vrbo**, **Google**
+   📝 Description: An all-in-one vacation rental software to manage hosting businesses with tools for channel management, website building, reservations, automation, and analytics.
+
+4. 🏢 **OwnerRez**
+   🌐 Website: https://www.ownerrez.com/
+   💰 Pricing: **Paid**
+   💰 Pricing Details: 45 day free trial with onboarding included; no revenue percentage fees
+   📖 Open Source: **False**
+   🔗 Integrations: **Airbnb**, **Vrbo**, **Various payment methods**, **Multiple channel partners**
+   📝 Description: OwnerRez is a vacation rental platform offering channel management, property management, messaging, accounting, and website building for rental businesses.
+
+**Recommendations / Analysis:**
+----------------------------------------
+Tool / Service Recommendation
+
+Primary choice:
+- Recommended tool: **Vrbo**
+
+Backup options:
+- **Lodgify**
+- **OwnerRez**
+
+Summary:
+**Vrbo** is the most direct alternative to **Airbnb** as a vacation rental marketplace connecting property owners with travelers. **Lodgify** and **OwnerRez** are more focused on providing vacation rental management software and tools for hosts to manage bookings, channels, and websites rather than being marketplaces themselves. **Lodgify** offers channel management and website building with integrations to major platforms, while **OwnerRez** provides extensive property management features and multi-channel integrations including **Airbnb** and **Vrbo**.
+
+Selection criteria:
+- Type of solution needed: **marketplace** vs **rental management software**
+- Budget and pricing model
+- Need for **channel management** and **integrations**
+- **Trial availability** to test platform features
+- Focus on property owner vs traveler use case
+
+Trade-offs:
+- **Vrbo** offers a marketplace for listing and booking rentals but does not provide host management tools.
+- **Lodgify** and **OwnerRez** provide comprehensive host management features but are not marketplaces themselves.
+- **OwnerRez** offers a longer free trial and no revenue fees, which may be better for hosts managing multiple properties.
+- **Lodgify** integrates with multiple booking channels and offers website building, suitable for hosts wanting an all-in-one platform.
+
+Step-by-step decision guide:
+1. Determine if you want a platform to list your property for travelers (**marketplace**) or software to manage your rental business.
+2. If you want a marketplace similar to **Airbnb**, choose **Vrbo** to reach travelers directly.
+3. If you want to manage multiple listings and channels, consider **Lodgify** or **OwnerRez**.
+4. Evaluate trial options: test **Lodgify**'s 7-day free trial or **OwnerRez**'s 45-day free trial with onboarding.
+5. Consider **integrations** needed (e.g., **Airbnb**, **Vrbo**, **Expedia**) and select the platform that supports your channels.
+6. Assess **pricing** and fees to ensure alignment with your budget and business model.
+7. Choose the platform that best fits your operational needs and preferred user experience.

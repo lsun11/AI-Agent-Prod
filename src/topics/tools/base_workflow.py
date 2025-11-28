@@ -113,6 +113,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
         try:
             analysis: AnalysisT = structured_llm.invoke(messages)
+            print("!!!!!!!!!!!!!!!!!!", analysis)
             return analysis
         except Exception as e:
             print(f"{self.topic_label} Error analyzing company content:", e)

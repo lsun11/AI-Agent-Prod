@@ -12,7 +12,7 @@ from ..base_models import (
 
 class ECommerceCompanyAnalysis(BaseCompanyAnalysis):
     """
-    Analysis model for e-commerce platforms and tooling.
+    Analysis model for e_commerce platforms and tooling.
     """
 
     # Types of stores (e.g. “DTC”, “marketplace”, “digital goods”)
@@ -27,7 +27,7 @@ class ECommerceCompanyAnalysis(BaseCompanyAnalysis):
 
 class ECommerceCompanyInfo(BaseCompanyInfo):
     """
-    Info model for e-commerce platforms.
+    Info model for e_commerce platforms.
     """
 
     # Any mention of transaction fees (e.g. “2.9% + 30¢ per transaction”)
@@ -42,6 +42,6 @@ class ECommerceCompanyInfo(BaseCompanyInfo):
 
 class ECommerceResearchState(BaseResearchState):
     """
-    Research state for e-commerce tools.
+    Research state for e_commerce tools.
     """
     pass

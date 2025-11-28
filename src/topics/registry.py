@@ -17,7 +17,7 @@ from .tools.database.workflow import DatabaseWorkflow
 from .tools.consumer_and_social.workflow import ConsumerAndSocialWorkflow
 from .tools.content_and_website.workflow import ContentAndWebsiteWorkflow
 from .tools.design.workflow import DesignWorkflow
-from .tools.e_commerce.workflow import EcommerceWorkflow
+from .tools.e_commerce.workflow import ECommerceWorkflow
 from .tools.file_storage.workflow import FileStorageWorkflow
 from .tools.messaging.workflow import MessagingWorkflow
 from .tools.productivity.workflow import ProductivityWorkflow
@@ -151,7 +151,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "E-commerce platforms, shopping carts, online marketplaces, and retail tooling for selling products "
             "and services online."
         ),
-        workflow_factory=EcommerceWorkflow,
+        workflow_factory=ECommerceWorkflow,
         domain="commerce",
     ),
     "file_storage": TopicConfig(

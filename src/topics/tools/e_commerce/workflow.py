@@ -13,7 +13,7 @@ class ECommerceWorkflow(
     BaseCSWorkflow[ECommerceResearchState, ECommerceCompanyInfo, ECommerceCompanyAnalysis]
 ):
     """
-    Workflow specialized for e-commerce platforms / tooling.
+    Workflow specialized for e_commerce platforms / tooling.
     """
 
     state_model = ECommerceResearchState

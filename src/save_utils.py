@@ -161,9 +161,8 @@ Task:
 - Do NOT change the wording, punctuation, or sentence order.
 - Do NOT add or remove content.
 - Wrap the title (e.g "Recommendations") with **double asterisks**.
-- Wrap important tools, frameworks, and key concepts with **double asterisks**.
+- Wrap important tools, frameworks, apps, software, and key concepts with **double asterisks**.
 - Use Markdown bold: **like this**.
-- Use Markdown headings: ## like this / # like this
 - Return ONLY the modified text.
 """
     response = renderer_llm.invoke(prompt)

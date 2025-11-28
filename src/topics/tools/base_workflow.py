@@ -10,6 +10,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from ...firecrawl import FirecrawlService
 from .base_prompts import BaseCSResearchPrompts
 from .base_models import BaseResearchState, BaseCompanyInfo, BaseCompanyAnalysis
+from pydantic import BaseModel
 
 StateT = TypeVar("StateT", bound=BaseResearchState)
 CompanyT = TypeVar("CompanyT", bound=BaseCompanyInfo)
@@ -113,7 +114,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
         try:
             analysis: AnalysisT = structured_llm.invoke(messages)
-            print("!!!!!!!!!!!!!!!!!!", analysis)
+            #print("!!!!!!!!!!!!!!!!!!", analysis)
             return analysis
         except Exception as e:
             print(f"{self.topic_label} Error analyzing company content:", e)
@@ -131,7 +132,37 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
     # ------------------------------------------------------------------ #
     # Node: research
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------ #        ...
+
+    def _apply_analysis_to_company(self, company: CompanyT, analysis: AnalysisT) -> CompanyT:
+        """
+        Copy any matching fields from the analysis model onto the company model.
+
+        - Only copies fields that exist on `company`.
+        - Skips None values so we don't overwrite existing info with empties.
+        """
+        # Pydantic v2: model_dump; fallback for dict/other
+        if isinstance(analysis, BaseModel):
+            data = analysis.model_dump()
+        elif isinstance(analysis, dict):
+            data = analysis
+        else:
+            data = getattr(analysis, "__dict__", {}) or {}
+
+        # Optional: protect a few identity fields from being overwritten
+        protected = {"name", "website"}
+
+        for field_name, value in data.items():
+            if value is None:
+                continue
+            if field_name in protected:
+                continue
+            if hasattr(company, field_name):
+                setattr(company, field_name, value)
+
+        return company
+
+
     def _research_single_tool(self, tool_name: str) -> Optional[CompanyT]:
         self._log(f"researching: {tool_name}")
         tool_query = f"{tool_name} (computer software/platform/service/product) official site"
@@ -176,17 +207,12 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
             print("Checking:", company.name)
             analysis = self._analyze_company_content(company.name, content)
             print("Done checking:", company.name)
-            company.pricing_model = analysis.pricing_model
-            company.pricing_details = analysis.pricing_details
-            company.is_open_source = analysis.is_open_source
-            company.tech_stack = analysis.tech_stack
-            company.description = analysis.description
-            company.api_available = analysis.api_available
-            company.language_support = analysis.language_support
-            company.integration_capabilities = analysis.integration_capabilities
+            if getattr(analysis, "description", None):
+                company.description = analysis.description
+            company = self._apply_analysis_to_company(company, analysis)
         else:
             self._log(f"no content (markdown/scrape) for {tool_name}, skipping analysis")
-        print("Finished:", company.name)
+        print("Finished:", company.name, company)
         return company
 
     def _research_step(self, state: StateT) -> Dict[str, Any]:

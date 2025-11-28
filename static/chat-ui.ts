@@ -371,7 +371,7 @@ export class ChatUI {
             es.onmessage = (event: MessageEvent) => {
                 try {
                     const data = JSON.parse(event.data);
-
+                    console.log("!!!!!!!", data.reply)
                     if (data.type === "topic") {
                         const topicLabel = data.topic_label as string;
                         const topicKey = data.topic_key as string;
@@ -387,7 +387,6 @@ export class ChatUI {
                     }
 
                     if (data.type === "final") {
-                        console.log("!!!!!!!", data.reply)
                         const bubbles = this.splitReplyIntoBubbles(data.reply as string);
                         for (let i = 0; i < bubbles.length; i++) {
                             const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";

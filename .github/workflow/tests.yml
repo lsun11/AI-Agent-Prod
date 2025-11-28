@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      # Dummy keys so ChatOpenAI / FirecrawlService can be constructed in tests
+      OPENAI_API_KEY: "test-key"
+      FIRECRAWL_API_KEY: "test-key"
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Install uv (fast package manager you're already using)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      # Install the Python version required by pyproject (>=3.13)
+      # uv will read pyproject.toml and pick a compatible version
+      - name: Set up Python
+        run: uv python install
+
+      # Install project dependencies (and dev deps if you add them in pyproject)
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      # Run your pytest suite
+      - name: Run tests
+        run: uv run pytest

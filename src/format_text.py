@@ -188,33 +188,33 @@ def _format_tool_recommendation_doc(data: Dict[str, Any]) -> str:
 
     lines: List[str] = []
 
-    lines.append("Tool / Service Recommendation")
+    lines.append("## Tool / Service Recommendation")
     lines.append("")
 
     # Primary choice
-    lines.append("Primary choice:")
+    lines.append("### Primary choice:")
     if primary_choice:
         lines.append(f"- Recommended tool: {primary_choice}")
     else:
         lines.append("- No single clear primary choice identified.")
-    lines.append("")
+    # lines.append("")
 
     # Backup options
-    lines.append("Backup options:")
+    lines.append("### Backup options:")
     if backup_options:
         for opt in backup_options:
             lines.append(f"- {opt}")
     else:
         lines.append("- No backup options suggested.")
-    lines.append("")
+    # lines.append("")
 
     # Summary
-    lines.append("Summary:")
+    lines.append("### Summary:")
     lines.append(summary or "No summary provided.")
     lines.append("")
 
     # Selection criteria
-    lines.append("Selection criteria:")
+    lines.append("### Selection criteria:")
     if selection_criteria:
         for crit in selection_criteria:
             lines.append(f"- {crit}")
@@ -223,14 +223,14 @@ def _format_tool_recommendation_doc(data: Dict[str, Any]) -> str:
     lines.append("")
 
     # Trade-offs (handle both list[str] and list[dict])
-    lines.append("Trade-offs:")
+    lines.append("### Trade-offs:")
     if isinstance(tradeoffs_raw, list) and tradeoffs_raw:
         if isinstance(tradeoffs_raw[0], dict):
             # list of {aspect, description}
             for t in tradeoffs_raw:
                 aspect = t.get("aspect") or "Trade-off"
                 desc = t.get("description") or ""
-                lines.append(f"- {aspect}: {desc}")
+                lines.append(f"- **{aspect}**: {desc}")
         else:
             # assume list of strings
             for t in tradeoffs_raw:
@@ -240,7 +240,7 @@ def _format_tool_recommendation_doc(data: Dict[str, Any]) -> str:
     lines.append("")
 
     # Step-by-step decision guide
-    lines.append("Step-by-step decision guide:")
+    lines.append("### Step-by-step decision guide:")
     if steps:
         for idx, step in enumerate(steps, start=1):
             lines.append(f"{idx}. {step}")

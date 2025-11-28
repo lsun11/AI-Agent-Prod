@@ -18,7 +18,7 @@ TOPIC_DESCRIPTIONS = get_topic_descriptions()
 TOPIC_KEYS = list(TOPIC_CONFIGS.keys())
 
 # LLM used for classification (small, deterministic)
-topic_classifier_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+topic_classifier_llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
 
 
 def classify_topic_with_llm(query: str) -> Tuple[str, str]:

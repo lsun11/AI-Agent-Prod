@@ -387,6 +387,7 @@ export class ChatUI {
                     }
 
                     if (data.type === "final") {
+                        console.log("!!!!!!!", data.reply)
                         const bubbles = this.splitReplyIntoBubbles(data.reply as string);
                         for (let i = 0; i < bubbles.length; i++) {
                             const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";

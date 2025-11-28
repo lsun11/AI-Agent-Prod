@@ -293,6 +293,7 @@ export class ChatUI {
                         return;
                     }
                     if (data.type === "final") {
+                        console.log("!!!!!!!", data.reply);
                         const bubbles = this.splitReplyIntoBubbles(data.reply);
                         for (let i = 0; i < bubbles.length; i++) {
                             const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";

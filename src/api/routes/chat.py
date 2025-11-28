@@ -101,7 +101,6 @@ async def chat_stream(
         workflow.set_log_callback(log_callback)
         try:
             result = workflow.run(internal_query)
-            #print("result:", result)
             final_payload = format_workflow_result(result)
             q.put(json.dumps(final_payload))
         finally:

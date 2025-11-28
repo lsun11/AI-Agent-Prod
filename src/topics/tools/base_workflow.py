@@ -87,7 +87,6 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
         try:
             response = self.llm.invoke(messages)
-            print(response.content.strip().split("\n"),"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             tool_names = [
                 name.strip()
                 for name in response.content.strip().split("\n")

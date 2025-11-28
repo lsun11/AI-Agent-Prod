@@ -9,7 +9,7 @@ from pptx import Presentation
 from src.format_text import to_document
 
 load_dotenv()
-renderer_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+renderer_llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
 
 def _get_items_from_result(result: Any) -> Iterable[Any]:
     """
@@ -144,48 +144,6 @@ def format_result_text(query: str, result: Any) -> str:
         else:
             formatted = to_document(analysis)
             lines.append(formatted)
-        # # Case 1: already a string
-        # if isinstance(analysis, str):
-        #     lines.append(analysis)
-        #
-        # else:
-        #     # Case 2: Pydantic model or dict-like
-        #     if hasattr(analysis, "model_dump"):
-        #         data: dict[str, Any] = analysis.model_dump()
-        #     elif isinstance(analysis, dict):
-        #         data = analysis
-        #     else:
-        #         # Fallback: just stringified
-        #         lines.append(str(analysis))
-        #         return "\n".join(lines)
-        #
-        #     summary = data.get("summary") or data.get("description")
-        #     if summary:
-        #         lines.append(f"Summary:\n{summary}\n")
-        #
-        #     best_practices = data.get("best_practices") or data.get("tips")
-        #     if best_practices:
-        #         lines.append("Best Practices:")
-        #         for idx, bp in enumerate(best_practices, 1):
-        #             lines.append(f"{idx}. {bp}")
-        #         lines.append("")
-        #
-        #     pitfalls = data.get("pitfalls")
-        #     if pitfalls:
-        #         lines.append("Pitfalls / Risks:")
-        #         for idx, pf in enumerate(pitfalls, 1):
-        #             lines.append(f"{idx}. {pf}")
-        #         lines.append("")
-        #
-        #     action_plan = data.get("suggested_action_plan") or data.get("action_plan")
-        #     if action_plan:
-        #         lines.append("Suggested Action Plan:")
-        #         for idx, step in enumerate(action_plan, 1):
-        #             lines.append(f"{idx}. {step}")
-        #         lines.append("")
-        #
-        #     # Any extra fields you care about can be added similarly,
-        #     # e.g. key_arch_decisions, scalability_considerations, etc.
     analysis_text = "\n".join(lines)
     highlighted = ai_highlight(analysis_text)
     return highlighted #"\n".join(lines)
@@ -205,6 +163,7 @@ Task:
 - Wrap the title (e.g "Recommendations") with **double asterisks**.
 - Wrap important tools, frameworks, and key concepts with **double asterisks**.
 - Use Markdown bold: **like this**.
+- Use Markdown headings: ## like this / # like this
 - Return ONLY the modified text.
 """
     response = renderer_llm.invoke(prompt)

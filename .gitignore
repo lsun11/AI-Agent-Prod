@@ -1,0 +1,14 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/hj
+dist/
+wheels/
+*.egg-info
+node_modules/
+saved_docs/
+saved_slides/
+.
+# Virtual environments
+.venv
+.env

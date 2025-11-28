@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # allows manual run from the Actions tab
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Sync dependencies with uv
+        run: uv sync --all-extras
+
+      - name: Run tests
+        env:
+          # Fake keys so tests that touch OpenAI / Firecrawl don't crash
+          OPENAI_API_KEY: test-key
+          FIRECRAWL_API_KEY: test-key
+        run: uv run pytest

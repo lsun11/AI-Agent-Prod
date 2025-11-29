@@ -373,8 +373,10 @@ export class ChatUI {
                     if (data.type === "topic") {
                         const topicLabel = data.topic_label as string;
                         const topicKey = data.topic_key as string;
+                        const topicDomain = data.topic_domain as string;
                         this.updateTitle(topicLabel);
-                        this.updateBackground(topicKey);
+                        this.updateBackground(topicDomain);
+                        console.log("!!!!!!!!!!!", topicDomain);
                         this.startThinking();
                         return;
                     }

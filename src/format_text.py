@@ -78,14 +78,14 @@ def _format_se_recommendation_doc(data: Dict[str, Any]) -> str:
 
     lines: List[str] = []
 
-    lines.append("Software Engineering Recommendation")
+    lines.append("## Software Engineering Recommendation")
     lines.append("")
 
-    lines.append("Summary:")
+    lines.append("### Summary:")
     lines.append(summary or "No summary provided.")
     lines.append("")
 
-    lines.append("Best practices:")
+    lines.append("### Best practices:")
     if best_practices:
         for bp in best_practices:
             lines.append(f"- {bp}")
@@ -93,7 +93,7 @@ def _format_se_recommendation_doc(data: Dict[str, Any]) -> str:
         lines.append("- No best practices listed.")
     lines.append("")
 
-    lines.append("Pitfalls:")
+    lines.append("### Pitfalls:")
     if pitfalls:
         for p in pitfalls:
             lines.append(f"- {p}")
@@ -101,7 +101,7 @@ def _format_se_recommendation_doc(data: Dict[str, Any]) -> str:
         lines.append("- No pitfalls listed.")
     lines.append("")
 
-    lines.append("Suggested action plan (1–4 weeks):")
+    lines.append("### Suggested action plan (1–4 weeks):")
     if action_plan:
         for idx, step in enumerate(action_plan, start=1):
             lines.append(f"{idx}. {step}")
@@ -110,13 +110,13 @@ def _format_se_recommendation_doc(data: Dict[str, Any]) -> str:
     lines.append("")
 
     if suggested_tools:
-        lines.append("Suggested tools:")
+        lines.append("### Suggested tools:")
         for t in suggested_tools:
             lines.append(f"- {t}")
         lines.append("")
 
     if applicable_scenarios:
-        lines.append("Applicable scenarios:")
+        lines.append("### Applicable scenarios:")
         for s in applicable_scenarios:
             lines.append(f"- {s}")
         lines.append("")

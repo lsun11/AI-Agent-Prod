@@ -21,7 +21,7 @@ TOPIC_KEYS = list(TOPIC_CONFIGS.keys())
 topic_classifier_llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
 
 
-def classify_topic_with_llm(query: str) -> Tuple[str, str]:
+def classify_topic_with_llm(query: str) -> Tuple[str, str, str]:
     """
     Returns (key, label)
     - key: internal name (e.g. 'database')
@@ -55,11 +55,11 @@ def classify_topic_with_llm(query: str) -> Tuple[str, str]:
         # Find which config matches this label
         for key, cfg in TOPIC_CONFIGS.items():
             if cfg.label.lower() == label.lower():
-                return key, cfg.label
+                return key, cfg.label, cfg.domain
 
         # fallback — shouldn't happen
         default_key = next(iter(TOPIC_CONFIGS.keys()))
-        return default_key, TOPIC_CONFIGS[default_key].label
+        return default_key, TOPIC_CONFIGS[default_key].label, TOPIC_CONFIGS[default_key].domain
 
     except Exception as e:
         print("Topic classification error:", e)

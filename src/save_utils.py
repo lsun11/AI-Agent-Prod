@@ -6,7 +6,8 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from pptx import Presentation
 from pydantic import BaseModel
-
+import re
+import unicodedata
 from .format_text import to_document
 
 load_dotenv()
@@ -42,7 +43,7 @@ def format_result_text(query: str, result: Any) -> str:
     lines.append(f"📊 Results for: {query}. Click a bubble to open the links")
 
     items = list(_get_items_from_result(result))
-    print("FFFFFFFFFFFFFFFFOOOOOOOOOOOOOOOO", lines, items)
+
     if not items:
         # If no structured items, just show analysis/summary if available
         lines.append("")
@@ -267,9 +268,17 @@ Task:
 
 def save_result_document_raw(query: str, result_text: str) -> str:
     raw_summary = query.strip() or "research"
-    summary_snippet = "_".join(raw_summary.split())[:50]
+
+    # Normalize unicode so Chinese characters are preserved
+    normalized = unicodedata.normalize("NFKC", raw_summary)
+
+    # Replace any invalid filename characters with "_"
+    safe = re.sub(r'[<>:"/\\|?*\n\r\t]', "_", normalized)
+
+    # Trim and collapse spaces
+    safe = "_".join(safe.split())[:80]
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{summary_snippet}_{timestamp}.txt"
+    filename = f"{safe}_{timestamp}.txt"
 
     folder = "saved_docs"
     os.makedirs(folder, exist_ok=True)
@@ -447,9 +456,17 @@ def save_result_slides(query: str, result: Any) -> str:
 
     # ---------- 4) Save to disk ----------
     raw_summary = query.strip() or "research"
-    summary_snippet = "_".join(raw_summary.split())[:50]
+
+    # Normalize unicode so Chinese characters are preserved
+    normalized = unicodedata.normalize("NFKC", raw_summary)
+
+    # Replace any invalid filename characters with "_"
+    safe = re.sub(r'[<>:"/\\|?*\n\r\t]', "_", normalized)
+
+    # Trim and collapse spaces
+    safe = "_".join(safe.split())[:80]
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{summary_snippet}_{timestamp}.pptx"
+    filename = f"{safe}_{timestamp}.pptx"
 
     folder = "saved_slides"
     os.makedirs(folder, exist_ok=True)

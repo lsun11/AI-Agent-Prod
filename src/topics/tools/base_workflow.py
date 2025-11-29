@@ -75,12 +75,10 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
         article_query = self.article_query_template.format(query=state.query)
         search_results = self.firecrawl.search_companies(article_query, num_results=3)
-        print("_extract_tools_step, check0")
         web_results = self._get_web_results(search_results)
-        print("_extract_tools_step, check1")
         all_content, _ = self._collect_content_from_web_results(web_results)
 
-        print("_extract_tools_step, check2")
+        print("_extract_tools_step, check")
         messages = [
             SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
             HumanMessage(content=self.prompts.tool_extraction_user(state.query, all_content)),

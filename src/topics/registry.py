@@ -51,7 +51,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="developer_tools",
         label="Developer Tools",
         description=(
-            "IDEs, editors, debuggers, build tools, CI/CD, and developer productivity tooling."
+            "IDEs, editors, debuggers, build tools, CI/CD, developer productivity tooling, "
+            "version control clients, code review tools, and local dev environments. "
+            "NOT for cloud platforms, databases, or generic SaaS products."
         ),
         workflow_factory=DeveloperToolsWorkflow,
         domain="tools",
@@ -60,7 +62,10 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="saas",
         label="SaaS Products",
         description=(
-            "Hosted subscription software (B2B/B2C SaaS apps, CRM, helpdesk, collaboration tools, etc.)."
+            "Business / B2B SaaS products: CRM, ERP, helpdesk, HR, finance suites, "
+            "marketing automation, analytics dashboards, and business operations platforms. "
+            "Think Salesforce, HubSpot, Zendesk, Workday. "
+            "NOT for consumer wallets or P2P payment apps (those go to E-Commerce & Fintech)."
         ),
         workflow_factory=SaaSWorkflow,
         domain="tools",
@@ -69,7 +74,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="api",
         label="API Platforms",
         description=(
-            "Platforms whose main product is an API/SDK: REST/GraphQL APIs, webhooks, API gateways, etc."
+            "Platforms whose main product is an API/SDK: REST / GraphQL APIs, webhooks, "
+            "API gateways, developer platforms exposed primarily via API. "
+            "Use for questions like 'Stripe API vs Braintree API' or 'Best SMS APIs'."
         ),
         workflow_factory=APIWorkflow,
         domain="tools",
@@ -78,7 +85,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="ai_ml",
         label="AI & ML Platforms",
         description=(
-            "LLM providers, ML platforms, model hosting, vector DBs, embeddings, fine-tuning, and AI infrastructure."
+            "LLM providers, ML platforms, model hosting, vector DBs, embeddings, "
+            "fine-tuning services, and AI infrastructure. "
+            "Use for topics like OpenAI vs Anthropic, Pinecone vs Weaviate, MLops platforms, etc."
         ),
         workflow_factory=AIWorkflow,
         domain="tools",
@@ -87,7 +96,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="security",
         label="Security & Identity",
         description=(
-            "Auth, identity, IAM, SSO, OAuth/OIDC, MFA, zero trust, WAF, bot/fraud detection, and security tooling."
+            "Auth, identity, IAM, SSO, OAuth/OIDC, MFA, zero trust, WAF, bot/fraud detection, "
+            "and security tooling. Examples: Auth0, Okta, Cloudflare Security, Snyk. "
+            "NOT for generic cloud providers or payment wallets."
         ),
         workflow_factory=SecurityWorkflow,
         domain="tools",
@@ -96,7 +107,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="cloud",
         label="Cloud & Infrastructure",
         description=(
-            "Cloud providers and infrastructure: compute, storage, networking, serverless, managed Kubernetes, etc."
+            "Cloud providers and infrastructure: compute, storage, networking, serverless, "
+            "managed Kubernetes, and infra platforms (AWS, Azure, GCP, DigitalOcean, Fly.io, etc.). "
+            "Also includes DevOps infra tools that are primarily about runtime/infra, not app-level SaaS."
         ),
         workflow_factory=CloudWorkflow,
         domain="tools",
@@ -105,7 +118,8 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="database",
         label="Databases & Data Platforms",
         description=(
-            "SQL/NoSQL databases, data warehouses, OLTP/OLAP engines, and managed database services."
+            "SQL/NoSQL databases, data warehouses, OLTP/OLAP engines, data lakes, and managed database services. "
+            "Use for questions like 'Postgres vs MySQL', 'Snowflake vs BigQuery', 'best time-series DBs'."
         ),
         workflow_factory=DatabaseWorkflow,
         domain="tools",
@@ -118,8 +132,10 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="consumer_and_social",
         label="Consumer & Social Apps",
         description=(
-            "Consumer-facing apps such as dating apps, social networks, ride-hailing companions, "
-            "and lifestyle services (e.g. Tinder, Instagram-style products)."
+            "Consumer-facing apps whose primary purpose is social interaction, dating, content feeds, "
+            "or lifestyle communities. Examples: Tinder, Bumble, Instagram, TikTok, X/Twitter, Reddit. "
+            "NOT for payment / money-transfer apps (Venmo, Cash App, PayPal → E-Commerce & Fintech). "
+            "NOT for pure messaging/chat tools (WhatsApp, Telegram, Slack → Messaging & Communication)."
         ),
         workflow_factory=ConsumerAndSocialWorkflow,
         domain="consumer",
@@ -128,8 +144,8 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="content_and_website",
         label="Content & Website Platforms",
         description=(
-            "Content management systems, blogging platforms, website builders, and tools for hosting "
-            "or publishing online content."
+            'Content management systems, blogging platforms, website builders, and publishing tools. '
+            "Examples: WordPress, Ghost, Wix, Squarespace, Webflow, Medium-like platforms."
         ),
         workflow_factory=ContentAndWebsiteWorkflow,
         domain="consumer",
@@ -138,18 +154,22 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="design",
         label="Design & Creative Tools",
         description=(
-            "UI/UX design tools, graphic design platforms, prototyping tools, and collaborative design systems "
-            "(e.g. Figma-like products)."
+            "UI/UX design tools, graphic design platforms, prototyping tools, and creative software. "
+            "Examples: Figma, Sketch, Adobe XD, Photoshop, Illustrator, Canva. "
+            "Use for design tooling, creative workflows, and collaborative design systems."
         ),
         workflow_factory=DesignWorkflow,
         domain="creative",
     ),
     "e_commerce": TopicConfig(
         key="e_commerce",
-        label="E-Commerce & Online Stores",
+        label="E-Commerce & Fintech / Payments",
         description=(
-            "E-commerce platforms, shopping carts, online marketplaces, and retail tooling for selling products "
-            "and services online."
+            "E-commerce platforms, online store builders, checkout systems, and **consumer or business "
+            "payment tools**. This includes payment processors, wallets, and P2P money transfer apps. "
+            "Examples: Shopify, WooCommerce, Stripe, Adyen, Braintree, PayPal, Venmo, Cash App, Klarna. "
+            "Use this for anything primarily about **paying, getting paid, checkout, or online selling**, "
+            "even if the app has a social feed (e.g. Venmo)."
         ),
         workflow_factory=ECommerceWorkflow,
         domain="commerce",
@@ -158,8 +178,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="file_storage",
         label="File Storage & Sync",
         description=(
-            "Cloud storage, file synchronization/sharing tools, backup solutions, and team file collaboration "
-            "platforms (e.g. Dropbox-style services)."
+            "Cloud storage, file synchronization and sharing tools, backup solutions, and team file "
+            "collaboration platforms. Examples: Dropbox, Google Drive, OneDrive, Box, iCloud Drive. "
+            "Use when the main focus is storing/syncing files, not general productivity or messaging."
         ),
         workflow_factory=FileStorageWorkflow,
         domain="tools",
@@ -169,7 +190,8 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         label="Messaging & Communication",
         description=(
             "Messaging apps and communication platforms: chat apps, team messaging, email-like tools, "
-            "and real-time collaboration (e.g. WhatsApp, Slack-style tools)."
+            "and real-time collaboration. Examples: WhatsApp, Telegram, Signal, Slack, Microsoft Teams, "
+            "Discord. Use when the primary purpose is **communication**, not social feed or payments."
         ),
         workflow_factory=MessagingWorkflow,
         domain="communication",
@@ -178,8 +200,9 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="productivity",
         label="Productivity & Organization",
         description=(
-            "Note-taking apps, personal/task management tools, knowledge bases, and productivity suites "
-            "(e.g. Notion, Evernote, Todoist)."
+            "Note-taking apps, personal task managers, knowledge bases, calendars, and productivity suites. "
+            "Examples: Notion, Evernote, Todoist, Obsidian, Roam, ClickUp (solo/team productivity angle). "
+            "Use when the core purpose is organizing work or personal information, not primarily messaging or sales."
         ),
         workflow_factory=ProductivityWorkflow,
         domain="productivity",
@@ -188,14 +211,15 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         key="transportation",
         label="Transportation & Mobility",
         description=(
-            "Ride-share, taxi-hailing, micromobility, and transportation apps/platforms (e.g. Uber, Lyft, "
-            "scooter/bike-sharing apps)."
+            "Ride-share, taxi-hailing, micromobility, delivery-as-transport, and mobility apps/platforms. "
+            "Examples: Uber, Lyft, Bolt, Didi, Grab, scooter/bike-sharing apps. "
+            "Use for queries like 'Uber alternatives', 'best ride-share apps in Europe', etc. "
+            "NOT for pure payment or wallet apps (those belong to E-Commerce & Fintech)."
         ),
         workflow_factory=TransportationWorkflow,
         domain="consumer",
     ),
 }
-
 
 def build_workflows() -> Dict[str, Any]:
     """

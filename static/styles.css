@@ -272,7 +272,7 @@ body {
 /* Lists: kill huge gaps between <ul>s */
 .message.bot-first ul,
 .message.bot ul {
-  margin: 2px 0 -10px 18px;   /* small vertical gap, slight indent */
+  margin: 0 0 3px 18px;   /* small vertical gap, slight indent */
   padding-left: 0;
 }
 

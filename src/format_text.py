@@ -11,18 +11,18 @@ def _format_career_action_plan_doc(data: Dict[str, Any]) -> str:
 
     lines: List[str] = []
 
-    lines.append("Career Action Plan")
+    lines.append("## Career Action Plan")
     lines.append("")
 
-    lines.append("Goal summary:")
+    lines.append("### Goal summary:")
     lines.append(goal_summary or "No goal summary provided.")
     lines.append("")
 
-    lines.append("Main theme:")
+    lines.append("### Main theme:")
     lines.append(main_theme or "No main theme provided.")
     lines.append("")
 
-    lines.append("Steps:")
+    lines.append("### Steps:")
     if not steps:
         lines.append("No steps were generated.")
     else:
@@ -49,7 +49,7 @@ def _format_career_action_plan_doc(data: Dict[str, Any]) -> str:
                 lines.append(f"  Outcome: {outcome}")
             lines.append("")
 
-    lines.append("Risks & pitfalls:")
+    lines.append("### Risks & pitfalls:")
     if risks:
         for r in risks:
             lines.append(f"- {r}")
@@ -57,7 +57,7 @@ def _format_career_action_plan_doc(data: Dict[str, Any]) -> str:
         lines.append("- No risks listed.")
     lines.append("")
 
-    lines.append("Success metrics:")
+    lines.append("### Success metrics:")
     if success_metrics:
         for m in success_metrics:
             lines.append(f"- {m}")

@@ -198,7 +198,6 @@ export class ChatUI {
     private addMessage(text: string, sender: Sender, url?: string): void {
         const div = document.createElement("div");
         div.className = `message ${sender}`;
-
         // render markdown → HTML
         div.innerHTML = markdownToHtml(text);
 
@@ -371,7 +370,6 @@ export class ChatUI {
             es.onmessage = (event: MessageEvent) => {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log("!!!!!!!", data.reply)
                     if (data.type === "topic") {
                         const topicLabel = data.topic_label as string;
                         const topicKey = data.topic_key as string;

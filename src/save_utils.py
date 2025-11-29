@@ -59,7 +59,7 @@ def format_result_text(query: str, result: Any) -> str:
     for i, item in enumerate(items, 1):
         # Name / title
         name = getattr(item, "name", None) or getattr(item, "title", None) or f"Item {i}"
-        lines.append(f"\n{i}. 🏢 {name}")
+        lines.append(f"\n{i}. 🏢 **{name}**")
 
         # Website / URL
         website = getattr(item, "website", None) or getattr(item, "url", None)

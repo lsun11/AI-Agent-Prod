@@ -280,7 +280,6 @@ export class ChatUI {
             es.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log("!!!!!!!", data.reply);
                     if (data.type === "topic") {
                         const topicLabel = data.topic_label;
                         const topicKey = data.topic_key;

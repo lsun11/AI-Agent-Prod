@@ -25,7 +25,7 @@ body {
     margin: 0px auto 3px auto;
     margin-bottom: 0px;
 
-    padding: 7px 16px; /* the “pad” around text */
+    padding: 5px 8px 7px; /* the “pad” around text */
     border-radius: 8px; /* pill shape */
     background: rgba(255, 255, 255, 0.9); /* light background for contrast */
     color: #004b50; /* slightly darker text */
@@ -39,7 +39,7 @@ body {
     margin: 10px auto -4px auto;
     margin-bottom: 16px;
 
-    padding: 2px 14px 4px 14px; /* the “pad” around text */
+    padding: 2px 8px 4px 8px; /* the “pad” around text */
     border-radius: 999px; /* pill shape */
     background: rgba(248, 252, 253, 0.33); /* light background for contrast */
     color: #004b50; /* slightly darker text */
@@ -240,6 +240,55 @@ body {
     border-color: #131a2a;
     width: fit-content;
 }
+
+/* === Compact rich-content styling inside bot bubbles === */
+.message.bot-first,
+.message.bot {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.4;
+}
+
+/* Headings: smaller, tighter, nicer */
+.message.bot-first h2,
+.message.bot h2 {
+  font-size: 16px;
+  margin: 4px 0 6px;
+  font-weight: 600;
+}
+
+.message.bot-first h3,
+.message.bot h3 {
+  font-size: 14px;
+  margin: 4px 0 4px;
+  font-weight: 600;
+}
+
+/* Paragraphs */
+.message.bot-first p,
+.message.bot p {
+  margin: 2px 0 4px;
+}
+
+/* Lists: kill huge gaps between <ul>s */
+.message.bot-first ul,
+.message.bot ul {
+  margin: 2px 0 -10px 18px;   /* small vertical gap, slight indent */
+  padding-left: 0;
+}
+
+.message.bot-first li,
+.message.bot li {
+  margin: 0;
+  padding: 0;
+  list-style-type: disc;
+}
+
+/* Optional: make bold text pop a bit more */
+.message.bot-first strong,
+.message.bot strong {
+  font-weight: 600;
+}
+
 
 .message.bot:hover {
     border-color: rgba(4, 143, 143, 0.66);

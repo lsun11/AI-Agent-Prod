@@ -212,7 +212,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
             company = self._apply_analysis_to_company(company, analysis)
         else:
             self._log(f"no content (markdown/scrape) for {tool_name}, skipping analysis")
-        print("Finished:", company.name, company)
+        print("Finished:", company.name)
         return company
 
     def _research_step(self, state: StateT) -> Dict[str, Any]:

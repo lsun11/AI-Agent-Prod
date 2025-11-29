@@ -3,9 +3,21 @@ from ..base_prompts import BaseCSResearchPrompts
 
 class CloudServicePrompts(BaseCSResearchPrompts):
     """
-    Prompts specialized for API-based platforms, developer APIs, and integrations.
+    Cloud, infrastructure, and DevOps tooling.
+
+    Examples:
+      - AWS, Azure, GCP, DigitalOcean
+      - Kubernetes platforms, serverless (Lambda, Cloud Functions)
+      - CI/CD infra, observability/monitoring, logging, APM
+      - IaC tools (Terraform, Pulumi) if framed as infra tooling
+
+    NOT:
+      - Databases as products (Postgres services → database)
+      - Generic SaaS business apps (Salesforce → saas)
     """
 
-    TOPIC_LABEL = "cloud service, infrastructure platform, or DevOps tool"
-    ANALYSIS_SUBJECT = "cloud platforms, infrastructure services, DevOps tooling, and runtime environments"
+    TOPIC_LABEL = "cloud platform, infrastructure service, or DevOps tool"
+    ANALYSIS_SUBJECT = (
+        "cloud providers, compute/storage/networking, DevOps tooling, and infrastructure management"
+    )
     RECOMMENDER_ROLE = "cloud infrastructure architect"

@@ -208,7 +208,7 @@ def format_result_text(query: str, result: Any) -> str:
             lines.append(f"   🔧 {label}: {rendered}")
 
         lines.append("")
-    print("LLLLLLLLLLLLLLLLLLLLLL", lines)
+
     # ... tail part (analysis / to_document / ai_highlight) unchanged ...
     analysis = getattr(result, "analysis", None) or getattr(result, "summary", None)
     if analysis is not None:
@@ -221,9 +221,7 @@ def format_result_text(query: str, result: Any) -> str:
             lines.append(formatted)
 
     analysis_text = "\n".join(lines)
-    print("TTTTTTTTTTTTTTTTTTTTTT", analysis_text)
     highlighted = ai_highlight(analysis_text)
-    print("HHHHHHHHHHHHHHHHHh", highlighted)
     return highlighted
 
 

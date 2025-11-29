@@ -31,7 +31,14 @@ from .career.coding_interview.workflow import CodingInterviewPlatformsWorkflow
 from .career.system_design.workflow import SystemDesignPlatformsWorkflow
 from .career.behavioral_interview.workflow import BehavioralInterviewToolsWorkflow
 
-
+from .software_engineering.agile import AgileWorkflow
+from .software_engineering.architecture_design.workflow import ArchitectureDesignWorkflow
+from .software_engineering.cicd import CICDWorkflow
+from .software_engineering.code_quality.workflow import CodeQualityWorkflow
+# from .software_engineering.code_review.workflow import CodeReviewWorkflow
+# from .software_engineering.productivity.workflow import ProductivityWorkflow
+# from .software_engineering.project_management.workflow import ProjectManagementWorkflow
+from .software_engineering.testing.workflow import TestingWorkflow
 
 @dataclass
 class TopicConfig:
@@ -272,6 +279,63 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
         workflow_factory=BehavioralInterviewToolsWorkflow,
         domain="career",
     ),
+    # ==== Software engineering domain ====
+    "architecture_design": TopicConfig(
+        key="architecture_design",
+        label="Architecture Design Suggestions",
+        description="Suggestions for architecture design.",
+        workflow_factory=ArchitectureDesignWorkflow,
+        domain="software_engineering",
+    ),
+    "code_quality": TopicConfig(
+        key="code_quality",
+        label="Code Quality Suggestions",
+        description="Suggestions for code quality.",
+        workflow_factory=CodeQualityWorkflow,
+        domain="software_engineering",
+    ),
+    # "code_review": TopicConfig(
+    #     key="code_review",
+    #     label="Code Review Suggestions",
+    #     description="Suggestions for code review.",
+    #     workflow_factory=CodeReviewWorkflow,
+    #     domain="software_engineering_old",
+    # ),
+    # "productivity": TopicConfig(
+    #     key="productivity",
+    #     label="Productivity Suggestions",
+    #     description="Suggestions for software engineering productivity.",
+    #     workflow_factory=ProductivityWorkflow,
+    #     domain="software_engineering_old",
+    # ),
+    # "project_management": TopicConfig(
+    #     key="project_management",
+    #     label="Project Management",
+    #     description="Project management tools & suggestions for project management.",
+    #     workflow_factory=ProjectManagementWorkflow,
+    #     domain="software_engineering_old",
+    # ),
+    "testing": TopicConfig(
+        key="testing",
+        label="Testing",
+        description="Testing tools & suggestions for testing.",
+        workflow_factory=TestingWorkflow,
+        domain="software_engineering",
+    ),
+    "agile": TopicConfig(
+        key="agile",
+        label="Agile Tools",
+        description="Agile tools & suggestions.",
+        workflow_factory=AgileWorkflow,
+        domain="software_engineering",
+    ),
+    "cicd": TopicConfig(
+        key="cicd",
+        label="CICD Tools",
+        description="CICD tools & suggestions.",
+        workflow_factory=CICDWorkflow,
+        domain="software_engineering",
+    )
 }
 
 def build_workflows() -> Dict[str, Any]:

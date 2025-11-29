@@ -41,7 +41,7 @@ async def chat_stream(
     print("User selected temperature:", selected_temperature)
 
     # 1) classify topic
-    topic_key, topic_label = classify_topic_with_llm(internal_query)
+    topic_key, topic_label, topic_domain = classify_topic_with_llm(internal_query)
 
     # 2) get the *instance* from TOPIC_WORKFLOWS
     workflow = TOPIC_WORKFLOWS.get(topic_key)
@@ -49,6 +49,7 @@ async def chat_stream(
         workflow = TOPIC_WORKFLOWS.get("developer_tools")
         topic_key = "developer_tools"
         topic_label = "Developer Tools"
+        topic_domain = "tools"
 
     # If Chinese, we may also translate the topic label for UI
     topic_label_display = (
@@ -116,6 +117,7 @@ async def chat_stream(
             "type": "topic",
             "topic_key": topic_key,
             "topic_label": topic_label_display,
+            "topic_domain": topic_domain,
         }
         yield f"data: {json.dumps(topic_payload)}\n\n"
 

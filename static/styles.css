@@ -467,87 +467,34 @@ body {
     background-position: top left;
 }
 
-/* topic-specific backgrounds */
-body.topic-bg-computer_science {
-    background-image: url("../static/assets/backgrounds/computer_science.png");
-    background-repeat: repeat;
-    background-size: auto;
+body.topic-bg-tools,
+body.topic-bg-career,
+body.topic-bg-software_engineering {
+  position: relative;
+  z-index: 0;
 }
 
-body.topic-bg-developer_tools {
-    background-image: url("../static/assets/backgrounds/developer_tools.png");
-    background-repeat: repeat;
-    background-size: auto;
+body.topic-bg-tools::before,
+body.topic-bg-career::before,
+body.topic-bg-software_engineering::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-repeat: repeat;
+  background-size: auto;
+  opacity: 0.35;
+  z-index: -1;
+  pointer-events: none;
 }
 
-body.topic-bg-saas {
-    background-image: url("../static/assets/backgrounds/saas.png");
-    background-repeat: repeat;
-    background-size: auto;
+body.topic-bg-tools::before {
+  background-image: url("../static/assets/backgrounds/tools.png");
 }
 
-body.topic-bg-api {
-    background-image: url("../static/assets/backgrounds/api.png");
-    background-repeat: repeat;
-    background-size: auto;
+body.topic-bg-career::before {
+  background-image: url("../static/assets/backgrounds/career.png");
 }
 
-body.topic-bg-ai_ml {
-    background-image: url("../static/assets/backgrounds/ml_ai.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-security {
-    background-image: url("../static/assets/backgrounds/security.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-cloud {
-    background-image: url("../static/assets/backgrounds/cloud.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-database {
-    background-image: url("../static/assets/backgrounds/database.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-behavioral_interview {
-    background-image: url("../static/assets/backgrounds/behavioral_interview.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-coding_interview {
-    background-image: url("../static/assets/backgrounds/coding_interview.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-resume_tools {
-    background-image: url("../static/assets/backgrounds/resume_tools.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-job_search {
-    background-image: url("../static/assets/backgrounds/job_search.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-learning_platform {
-    background-image: url("../static/assets/backgrounds/learning_platform.png");
-    background-repeat: repeat;
-    background-size: auto;
-}
-
-body.topic-bg-system_design {
-    background-image: url("../static/assets/backgrounds/system_design.png");
-    background-repeat: repeat;
-    background-size: auto;
+body.topic-bg-software_engineering::before {
+  background-image: url("../static/assets/backgrounds/software_engineering.png");
 }

@@ -24,6 +24,15 @@ from .tools.productivity.workflow import ProductivityWorkflow
 from .tools.transportation.workflow import TransportationWorkflow
 
 
+from .career.resume_tools.workflow import ResumeToolsWorkflow
+from .career.job_search.workflow import JobSearchWorkflow
+from .career.learning_platforms.workflow import LearningPlatformsWorkflow
+from .career.coding_interview.workflow import CodingInterviewPlatformsWorkflow
+from .career.system_design.workflow import SystemDesignPlatformsWorkflow
+from .career.behavioral_interview.workflow import BehavioralInterviewToolsWorkflow
+
+
+
 @dataclass
 class TopicConfig:
     """
@@ -138,7 +147,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "NOT for pure messaging/chat tools (WhatsApp, Telegram, Slack → Messaging & Communication)."
         ),
         workflow_factory=ConsumerAndSocialWorkflow,
-        domain="consumer",
+        domain="tools",
     ),
     "content_and_website": TopicConfig(
         key="content_and_website",
@@ -148,7 +157,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "Examples: WordPress, Ghost, Wix, Squarespace, Webflow, Medium-like platforms."
         ),
         workflow_factory=ContentAndWebsiteWorkflow,
-        domain="consumer",
+        domain="tools",
     ),
     "design": TopicConfig(
         key="design",
@@ -159,7 +168,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "Use for design tooling, creative workflows, and collaborative design systems."
         ),
         workflow_factory=DesignWorkflow,
-        domain="creative",
+        domain="tools",
     ),
     "e_commerce": TopicConfig(
         key="e_commerce",
@@ -172,7 +181,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "even if the app has a social feed (e.g. Venmo)."
         ),
         workflow_factory=ECommerceWorkflow,
-        domain="commerce",
+        domain="tools",
     ),
     "file_storage": TopicConfig(
         key="file_storage",
@@ -194,7 +203,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "Discord. Use when the primary purpose is **communication**, not social feed or payments."
         ),
         workflow_factory=MessagingWorkflow,
-        domain="communication",
+        domain="tools",
     ),
     "productivity": TopicConfig(
         key="productivity",
@@ -205,7 +214,7 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "Use when the core purpose is organizing work or personal information, not primarily messaging or sales."
         ),
         workflow_factory=ProductivityWorkflow,
-        domain="productivity",
+        domain="tools",
     ),
     "transportation": TopicConfig(
         key="transportation",
@@ -217,7 +226,51 @@ TOPIC_CONFIGS: Dict[str, TopicConfig] = {
             "NOT for pure payment or wallet apps (those belong to E-Commerce & Fintech)."
         ),
         workflow_factory=TransportationWorkflow,
-        domain="consumer",
+        domain="tools",
+    ),
+
+    # ==== Career domain ====
+    "resume_tools": TopicConfig(
+        key="resume_tools",
+        label="Resume Optimization & ATS Tools",
+        description="Resume builders, ATS checkers, keyword optimizers and related tools.",
+        workflow_factory=ResumeToolsWorkflow,
+        domain="career",
+    ),
+    "job_search": TopicConfig(
+        key="job_search",
+        label="Job Search Platforms & Market Analysis",
+        description="Job boards, remote job sites, and salary/market insight platforms.",
+        workflow_factory=JobSearchWorkflow,
+        domain="career",
+    ),
+    "learning_platform": TopicConfig(
+        key="learning_platform",
+        label="Learning Platforms & Skill Roadmaps",
+        description="Online courses, bootcamps, and structured learning roadmaps.",
+        workflow_factory=LearningPlatformsWorkflow,
+        domain="career",
+    ),
+    "coding_interview": TopicConfig(
+        key="coding_interview",
+        label="Coding Interview Platforms",
+        description="Platforms for coding interview practice and mock interviews.",
+        workflow_factory=CodingInterviewPlatformsWorkflow,
+        domain="career",
+    ),
+    "system_design": TopicConfig(
+        key="system_design",
+        label="System Design Interview Platforms",
+        description="System design interview preparation platforms and resources.",
+        workflow_factory=SystemDesignPlatformsWorkflow,
+        domain="career",
+    ),
+    "behavioral_interview": TopicConfig(
+        key="behavioral_interview",
+        label="Behavioral Interview & Coaching Tools",
+        description="Behavioral interview practice tools and career coaching platforms.",
+        workflow_factory=BehavioralInterviewToolsWorkflow,
+        domain="career",
     ),
 }
 

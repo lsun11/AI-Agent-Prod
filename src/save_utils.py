@@ -247,19 +247,19 @@ Task:
 
     # --- Safety guard: ensure NO content was removed or changed ---
 
-    # def strip_bold(s: str) -> str:
-    #     # Remove all ** so we can compare the underlying text
-    #     return s.replace("**", "")
-    #
-    # base_original = strip_bold(text)
-    # base_candidate = strip_bold(candidate)
-    #
-    # # If the underlying text changed (content removed/added/reordered),
-    # # fall back to the original text with NO extra highlighting.
-    # if base_original != base_candidate:
-    #     # Debug (optional):
-    #     print("ai_highlight: content mismatch, falling back to original")
-    #     return text
+    def strip_bold(s: str) -> str:
+        # Remove all ** so we can compare the underlying text
+        return s.replace("**", "")
+
+    base_original = strip_bold(text)
+    base_candidate = strip_bold(candidate)
+
+    # If the underlying text changed (content removed/added/reordered),
+    # fall back to the original text with NO extra highlighting.
+    if base_original != base_candidate:
+        # Debug (optional):
+        print("ai_highlight: content mismatch, falling back to original")
+        return text
 
     return candidate
 

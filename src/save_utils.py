@@ -5,10 +5,13 @@ from typing import Any, Iterable
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from pptx import Presentation
+from pydantic import BaseModel
 
-from src.format_text import to_document
+from .format_text import to_document
 
 load_dotenv()
+## TODO: check if nano is a good model for this highligher.
+## Currently it's causing issues.
 renderer_llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
 
 def _get_items_from_result(result: Any) -> Iterable[Any]:
@@ -39,7 +42,7 @@ def format_result_text(query: str, result: Any) -> str:
     lines.append(f"📊 Results for: {query}. Click a bubble to open the links")
 
     items = list(_get_items_from_result(result))
-
+    print("FFFFFFFFFFFFFFFFOOOOOOOOOOOOOOOO", lines, items)
     if not items:
         # If no structured items, just show analysis/summary if available
         lines.append("")
@@ -110,7 +113,18 @@ def format_result_text(query: str, result: Any) -> str:
                 f"   🔗 Integrations: {', '.join(integration_caps[:4])}"
             )
 
-        # Generic tags / category if present (useful for software_engineering / career)
+        target_users = getattr(item, "target_users", None)
+        if target_users:
+            lines.append(
+                f"   🧑‍💻 Target users: {', '.join(target_users[:4])}"
+            )
+
+        primary_use_cases = getattr(item, "primary_use_cases", None)
+        if primary_use_cases:
+            lines.append(
+                f"   Primary use cases: {', '.join(primary_use_cases[:4])}"
+            )
+        # Generic tags / category if present
         category = getattr(item, "category", None)
         if category:
             lines.append(f"   🧩 Category: {category}")
@@ -124,29 +138,91 @@ def format_result_text(query: str, result: Any) -> str:
         if difficulty:
             lines.append(f"   📈 Difficulty: {difficulty}")
 
-        # Description / summary
-        description = getattr(item, "description", None) or getattr(
-            item, "summary", None
-        )
-        if description and description != "Analysis failed":
-            lines.append(f"   📝 Description: {description}")
+        # 🔎 Domain-specific extras (cloud, transportation, etc.)
+
+        # Cloud / infra extras (if present on model)
+        if hasattr(item, "free_tier_available"):
+            free_tier = getattr(item, "free_tier_available", None)
+            if free_tier is not None:
+                lines.append(f"   🆓 Free tier available: {free_tier}")
+
+        regions_coverage = getattr(item, "regions_coverage", None)
+        if regions_coverage:
+            lines.append(f"   🌍 Regions / coverage: {regions_coverage}")
+
+        if hasattr(item, "managed_kubernetes_available"):
+            mk = getattr(item, "managed_kubernetes_available", None)
+            if mk is not None:
+                lines.append(f"   ☸️ Managed Kubernetes: {mk}")
+
+        # Transportation / consumer apps extras
+        service_types = getattr(item, "service_types", None)
+        if service_types:
+            lines.append(f"   🚗 Service types: {', '.join(service_types[:5])}")
+
+        city_coverage = getattr(item, "city_coverage", None)
+        if city_coverage:
+            lines.append(f"   🌆 City / region coverage: {city_coverage}")
+
+        pricing_model_transport = getattr(item, "pricing_model_transport", None)
+        if pricing_model_transport:
+            lines.append(f"   💰 Transport pricing: {pricing_model_transport}")
 
         lines.append("")
 
-    # Analysis / recommendations at the end – works for all domains
+        # --- NEW: topic-specific / extra fields ---
+        # List of fields we've already displayed and want to skip.
+        core_fields = {
+            "name", "title", "website", "url",
+            "pricing_model", "pricing_details", "is_open_source",
+            "tech_stack", "competitors", "api_available",
+            "language_support", "integration_capabilities",
+            "category", "tags", "difficulty", "description", "summary",
+        }
+
+        # Introspect Pydantic model fields if available
+        if isinstance(item, BaseModel):
+            field_names = item.model_fields.keys()
+        else:
+            field_names = item.__dict__.keys()
+
+        for field_name in field_names:
+            if field_name in core_fields:
+                continue
+            if field_name.startswith("_"):
+                continue
+
+            value = getattr(item, field_name, None)
+            if value in (None, [], {}):
+                continue
+
+            # Pretty label: service_types -> Service types
+            label = field_name.replace("_", " ").capitalize()
+
+            # Simple formatting for lists vs scalars
+            if isinstance(value, list):
+                rendered = ", ".join(str(v) for v in value[:8])
+            else:
+                rendered = str(value)
+
+            lines.append(f"   🔧 {label}: {rendered}")
+
+        lines.append("")
+
+    # ... tail part (analysis / to_document / ai_highlight) unchanged ...
     analysis = getattr(result, "analysis", None) or getattr(result, "summary", None)
     if analysis is not None:
-        lines.append("Recommendations / Analysis:")
+        lines.append("**Recommendations / Analysis:**")
         lines.append("-" * 40)
-
         if isinstance(analysis, str):
             lines.append(to_document(analysis))
         else:
             formatted = to_document(analysis)
             lines.append(formatted)
+
     analysis_text = "\n".join(lines)
     highlighted = ai_highlight(analysis_text)
-    return highlighted #"\n".join(lines)
+    return highlighted
 
 
 
@@ -161,13 +237,31 @@ Task:
 - Do NOT change the wording, punctuation, or sentence order.
 - Do NOT add or remove content.
 - Wrap the title (e.g "Recommendations") with **double asterisks**.
-- Wrap important tools, frameworks, and key concepts with **double asterisks**.
+- Wrap important tools, frameworks, apps, software, and key concepts with **double asterisks**.
 - Use Markdown bold: **like this**.
-- Use Markdown headings: ## like this / # like this
 - Return ONLY the modified text.
 """
     response = renderer_llm.invoke(prompt)
-    return response.content.strip()
+    candidate = response.content.strip()
+
+    # --- Safety guard: ensure NO content was removed or changed ---
+
+    def strip_bold(s: str) -> str:
+        # Remove all ** so we can compare the underlying text
+        return s.replace("**", "")
+
+    base_original = strip_bold(text)
+    base_candidate = strip_bold(candidate)
+
+    # If the underlying text changed (content removed/added/reordered),
+    # fall back to the original text with NO extra highlighting.
+    if base_original != base_candidate:
+        # Debug (optional):
+        print("ai_highlight: content mismatch, falling back to original")
+        return text
+
+    return candidate
+
 
 
 

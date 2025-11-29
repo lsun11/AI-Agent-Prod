@@ -1,0 +1,129 @@
+1. ai_ml
+class AIPlatformPrompts(BaseCSResearchPrompts):
+    """
+    Prompts specialized for AI/ML platforms (LLMs, model hosting, vector DB, training services).
+    """
+    TOPIC_LABEL = "AI/ML platform, model API, or machine-learning service"
+    ANALYSIS_SUBJECT = "AI platforms, ML infrastructure, vector databases, and model serving systems"
+    RECOMMENDER_ROLE = "machine learning systems engineer"
+
+2. api
+class APIPlatformPrompts(BaseCSResearchPrompts):
+    """
+    Prompts specialized for API-based platforms, developer APIs, and integrations.
+    """
+
+    TOPIC_LABEL = "API platform, developer API, or integration service"
+    ANALYSIS_SUBJECT = "API platforms, integration services, and programmable interfaces"
+    RECOMMENDER_ROLE = "API integration specialist"
+
+3. cloud
+class CloudServicePrompts(BaseCSResearchPrompts):
+    """
+    Prompts specialized for API-based platforms, developer APIs, and integrations.
+    """
+
+    TOPIC_LABEL = "cloud service, infrastructure platform, or DevOps tool"
+    ANALYSIS_SUBJECT = "cloud platforms, infrastructure services, DevOps tooling, and runtime environments"
+    RECOMMENDER_ROLE = "cloud infrastructure architect"
+
+4. consumer_and_social
+class ConsumerAndSocialPrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "consumer app, social media platform, or digital community service"
+    ANALYSIS_SUBJECT = "consumer-facing apps, social platforms, community networks, and engagement tools"
+    RECOMMENDER_ROLE = "consumer technology analyst"
+
+5. content_and_website
+class ContentAndWebsitePrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "content management system, website builder, or publishing platform"
+    ANALYSIS_SUBJECT = "CMS platforms, site builders, digital publishing tools, and content workflows"
+    RECOMMENDER_ROLE = "web platform strategist"
+
+6. database
+class DatabasePrompts(BaseCSResearchPrompts):
+    """
+    Prompts specialized for databases, data warehouses, and data platforms.
+    """
+    TOPIC_LABEL = "database, data warehouse, data lake, or analytics engine"
+    ANALYSIS_SUBJECT = "databases, analytics platforms, data processing engines, and storage systems"
+    RECOMMENDER_ROLE = "data infrastructure architect"
+
+7. design
+class DesignPrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "design tool, creative software, or media production platform"
+    ANALYSIS_SUBJECT = "design platforms, creative tools, multimedia software, and content creation apps"
+    RECOMMENDER_ROLE = "creative tooling specialist"
+
+8. developer_tools
+class DeveloperToolsPrompts(BaseCSResearchPrompts):
+    """
+    Prompt set specialized for *developer tools*.
+    """
+
+    # Customize the generic labels for this specific topic
+    TOPIC_LABEL = "developer tool, library, SDK, or programming platform"
+    ANALYSIS_SUBJECT = "developer tools, programming technologies, and open-source libraries"
+    RECOMMENDER_ROLE = "senior software engineer"
+
+9. e_commerce
+class ECommercePrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "e_commerce platform, payment processor, or fintech service"
+    ANALYSIS_SUBJECT = "commerce software, financial technology tools, and digital payment systems"
+    RECOMMENDER_ROLE = "fintech solutions architect"
+
+10. file_storage
+class FileStoragePrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "file storage service, cloud sync tool, or backup platform"
+    ANALYSIS_SUBJECT = "cloud storage systems, sync services, and backup/recovery tools"
+    RECOMMENDER_ROLE = "data operations engineer"
+
+11. messaging
+class MessagingPrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "communication tool, messaging app, or video conferencing platform"
+    ANALYSIS_SUBJECT = "communication platforms, chat applications, and real-time collaboration tools"
+    RECOMMENDER_ROLE = "communication systems analyst"
+
+12. productivity
+class ProductivityPrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "productivity tool, collaboration software, or workflow management platform"
+    ANALYSIS_SUBJECT = "productivity apps, collaboration suites, and team workflow tools"
+    RECOMMENDER_ROLE = "productivity systems consultant"
+
+13. saas
+class SaaSPrompts(BaseCSResearchPrompts):
+    """
+    Prompts specialized for researching SaaS products.
+    """
+    TOPIC_LABEL = "SaaS product, CRM/ERP system, or business operations platform"
+    ANALYSIS_SUBJECT = "business SaaS platforms for sales, operations, HR, finance, and enterprise workflows"
+    RECOMMENDER_ROLE = "enterprise solutions architect"
+
+14. security
+class SecurityPrompts(BaseCSResearchPrompts):
+    """
+    Prompts specialized for cybersecurity platforms and authentication tools.
+
+    It inherits the generic structure from BaseCSResearchPrompts but tunes the wording
+    via these class-level attributes.
+
+    NOTE: All attribute and method names are kept the same as your original class:
+      - TOOL_EXTRACTION_SYSTEM
+      - tool_extraction_user
+      - TOOL_ANALYSIS_SYSTEM
+      - tool_analysis_user
+      - RECOMMENDATIONS_SYSTEM
+      - recommendations_user
+
+    So you can keep using `self.prompts.TOOL_EXTRACTION_SYSTEM`, etc.,
+    without changing any of the rest of your code.
+    """
+
+    TOPIC_LABEL = "security tool, identity platform, authentication service, or cybersecurity product"
+    ANALYSIS_SUBJECT = "security tools, identity systems, access control, and cyber defense platforms"
+    RECOMMENDER_ROLE = "security engineer"
+
+15. transportation
+class TransportationPrompts(BaseCSResearchPrompts):
+    TOPIC_LABEL = "transportation app, delivery platform, or mobility service"
+    ANALYSIS_SUBJECT = "transportation software, delivery apps, logistics services, and mobility solutions"
+    RECOMMENDER_ROLE = "mobility technology analyst"

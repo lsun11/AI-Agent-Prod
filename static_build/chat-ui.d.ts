@@ -11,6 +11,7 @@ export declare class ChatUI {
     private currentTopicKey;
     private isThinking;
     private language;
+    private latestCompaniesVisual;
     private currentEventSource?;
     constructor();
     private fetchSuggestions;
@@ -19,15 +20,12 @@ export declare class ChatUI {
     private addGreeting;
     private addFollowupMsg;
     private attachListeners;
-    private extractWebsiteUrl;
     private addMessage;
-    private addDownloadButton;
     private addDropDown;
     private startThinking;
     private stopThinking;
     private updateTitle;
     private updateBackground;
-    private splitReplyIntoBubbles;
     private handleSubmit;
 }
 //# sourceMappingURL=chat-ui.d.ts.map

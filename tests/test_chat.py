@@ -44,7 +44,7 @@ def make_test_app(monkeypatch) -> FastAPI:
     monkeypatch.setattr(
         chat,
         "classify_topic_with_llm",
-        lambda q: ("fake_topic", "Fake Topic"),
+        lambda q: ("fake_topic", "Fake Topic", "fake_domain"),
         raising=True,
     )
 
@@ -203,7 +203,7 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
     )
 
     def fake_classify(query: str):
-        return "developer_tools", "Developer Tools"
+        return "developer_tools", "Developer Tools", "tools"
 
     monkeypatch.setattr(
         "src.api.routes.chat.classify_topic_with_llm",

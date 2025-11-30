@@ -181,6 +181,10 @@ def format_result_text(query: str, result: Any) -> str:
             "category", "tags", "difficulty", "description", "summary",
         }
 
+        ui_fields = {
+            "primary_color", "brand_colors", "logo_url"
+        }
+
         # Introspect Pydantic model fields if available
         if isinstance(item, BaseModel):
             field_names = item.model_fields.keys()
@@ -188,7 +192,7 @@ def format_result_text(query: str, result: Any) -> str:
             field_names = item.__dict__.keys()
 
         for field_name in field_names:
-            if field_name in core_fields:
+            if field_name in core_fields or field_name in ui_fields:
                 continue
             if field_name.startswith("_"):
                 continue

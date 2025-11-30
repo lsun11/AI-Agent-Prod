@@ -126,10 +126,11 @@ class RootWorkflow:
                     title = (meta.get("title") or "").strip()
                     url = (meta.get("url") or "").strip()
                 else:
-                    title = getattr(meta, "title", "") if meta else ""
-                    url = getattr(meta, "url", "") if meta else ""
-                    title = title.strip()
-                    url = url.strip()
+                    raw_title = getattr(meta, "title", None)
+                    raw_url = getattr(meta, "url", None)
+
+                    title = (raw_title or "").strip()
+                    url = (raw_url or "").strip()
 
             # ------------------------------------
             # 2) Fallback: fetch/scrape if needed

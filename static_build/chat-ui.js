@@ -2,6 +2,7 @@
 import { DROPDOWN_OPTIONS_BY_ID } from "./configs.js";
 import { markdownToHtml } from "./markdown.js";
 import { mapLanguageValue, translateLabel, getGreetingText, getFollowupText, applyInterfaceLanguage, refreshDropdownLabels } from "./language.js";
+import { extractWebsiteUrl, splitReplyIntoBubbles, createCompanyBubbleElement, createDownloadButtonElement, } from "./chat-helpers.js";
 import { RECOMMENDATION_STARTERS } from "./types.js";
 export class ChatUI {
     constructor() {
@@ -10,6 +11,7 @@ export class ChatUI {
         this.currentTopicKey = null;
         this.isThinking = false;
         this.language = "Chn";
+        this.latestCompaniesVisual = [];
         const formEl = document.getElementById("chat-form");
         const inputEl = document.getElementById("chat-input");
         const messagesEl = document.getElementById("messages");
@@ -122,19 +124,6 @@ export class ChatUI {
             void this.handleSubmit();
         });
     }
-    extractWebsiteUrl(text) {
-        const lines = text.split("\n");
-        for (const line of lines) {
-            const m1 = line.match(/Website[:：]\s*(https?:\/\/\S+)/i);
-            const m2 = line.match(/网站[:：]\s*(https?:\/\/\S+)/i);
-            const m = m1 || m2;
-            if (m) {
-                // @ts-ignore
-                return m[1].trim().replace(/[)\]]+$/, "");
-            }
-        }
-        return undefined;
-    }
     addMessage(text, sender, url) {
         const div = document.createElement("div");
         div.className = `message ${sender}`;
@@ -147,25 +136,6 @@ export class ChatUI {
             });
         }
         this.messagesEl.appendChild(div);
-        this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
-    }
-    addDownloadButton(url, object) {
-        // Create a NEW container for this answer's download button(s)
-        const downloadContainer = document.createElement("div");
-        downloadContainer.className = "download-container";
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "download-button";
-        button.textContent =
-            this.language === "Eng"
-                ? "Download summary (" + object + ")"
-                : "下载总结 (" + object + ")";
-        button.addEventListener("click", () => {
-            window.open(url, "_blank");
-        });
-        downloadContainer.appendChild(button);
-        // Append THIS container right after the current answer's bubbles
-        this.messagesEl.appendChild(downloadContainer);
         this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
     }
     addDropDown(selectId) {
@@ -222,43 +192,6 @@ export class ChatUI {
         document.body.classList.add(`topic-bg-${topicKey}`);
         this.currentTopicKey = topicKey;
     }
-    splitReplyIntoBubbles(reply) {
-        const lines = reply.split(/\r?\n/);
-        const bubbles = [];
-        let current = [];
-        const flush = () => {
-            const text = current.join("\n").trim();
-            if (text) {
-                bubbles.push(text);
-            }
-            current = [];
-        };
-        for (const rawLine of lines) {
-            const line = rawLine;
-            const trimmed = rawLine.trim();
-            if (!trimmed && current.length === 0)
-                continue;
-            if (trimmed.startsWith("📊 Results for:")) {
-                flush();
-                current.push(line);
-                continue;
-            }
-            if (/^\d+\.\s*🏢/.test(trimmed)) {
-                flush();
-                current.push(line);
-                continue;
-            }
-            // if (trimmed.startsWith("**Recommendations") || trimmed.startsWith("**推荐"))
-            if (RECOMMENDATION_STARTERS.some(starter => trimmed.startsWith(starter))) {
-                flush();
-                current.push(line);
-                continue;
-            }
-            current.push(line);
-        }
-        flush();
-        return bubbles;
-    }
     async handleSubmit() {
         const text = this.input.value.trim();
         if (!text)
@@ -286,7 +219,6 @@ export class ChatUI {
                         const topicDomain = data.topic_domain;
                         this.updateTitle(topicLabel);
                         this.updateBackground(topicDomain);
-                        console.log("!!!!!!!!!!!", topicDomain);
                         this.startThinking();
                         return;
                     }
@@ -295,21 +227,50 @@ export class ChatUI {
                         return;
                     }
                     if (data.type === "final") {
-                        const bubbles = this.splitReplyIntoBubbles(data.reply);
+                        const bubbles = splitReplyIntoBubbles(data.reply);
+                        // read visual info from backend
+                        const companiesVisual = (data.companies_visual || []);
+                        this.latestCompaniesVisual = companiesVisual;
                         for (let i = 0; i < bubbles.length; i++) {
-                            const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";
+                            const isFirst = i === 0;
+                            const isLast = i === bubbles.length - 1;
+                            // Middle bubbles → company bubbles
+                            if (!isFirst && !isLast) {
+                                const companyIndex = i - 1; // bubble 1 ↔ company 0, etc.
+                                const company = companiesVisual[companyIndex];
+                                if (company) {
+                                    // @ts-ignore
+                                    const bubbleEl = createCompanyBubbleElement(bubbles[i], company);
+                                    this.messagesEl.appendChild(bubbleEl);
+                                    this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+                                }
+                                else {
+                                    // @ts-ignore
+                                    const url = extractWebsiteUrl(bubbles[i]);
+                                    // @ts-ignore
+                                    this.addMessage(bubbles[i], "bot", url);
+                                }
+                                continue;
+                            }
+                            // First and last bubble: normal bot messages
+                            const style = "bot-first";
                             // @ts-ignore
-                            const url = this.extractWebsiteUrl(bubbles[i]);
+                            const url = extractWebsiteUrl(bubbles[i]);
                             // @ts-ignore
                             this.addMessage(bubbles[i], style, url);
                         }
+                        // Download buttons using helper
                         if (data.download_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
-                            this.addDownloadButton(data.download_url, object);
+                            const el = createDownloadButtonElement(data.download_url, object, this.language);
+                            this.messagesEl.appendChild(el);
+                            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
                         if (data.slides_download_url) {
                             const object = this.language === "Eng" ? "slides" : "演示文稿";
-                            this.addDownloadButton(data.slides_download_url, object);
+                            const el = createDownloadButtonElement(data.slides_download_url, object, this.language);
+                            this.messagesEl.appendChild(el);
+                            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
                         es.close();
                         this.stopThinking();

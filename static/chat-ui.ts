@@ -9,13 +9,19 @@ import {
     getFollowupText,
     applyInterfaceLanguage, refreshDropdownLabels
 } from "./language.js";
+import {
+    extractWebsiteUrl,
+    splitReplyIntoBubbles,
+    createCompanyBubbleElement,
+    createDownloadButtonElement,
+    type CompanyVisual,
+} from "./chat-helpers.js";
 import type {Sender, LanguageCode} from "./types.js";
 import {RECOMMENDATION_STARTERS} from "./types.js";
 
 interface SuggestionsApiResponse {
     suggestions: string[];
 }
-
 
 export class ChatUI {
     private form: HTMLFormElement;
@@ -30,6 +36,7 @@ export class ChatUI {
     private currentTopicKey: string | null = null;
     private isThinking = false;
     private language: LanguageCode = "Chn";
+    private latestCompaniesVisual: CompanyVisual[] = [];
 
     // for SSE if you want to close later
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,20 +188,6 @@ export class ChatUI {
         });
     }
 
-    private extractWebsiteUrl(text: string): string | undefined {
-        const lines = text.split("\n");
-        for (const line of lines) {
-            const m1 = line.match(/Website[:：]\s*(https?:\/\/\S+)/i);
-            const m2 = line.match(/网站[:：]\s*(https?:\/\/\S+)/i);
-            const m = m1 || m2;
-            if (m) {
-                // @ts-ignore
-                return m[1].trim().replace(/[)\]]+$/, "");
-            }
-        }
-        return undefined;
-    }
-
     private addMessage(text: string, sender: Sender, url?: string): void {
         const div = document.createElement("div");
         div.className = `message ${sender}`;
@@ -209,30 +202,6 @@ export class ChatUI {
         }
 
         this.messagesEl.appendChild(div);
-        this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
-    }
-
-    private addDownloadButton(url: string, object: string): void {
-        // Create a NEW container for this answer's download button(s)
-        const downloadContainer = document.createElement("div");
-        downloadContainer.className = "download-container";
-
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "download-button";
-        button.textContent =
-            this.language === "Eng"
-                ? "Download summary (" + object + ")"
-                : "下载总结 (" + object + ")";
-
-        button.addEventListener("click", () => {
-            window.open(url, "_blank");
-        });
-
-        downloadContainer.appendChild(button);
-
-        // Append THIS container right after the current answer's bubbles
-        this.messagesEl.appendChild(downloadContainer);
         this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
     }
 
@@ -298,51 +267,6 @@ export class ChatUI {
         this.currentTopicKey = topicKey;
     }
 
-    private splitReplyIntoBubbles(reply: string): string[] {
-        const lines = reply.split(/\r?\n/);
-        const bubbles: string[] = [];
-        let current: string[] = [];
-
-        const flush = () => {
-            const text = current.join("\n").trim();
-            if (text) {
-                bubbles.push(text);
-            }
-            current = [];
-        };
-
-        for (const rawLine of lines) {
-            const line = rawLine;
-            const trimmed = rawLine.trim();
-
-            if (!trimmed && current.length === 0) continue;
-
-            if (trimmed.startsWith("📊 Results for:")) {
-                flush();
-                current.push(line);
-                continue;
-            }
-
-            if (/^\d+\.\s*🏢/.test(trimmed)) {
-                flush();
-                current.push(line);
-                continue;
-            }
-
-            // if (trimmed.startsWith("**Recommendations") || trimmed.startsWith("**推荐"))
-            if (RECOMMENDATION_STARTERS.some(starter => trimmed.startsWith(starter))) {
-                flush();
-                current.push(line);
-                continue;
-            }
-
-            current.push(line);
-        }
-
-        flush();
-        return bubbles;
-    }
-
     private async handleSubmit(): Promise<void> {
         const text = this.input.value.trim();
         if (!text) return;
@@ -376,7 +300,6 @@ export class ChatUI {
                         const topicDomain = data.topic_domain as string;
                         this.updateTitle(topicLabel);
                         this.updateBackground(topicDomain);
-                        console.log("!!!!!!!!!!!", topicDomain);
                         this.startThinking();
                         return;
                     }
@@ -387,22 +310,64 @@ export class ChatUI {
                     }
 
                     if (data.type === "final") {
-                        const bubbles = this.splitReplyIntoBubbles(data.reply as string);
+                        const bubbles = splitReplyIntoBubbles(data.reply as string);
+
+                        // read visual info from backend
+                        const companiesVisual = (data.companies_visual || []) as CompanyVisual[];
+                        this.latestCompaniesVisual = companiesVisual;
+
                         for (let i = 0; i < bubbles.length; i++) {
-                            const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";
+                            const isFirst = i === 0;
+                            const isLast = i === bubbles.length - 1;
+
+                            // Middle bubbles → company bubbles
+                            if (!isFirst && !isLast) {
+                                const companyIndex = i - 1; // bubble 1 ↔ company 0, etc.
+                                const company = companiesVisual[companyIndex];
+
+                                if (company) {
+                                    // @ts-ignore
+                                    const bubbleEl = createCompanyBubbleElement(bubbles[i], company);
+                                    this.messagesEl.appendChild(bubbleEl);
+                                    this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+                                } else {
+                                    // @ts-ignore
+                                    const url = extractWebsiteUrl(bubbles[i]);
+                                    // @ts-ignore
+                                    this.addMessage(bubbles[i], "bot", url);
+                                }
+                                continue;
+                            }
+
+                            // First and last bubble: normal bot messages
+                            const style = "bot-first";
                             // @ts-ignore
-                            const url = this.extractWebsiteUrl(bubbles[i]);
+                            const url = extractWebsiteUrl(bubbles[i]);
                             // @ts-ignore
-                            this.addMessage(bubbles[i], style, url);
+                            this.addMessage(bubbles[i], style as Sender, url);
                         }
+
+                        // Download buttons using helper
                         if (data.download_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
-                            this.addDownloadButton(data.download_url as string, object);
+                            const el = createDownloadButtonElement(
+                                data.download_url as string,
+                                object,
+                                this.language
+                            );
+                            this.messagesEl.appendChild(el);
+                            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
 
                         if (data.slides_download_url) {
                             const object = this.language === "Eng" ? "slides" : "演示文稿";
-                            this.addDownloadButton(data.slides_download_url as string, object);
+                            const el = createDownloadButtonElement(
+                                data.slides_download_url as string,
+                                object,
+                                this.language
+                            );
+                            this.messagesEl.appendChild(el);
+                            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
 
                         es.close();
@@ -413,6 +378,7 @@ export class ChatUI {
                         );
                         this.submitButton.disabled = false;
                     }
+
                 } catch (e) {
                     console.error("Error parsing SSE data", e, event.data);
                 }

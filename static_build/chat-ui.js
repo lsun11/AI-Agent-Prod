@@ -10,6 +10,7 @@ export class ChatUI {
         this.currentTopicKey = null;
         this.isThinking = false;
         this.language = "Chn";
+        this.latestCompaniesVisual = [];
         const formEl = document.getElementById("chat-form");
         const inputEl = document.getElementById("chat-input");
         const messagesEl = document.getElementById("messages");
@@ -259,6 +260,55 @@ export class ChatUI {
         flush();
         return bubbles;
     }
+    addCompanyBubble(text, company) {
+        const wrapper = document.createElement("div");
+        // keep the same base classes so CSS stays the same as other bot bubbles
+        wrapper.className = "message bot company-bubble";
+        // Make sure we can layer children inside
+        wrapper.style.position = "relative";
+        wrapper.style.overflow = "hidden";
+        // --- Logo background overlay (tiled, semi-transparent) ---
+        if (company.logo_url) {
+            const bg = document.createElement("div");
+            bg.className = "company-logo-bg";
+            bg.style.position = "absolute";
+            bg.style.inset = "0";
+            bg.style.zIndex = "0";
+            bg.style.pointerEvents = "none"; // don't block clicks
+            bg.style.backgroundImage = `url(${company.logo_url})`;
+            bg.style.backgroundRepeat = "repeat"; // tiled
+            bg.style.backgroundPosition = "center";
+            bg.style.backgroundSize = "240px 240px"; // tweak as you like
+            bg.style.opacity = "0.08"; // semi-transparent
+            wrapper.appendChild(bg);
+        }
+        // --- Foreground content (keeps original bubble look) ---
+        const inner = document.createElement("div");
+        inner.className = "company-bubble-inner";
+        inner.style.position = "relative";
+        inner.style.zIndex = "1";
+        // Optional: show company name as a small header
+        if (company.name) {
+            const nameEl = document.createElement("div");
+            nameEl.className = "company-name";
+            nameEl.textContent = company.name;
+            inner.appendChild(nameEl);
+        }
+        const bodyEl = document.createElement("div");
+        bodyEl.className = "company-body";
+        bodyEl.innerHTML = markdownToHtml(text); // same markdown rendering as other bubbles
+        inner.appendChild(bodyEl);
+        wrapper.appendChild(inner);
+        // Make bubble clickable to open website if available
+        if (company.website) {
+            wrapper.classList.add("clickable");
+            wrapper.addEventListener("click", () => {
+                window.open(company.website, "_blank");
+            });
+        }
+        this.messagesEl.appendChild(wrapper);
+        this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+    }
     async handleSubmit() {
         const text = this.input.value.trim();
         if (!text)
@@ -286,7 +336,6 @@ export class ChatUI {
                         const topicDomain = data.topic_domain;
                         this.updateTitle(topicLabel);
                         this.updateBackground(topicDomain);
-                        console.log("!!!!!!!!!!!", topicDomain);
                         this.startThinking();
                         return;
                     }
@@ -296,8 +345,31 @@ export class ChatUI {
                     }
                     if (data.type === "final") {
                         const bubbles = this.splitReplyIntoBubbles(data.reply);
+                        // NEW: read visual info from backend
+                        const companiesVisual = (data.companies_visual || []);
+                        this.latestCompaniesVisual = companiesVisual;
                         for (let i = 0; i < bubbles.length; i++) {
-                            const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";
+                            const isFirst = i === 0;
+                            const isLast = i === bubbles.length - 1;
+                            // Middle bubbles: show company bubble with logo/color
+                            if (!isFirst && !isLast) {
+                                const companyIndex = i - 1; // bubble 1 ↔ company 0, bubble 2 ↔ company 1, ...
+                                const company = companiesVisual[companyIndex];
+                                if (company) {
+                                    // @ts-ignore
+                                    this.addCompanyBubble(bubbles[i], company);
+                                }
+                                else {
+                                    // Fallback if we don't have a matching company
+                                    // @ts-ignore
+                                    const url = this.extractWebsiteUrl(bubbles[i]);
+                                    // @ts-ignore
+                                    this.addMessage(bubbles[i], "bot", url);
+                                }
+                                continue;
+                            }
+                            // First and last bubble: normal bot messages
+                            const style = "bot-first";
                             // @ts-ignore
                             const url = this.extractWebsiteUrl(bubbles[i]);
                             // @ts-ignore

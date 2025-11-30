@@ -87,12 +87,26 @@ async def chat_stream(
         slides_filename = os.path.basename(slides_path)
         slides_download_url = f"/download/{slides_filename}"
 
+        companies_visual = []
+        for company in getattr(result, "companies", []) or []:
+            companies_visual.append(
+                {
+                    "name": getattr(company, "name", None),
+                    "website": getattr(company, "website", None),
+                    "logo_url": getattr(company, "logo_url", None),
+                    "primary_color": getattr(company, "primary_color", None),
+                    "brand_colors": getattr(company, "brand_colors", None),
+                }
+            )
+
         final_payload = {
             "type": "final",
             "reply": reply_text,
             "download_url": download_url,
             "slides_download_url": slides_download_url,
             "topic_used": topic_label_display,
+            # 👇 send visuals to frontend
+            "companies_visual": companies_visual,
         }
         return final_payload
 

@@ -116,6 +116,9 @@ class BaseCompanyInfo(BaseModel):
     ideal_for: List[str] = Field(default_factory=list)
     not_suited_for: List[str] = Field(default_factory=list)
 
+    logo_url: Optional[str] = None
+    primary_color: Optional[str] = None       # e.g. "#0B5FFF"
+    brand_colors: Optional[Dict[str, str]] = None  # full color map if you want
 
 class BaseResearchState(BaseModel):
     """

@@ -78,19 +78,16 @@ class FirecrawlService:
         def _do_scrape():
             return self.app.scrape(
                 url=url,
-                formats=["markdown"],
+                formats=["markdown", "branding", "images"],
             )
-        print("Scraping2")
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_do_scrape)
                 result = future.result(timeout=self.timeout_seconds)
-
         except concurrent.futures.TimeoutError:
             print(f"[TIMEOUT] scrape took longer than {self.timeout_seconds}s for {url}")
             executor.shutdown(wait=False, cancel_futures=True)
             return None
-
         except Exception as e:
             print(f"[ERROR] scrape failed for {url}: {e}")
             executor.shutdown(wait=False, cancel_futures=True)

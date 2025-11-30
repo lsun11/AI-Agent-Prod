@@ -11,6 +11,7 @@ export declare class ChatUI {
     private currentTopicKey;
     private isThinking;
     private language;
+    private latestCompaniesVisual;
     private currentEventSource?;
     constructor();
     private fetchSuggestions;
@@ -28,6 +29,7 @@ export declare class ChatUI {
     private updateTitle;
     private updateBackground;
     private splitReplyIntoBubbles;
+    private addCompanyBubble;
     private handleSubmit;
 }
 //# sourceMappingURL=chat-ui.d.ts.map

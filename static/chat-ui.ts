@@ -16,6 +16,15 @@ interface SuggestionsApiResponse {
     suggestions: string[];
 }
 
+interface CompanyVisual {
+    name: string | null;
+    website: string | null;
+    logo_url: string | null;
+    primary_color: string | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    brand_colors: Record<string, string> | null;
+}
+
 
 export class ChatUI {
     private form: HTMLFormElement;
@@ -30,6 +39,7 @@ export class ChatUI {
     private currentTopicKey: string | null = null;
     private isThinking = false;
     private language: LanguageCode = "Chn";
+    private latestCompaniesVisual: CompanyVisual[] = [];
 
     // for SSE if you want to close later
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -343,6 +353,67 @@ export class ChatUI {
         return bubbles;
     }
 
+private addCompanyBubble(text: string, company: CompanyVisual): void {
+    const wrapper = document.createElement("div");
+    // keep the same base classes so CSS stays the same as other bot bubbles
+    wrapper.className = "message bot company-bubble";
+
+    // Make sure we can layer children inside
+    wrapper.style.position = "relative";
+    wrapper.style.overflow = "hidden";
+
+    // --- Logo background overlay (tiled, semi-transparent) ---
+    if (company.logo_url) {
+        const bg = document.createElement("div");
+        bg.className = "company-logo-bg";
+        bg.style.position = "absolute";
+        bg.style.inset = "0";
+        bg.style.zIndex = "0";
+        bg.style.pointerEvents = "none"; // don't block clicks
+
+        bg.style.backgroundImage = `url(${company.logo_url})`;
+        bg.style.backgroundRepeat = "repeat";        // tiled
+        bg.style.backgroundPosition = "center";
+        bg.style.backgroundSize = "240px 240px";       // tweak as you like
+        bg.style.opacity = "0.08";                   // semi-transparent
+
+        wrapper.appendChild(bg);
+    }
+
+    // --- Foreground content (keeps original bubble look) ---
+    const inner = document.createElement("div");
+    inner.className = "company-bubble-inner";
+    inner.style.position = "relative";
+    inner.style.zIndex = "1";
+
+    // Optional: show company name as a small header
+    if (company.name) {
+        const nameEl = document.createElement("div");
+        nameEl.className = "company-name";
+        nameEl.textContent = company.name;
+        inner.appendChild(nameEl);
+    }
+
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "company-body";
+    bodyEl.innerHTML = markdownToHtml(text); // same markdown rendering as other bubbles
+    inner.appendChild(bodyEl);
+
+    wrapper.appendChild(inner);
+
+    // Make bubble clickable to open website if available
+    if (company.website) {
+        wrapper.classList.add("clickable");
+        wrapper.addEventListener("click", () => {
+            window.open(company.website as string, "_blank");
+        });
+    }
+
+    this.messagesEl.appendChild(wrapper);
+    this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
+}
+
+
     private async handleSubmit(): Promise<void> {
         const text = this.input.value.trim();
         if (!text) return;
@@ -376,7 +447,6 @@ export class ChatUI {
                         const topicDomain = data.topic_domain as string;
                         this.updateTitle(topicLabel);
                         this.updateBackground(topicDomain);
-                        console.log("!!!!!!!!!!!", topicDomain);
                         this.startThinking();
                         return;
                     }
@@ -388,13 +458,41 @@ export class ChatUI {
 
                     if (data.type === "final") {
                         const bubbles = this.splitReplyIntoBubbles(data.reply as string);
+
+                        // NEW: read visual info from backend
+                        const companiesVisual = (data.companies_visual || []) as CompanyVisual[];
+                        this.latestCompaniesVisual = companiesVisual;
+
                         for (let i = 0; i < bubbles.length; i++) {
-                            const style = i === 0 ? "bot-first" : i === bubbles.length - 1 ? "bot-first" : "bot";
+                            const isFirst = i === 0;
+                            const isLast = i === bubbles.length - 1;
+
+                            // Middle bubbles: show company bubble with logo/color
+                            if (!isFirst && !isLast) {
+                                const companyIndex = i - 1; // bubble 1 ↔ company 0, bubble 2 ↔ company 1, ...
+                                const company = companiesVisual[companyIndex];
+
+                                if (company) {
+                                    // @ts-ignore
+                                    this.addCompanyBubble(bubbles[i], company);
+                                } else {
+                                    // Fallback if we don't have a matching company
+                                    // @ts-ignore
+                                    const url = this.extractWebsiteUrl(bubbles[i]);
+                                    // @ts-ignore
+                                    this.addMessage(bubbles[i], "bot", url);
+                                }
+                                continue;
+                            }
+
+                            // First and last bubble: normal bot messages
+                            const style = "bot-first";
                             // @ts-ignore
                             const url = this.extractWebsiteUrl(bubbles[i]);
                             // @ts-ignore
                             this.addMessage(bubbles[i], style, url);
                         }
+
                         if (data.download_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
                             this.addDownloadButton(data.download_url as string, object);
@@ -413,6 +511,7 @@ export class ChatUI {
                         );
                         this.submitButton.disabled = false;
                     }
+
                 } catch (e) {
                     console.error("Error parsing SSE data", e, event.data);
                 }

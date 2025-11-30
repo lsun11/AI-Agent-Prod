@@ -498,3 +498,29 @@ body.topic-bg-career::before {
 body.topic-bg-software_engineering::before {
   background-image: url("../static/assets/backgrounds/software_engineering.png");
 }
+
+
+.message.company-bubble {
+    position: relative;
+    overflow: hidden;
+}
+
+.company-logo-bg {
+    /* styles are mostly set inline in JS; this is just in case */
+    pointer-events: none;
+}
+
+.company-bubble-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.company-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.company-body {
+    /* same font-size / styles as your normal bot message body */
+}
+

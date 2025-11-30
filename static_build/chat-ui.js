@@ -2,6 +2,7 @@
 import { DROPDOWN_OPTIONS_BY_ID } from "./configs.js";
 import { markdownToHtml } from "./markdown.js";
 import { mapLanguageValue, translateLabel, getGreetingText, getFollowupText, applyInterfaceLanguage, refreshDropdownLabels } from "./language.js";
+import { extractWebsiteUrl, splitReplyIntoBubbles, createCompanyBubbleElement, createDownloadButtonElement, } from "./chat-helpers.js";
 import { RECOMMENDATION_STARTERS } from "./types.js";
 export class ChatUI {
     constructor() {
@@ -123,19 +124,6 @@ export class ChatUI {
             void this.handleSubmit();
         });
     }
-    extractWebsiteUrl(text) {
-        const lines = text.split("\n");
-        for (const line of lines) {
-            const m1 = line.match(/Website[:：]\s*(https?:\/\/\S+)/i);
-            const m2 = line.match(/网站[:：]\s*(https?:\/\/\S+)/i);
-            const m = m1 || m2;
-            if (m) {
-                // @ts-ignore
-                return m[1].trim().replace(/[)\]]+$/, "");
-            }
-        }
-        return undefined;
-    }
     addMessage(text, sender, url) {
         const div = document.createElement("div");
         div.className = `message ${sender}`;
@@ -148,25 +136,6 @@ export class ChatUI {
             });
         }
         this.messagesEl.appendChild(div);
-        this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
-    }
-    addDownloadButton(url, object) {
-        // Create a NEW container for this answer's download button(s)
-        const downloadContainer = document.createElement("div");
-        downloadContainer.className = "download-container";
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "download-button";
-        button.textContent =
-            this.language === "Eng"
-                ? "Download summary (" + object + ")"
-                : "下载总结 (" + object + ")";
-        button.addEventListener("click", () => {
-            window.open(url, "_blank");
-        });
-        downloadContainer.appendChild(button);
-        // Append THIS container right after the current answer's bubbles
-        this.messagesEl.appendChild(downloadContainer);
         this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
     }
     addDropDown(selectId) {
@@ -223,92 +192,6 @@ export class ChatUI {
         document.body.classList.add(`topic-bg-${topicKey}`);
         this.currentTopicKey = topicKey;
     }
-    splitReplyIntoBubbles(reply) {
-        const lines = reply.split(/\r?\n/);
-        const bubbles = [];
-        let current = [];
-        const flush = () => {
-            const text = current.join("\n").trim();
-            if (text) {
-                bubbles.push(text);
-            }
-            current = [];
-        };
-        for (const rawLine of lines) {
-            const line = rawLine;
-            const trimmed = rawLine.trim();
-            if (!trimmed && current.length === 0)
-                continue;
-            if (trimmed.startsWith("📊 Results for:")) {
-                flush();
-                current.push(line);
-                continue;
-            }
-            if (/^\d+\.\s*🏢/.test(trimmed)) {
-                flush();
-                current.push(line);
-                continue;
-            }
-            // if (trimmed.startsWith("**Recommendations") || trimmed.startsWith("**推荐"))
-            if (RECOMMENDATION_STARTERS.some(starter => trimmed.startsWith(starter))) {
-                flush();
-                current.push(line);
-                continue;
-            }
-            current.push(line);
-        }
-        flush();
-        return bubbles;
-    }
-    addCompanyBubble(text, company) {
-        const wrapper = document.createElement("div");
-        // keep the same base classes so CSS stays the same as other bot bubbles
-        wrapper.className = "message bot company-bubble";
-        // Make sure we can layer children inside
-        wrapper.style.position = "relative";
-        wrapper.style.overflow = "hidden";
-        // --- Logo background overlay (tiled, semi-transparent) ---
-        if (company.logo_url) {
-            const bg = document.createElement("div");
-            bg.className = "company-logo-bg";
-            bg.style.position = "absolute";
-            bg.style.inset = "0";
-            bg.style.zIndex = "0";
-            bg.style.pointerEvents = "none"; // don't block clicks
-            bg.style.backgroundImage = `url(${company.logo_url})`;
-            bg.style.backgroundRepeat = "repeat"; // tiled
-            bg.style.backgroundPosition = "center";
-            bg.style.backgroundSize = "240px 240px"; // tweak as you like
-            bg.style.opacity = "0.08"; // semi-transparent
-            wrapper.appendChild(bg);
-        }
-        // --- Foreground content (keeps original bubble look) ---
-        const inner = document.createElement("div");
-        inner.className = "company-bubble-inner";
-        inner.style.position = "relative";
-        inner.style.zIndex = "1";
-        // Optional: show company name as a small header
-        if (company.name) {
-            const nameEl = document.createElement("div");
-            nameEl.className = "company-name";
-            nameEl.textContent = company.name;
-            inner.appendChild(nameEl);
-        }
-        const bodyEl = document.createElement("div");
-        bodyEl.className = "company-body";
-        bodyEl.innerHTML = markdownToHtml(text); // same markdown rendering as other bubbles
-        inner.appendChild(bodyEl);
-        wrapper.appendChild(inner);
-        // Make bubble clickable to open website if available
-        if (company.website) {
-            wrapper.classList.add("clickable");
-            wrapper.addEventListener("click", () => {
-                window.open(company.website, "_blank");
-            });
-        }
-        this.messagesEl.appendChild(wrapper);
-        this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
-    }
     async handleSubmit() {
         const text = this.input.value.trim();
         if (!text)
@@ -344,25 +227,26 @@ export class ChatUI {
                         return;
                     }
                     if (data.type === "final") {
-                        const bubbles = this.splitReplyIntoBubbles(data.reply);
-                        // NEW: read visual info from backend
+                        const bubbles = splitReplyIntoBubbles(data.reply);
+                        // read visual info from backend
                         const companiesVisual = (data.companies_visual || []);
                         this.latestCompaniesVisual = companiesVisual;
                         for (let i = 0; i < bubbles.length; i++) {
                             const isFirst = i === 0;
                             const isLast = i === bubbles.length - 1;
-                            // Middle bubbles: show company bubble with logo/color
+                            // Middle bubbles → company bubbles
                             if (!isFirst && !isLast) {
-                                const companyIndex = i - 1; // bubble 1 ↔ company 0, bubble 2 ↔ company 1, ...
+                                const companyIndex = i - 1; // bubble 1 ↔ company 0, etc.
                                 const company = companiesVisual[companyIndex];
                                 if (company) {
                                     // @ts-ignore
-                                    this.addCompanyBubble(bubbles[i], company);
+                                    const bubbleEl = createCompanyBubbleElement(bubbles[i], company);
+                                    this.messagesEl.appendChild(bubbleEl);
+                                    this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                                 }
                                 else {
-                                    // Fallback if we don't have a matching company
                                     // @ts-ignore
-                                    const url = this.extractWebsiteUrl(bubbles[i]);
+                                    const url = extractWebsiteUrl(bubbles[i]);
                                     // @ts-ignore
                                     this.addMessage(bubbles[i], "bot", url);
                                 }
@@ -371,17 +255,22 @@ export class ChatUI {
                             // First and last bubble: normal bot messages
                             const style = "bot-first";
                             // @ts-ignore
-                            const url = this.extractWebsiteUrl(bubbles[i]);
+                            const url = extractWebsiteUrl(bubbles[i]);
                             // @ts-ignore
                             this.addMessage(bubbles[i], style, url);
                         }
+                        // Download buttons using helper
                         if (data.download_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
-                            this.addDownloadButton(data.download_url, object);
+                            const el = createDownloadButtonElement(data.download_url, object, this.language);
+                            this.messagesEl.appendChild(el);
+                            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
                         if (data.slides_download_url) {
                             const object = this.language === "Eng" ? "slides" : "演示文稿";
-                            this.addDownloadButton(data.slides_download_url, object);
+                            const el = createDownloadButtonElement(data.slides_download_url, object, this.language);
+                            this.messagesEl.appendChild(el);
+                            this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
                         es.close();
                         this.stopThinking();

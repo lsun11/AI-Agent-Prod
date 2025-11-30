@@ -2,12 +2,8 @@
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Callable
 from langgraph.graph import StateGraph, END
-
-
 from langchain_core.messages import HumanMessage, SystemMessage
-
 from ..tools.base_workflow import CompanyT
-# from ..software_engineering.base_workflow import LogCallback
 from .base_models import (
     CareerBaseCompanyAnalysis,
     CareerBaseCompanyInfo,
@@ -168,6 +164,57 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
         # Prefer search markdown if available
         content = getattr(doc, "markdown", None)
 
+        # --- fields for branding info ---
+        primary_color = None
+        brand_colors = None
+        logo_url = None
+
+        scraped = self.firecrawl.scrape_company_pages(url)
+        if scraped:
+            # FirecrawlApp.scrape often returns {"data": {...}}
+            if isinstance(scraped, dict):
+                data = scraped.get("data", scraped)
+            else:
+                data = scraped
+
+            # markdown from scrape (override search markdown if present)
+            scraped_markdown = (
+                data.get("markdown")
+                if isinstance(data, dict)
+                else getattr(data, "markdown", None)
+            )
+            if scraped_markdown:
+                content = scraped_markdown
+
+            # ---- Branding block (colors + images) ----
+            if isinstance(data, dict):
+                branding = data.get("branding")
+            else:
+                branding = getattr(data, "branding", None)
+
+            if branding is not None:
+                # colors can be attribute or dict field
+                if isinstance(branding, dict):
+                    colors = branding.get("colors")
+                    images = branding.get("images")
+                else:
+                    colors = getattr(branding, "colors", None)
+                    images = getattr(branding, "images", None)
+
+                # colors: pick full map + primary
+                if isinstance(colors, dict) and colors:
+                    brand_colors = colors
+                    primary_color = colors.get("primary") or primary_color
+
+                # images: favicon → ogImage → logo
+                if isinstance(images, dict) and images:
+                    logo_url = (
+                            images.get("favicon")
+                            or images.get("ogImage")
+                            or images.get("logo")
+                            or logo_url
+                    )
+
         if not content:
             self._log(f"no markdown in search result for {tool_name}, scraping {url}")
             scraped = self.firecrawl.scrape_company_pages(url)
@@ -190,6 +237,14 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
             company.seniority_focus = analysis.seniority_focus
         else:
             self._log(f"no content (markdown/scrape) for {tool_name}, skipping analysis")
+
+        if primary_color:
+            company.primary_color = primary_color
+        if brand_colors:
+            company.brand_colors = brand_colors
+        if logo_url:
+            company.logo_url = logo_url
+
 
         return company
 

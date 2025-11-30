@@ -198,7 +198,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
         # Prefer markdown that may have been attached to the search doc
         content = getattr(doc, "markdown", None)
 
-        # --- NEW: fields for branding info ---
+        # --- fields for branding info ---
         primary_color = None
         brand_colors = None
         logo_url = None
@@ -267,7 +267,6 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
         if logo_url:
             company.logo_url = logo_url
 
-        print("Finished:", company.name, company.primary_color, company.brand_colors, company.logo_url)
         return company
 
     def _research_step(self, state: StateT) -> Dict[str, Any]:

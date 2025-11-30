@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 
 
@@ -25,7 +25,9 @@ class BaseSoftwareEngResourceSummary(BaseModel):
 
     # Optional: focus area, e.g. "Testing", "CI/CD", "Architecture", "Agile"
     focus_areas: List[str] = Field(default_factory=list)
-
+    logo_url: Optional[str] = None
+    primary_color: Optional[str] = None       # e.g. "#0B5FFF"
+    brand_colors: Optional[Dict[str, str]] = None  # full color map if you want
 
 class BaseSoftwareEngRecommendation(BaseModel):
     """

@@ -92,7 +92,6 @@ class FirecrawlService:
             print(f"[ERROR] scrape failed for {url}: {e}")
             executor.shutdown(wait=False, cancel_futures=True)
             return None
-        print("Scraping3")
         if not result:
             print(f"[WARN] scrape returned empty result for {url}")
             return None

@@ -99,6 +99,18 @@ async def chat_stream(
                 }
             )
 
+        resources_visual = []
+        for res in getattr(result, "resources", []) or []:
+            resources_visual.append(
+                {
+                    "title": getattr(res, "title", None),
+                    "url": getattr(res, "url", None),
+                    "logo_url": getattr(res, "logo_url", None),
+                    "primary_color": getattr(res, "primary_color", None),
+                    "brand_colors": getattr(res, "brand_colors", None),
+                }
+            )
+
         final_payload = {
             "type": "final",
             "reply": reply_text,

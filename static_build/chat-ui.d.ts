@@ -20,16 +20,12 @@ export declare class ChatUI {
     private addGreeting;
     private addFollowupMsg;
     private attachListeners;
-    private extractWebsiteUrl;
     private addMessage;
-    private addDownloadButton;
     private addDropDown;
     private startThinking;
     private stopThinking;
     private updateTitle;
     private updateBackground;
-    private splitReplyIntoBubbles;
-    private addCompanyBubble;
     private handleSubmit;
 }
 //# sourceMappingURL=chat-ui.d.ts.map

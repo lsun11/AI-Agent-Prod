@@ -134,6 +134,9 @@ class CareerBaseCompanyInfo(BaseModel):
 
     extra: Dict[str, Any] = Field(default_factory=dict)
 
+    logo_url: Optional[str] = None
+    primary_color: Optional[str] = None       # e.g. "#0B5FFF"
+    brand_colors: Optional[Dict[str, str]] = None  # full color map if you want
 
 class CareerBaseResearchState(BaseModel):
     """

@@ -78,6 +78,7 @@ async def chat_stream(
             if user_is_chinese
             else reply_text_en
         )
+        print(reply_text)
 
         text_path = save_result_document_raw(user_query, reply_text)
         text_filename = os.path.basename(text_path)

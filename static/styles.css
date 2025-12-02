@@ -367,6 +367,7 @@ body {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
+    position: relative;            /* Required for absolute-positioned hover menu */
 }
 
 .download-button {
@@ -383,6 +384,40 @@ body {
 .download-button:hover {
     opacity: 0.9;
 }
+
+/* --- Hover Format Menu --- */
+
+.download-format-menu {
+    position: absolute;
+    top: 110%;                     /* Right below the main button */
+    right: 0;                      /* Right aligned with your current container */
+    display: flex;
+    gap: 0.4rem;
+    padding: 4px 6px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+    z-index: 20;
+}
+
+.download-format-menu.hidden {
+    display: none;
+}
+
+.download-format-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: none;
+    background: #e0e0e0;          /* light grey to contrast with green main button */
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.download-format-btn:hover {
+    background: rgba(235, 255, 224, 0.92);
+}
+
 
 .header-row {
     display: flex;

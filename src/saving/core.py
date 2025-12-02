@@ -8,10 +8,15 @@ from typing import Any
 from .pdf_builder import build_pdf_document
 from .docx_builder import build_docx_document
 from .slides import save_result_slides as _save_result_slides
-from .formatters import format_result_text
+from typing import Optional, TypedDict
 
 
-def save_result_document_raw(query: str, result_text: str) -> str:
+class SavedResultPaths(TypedDict):
+    pdf: str
+    txt: str
+    docx: Optional[str]
+
+def save_result_document_raw(query: str, result_text: str) -> SavedResultPaths:
     """
     Save the result in three formats:
 
@@ -52,7 +57,11 @@ def save_result_document_raw(query: str, result_text: str) -> str:
     build_pdf_document(query, result_text, pdf_path)
 
     # Prefer pdf, then docx, then txt
-    return pdf_path or docx_path or txt_path
+    return {
+        "pdf": pdf_path,
+        "docx": docx_path,
+        "txt": txt_path,
+    }
 
 
 def save_result_slides(query: str, result: Any) -> str:

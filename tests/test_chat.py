@@ -64,9 +64,14 @@ def make_test_app(monkeypatch) -> FastAPI:
     monkeypatch.setattr(
         chat,
         "save_result_document_raw",
-        lambda query, text: "saved_docs/fake_doc.txt",
+        lambda query, text: {
+            "pdf": "saved_docs/fake_doc.pdf",
+            "docx": "saved_docs/fake_doc.docx",
+            "txt": "saved_docs/fake_doc.txt",
+        },
         raising=True,
     )
+
     monkeypatch.setattr(
         chat,
         "save_result_slides",
@@ -132,10 +137,22 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
     # Check final event payload structure
     final_event = next(e for e in events if e["type"] == "final")
     assert final_event["reply"] == "formatted result text"
-    assert final_event["download_url"].startswith("/download/")
-    assert final_event["download_url"].endswith(".txt")
+
+    # Multi-format URLs for the frontend hover menu
+    assert final_event["download_pdf_url"].startswith("/download/")
+    assert final_event["download_pdf_url"].endswith(".pdf")
+
+    assert final_event["download_txt_url"].startswith("/download/")
+    assert final_event["download_txt_url"].endswith(".txt")
+
+    # docx is optional in your code, but in this test we *do* provide one:
+    assert final_event["download_docx_url"].startswith("/download/")
+    assert final_event["download_docx_url"].endswith(".docx")
+
+    # Slides remain the same
     assert final_event["slides_download_url"].startswith("/download/")
     assert final_event["slides_download_url"].endswith(".pptx")
+
     assert final_event["topic_used"] == "Fake Topic"
 
 

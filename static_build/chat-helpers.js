@@ -100,10 +100,20 @@ export function createCompanyBubbleElement(text, company) {
     }
     return wrapper;
 }
-/**
- * Creates the “Download summary” button container.
- */
-export function createDownloadButtonElement(url, object, language) {
+function buildFormatUrl(baseUrl, format) {
+    // Adjust this if your backend uses a different format pattern.
+    try {
+        const url = new URL(baseUrl, window.location.origin);
+        url.searchParams.set("format", format);
+        return url.toString();
+    }
+    catch (_a) {
+        const sep = baseUrl.includes("?") ? "&" : "?";
+        return `${baseUrl}${sep}format=${format}`;
+    }
+}
+// Implementation
+export function createDownloadButtonElement(urlOrUrls, object, language, multiFormat = false) {
     const downloadContainer = document.createElement("div");
     downloadContainer.className = "download-container";
     const button = document.createElement("button");
@@ -113,10 +123,71 @@ export function createDownloadButtonElement(url, object, language) {
         language === "Eng"
             ? `Download summary (${object})`
             : `下载总结 (${object})`;
-    button.addEventListener("click", () => {
-        window.open(url, "_blank");
-    });
     downloadContainer.appendChild(button);
+    const isMultiUrls = typeof urlOrUrls === "object" && urlOrUrls !== null;
+    // --- Simple single-file behaviour (slides, or non-multi usage) ---
+    if (!multiFormat || !isMultiUrls) {
+        const singleUrl = typeof urlOrUrls === "string" ? urlOrUrls : urlOrUrls.pdf;
+        button.addEventListener("click", () => {
+            window.open(singleUrl, "_blank");
+        });
+        return downloadContainer;
+    }
+    // --- Fancy multi-format hover menu (PDF / DOCX / TXT) ---
+    const urls = urlOrUrls;
+    const menu = document.createElement("div");
+    menu.className = "download-format-menu hidden";
+    const formats = [
+        {
+            key: "pdf",
+            label: language === "Eng" ? "PDF" : "PDF 文档",
+        },
+        {
+            key: "docx",
+            label: language === "Eng" ? "DOCX" : "Word 文档",
+        },
+        {
+            key: "txt",
+            label: language === "Eng" ? "TXT" : "纯文本",
+        },
+    ];
+    formats.forEach(({ key, label }) => {
+        const fmtBtn = document.createElement("button");
+        fmtBtn.type = "button";
+        fmtBtn.className = "download-format-btn";
+        fmtBtn.textContent = label;
+        fmtBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const targetUrl = urls[key];
+            if (targetUrl) {
+                window.open(targetUrl, "_blank");
+            }
+        });
+        menu.appendChild(fmtBtn);
+    });
+    downloadContainer.appendChild(menu);
+    // Optional: main button click defaults to PDF
+    button.addEventListener("click", () => {
+        if (urls.pdf) {
+            window.open(urls.pdf, "_blank");
+        }
+    });
+    // Show / hide on hover
+    let hideTimeout = null;
+    const showMenu = () => {
+        if (hideTimeout !== null) {
+            window.clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        menu.classList.remove("hidden");
+    };
+    const hideMenu = () => {
+        hideTimeout = window.setTimeout(() => {
+            menu.classList.add("hidden");
+        }, 120);
+    };
+    downloadContainer.addEventListener("mouseenter", showMenu);
+    downloadContainer.addEventListener("mouseleave", hideMenu);
     return downloadContainer;
 }
 //# sourceMappingURL=chat-helpers.js.map

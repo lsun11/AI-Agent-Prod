@@ -18,6 +18,9 @@ const MODEL_OPTIONS: SelectOption[] = [
     {value: 'claude-sonnet-4-5-20250929', label: "Claude Sonnet 4.5"},
     {value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5"},
     { value: "deepseek-chat", label: "Deepseek V3" },
+    { value: "gemini-3-pro-preview", label: "Gemini 3" },
+    { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+    { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite" },
 ];
 
 // Humanization dropdown options

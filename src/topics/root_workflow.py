@@ -4,6 +4,7 @@ from typing import Optional, Callable, Any, List, Dict, Tuple
 from langchain_openai import ChatOpenAI
 from langchain_deepseek import ChatDeepSeek
 from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from ..firecrawl import FirecrawlService
 
 
@@ -41,12 +42,14 @@ class RootWorkflow:
         print(f"Setting LLM... model: {model_name} temperature: {temperature}")
         timeout = 20,  # <--- real HTTP timeout in seconds
 
-        if "deepseek" in model_name:
-            self.llm = ChatDeepSeek(model=model_name, temperature=temperature, timeout=60, max_retries=1)
-        elif "claude" in model_name:
-            self.llm = ChatAnthropic(model=model_name, temperature=temperature, timeout=60, max_retries=1)
-        else:
+        if "gpt" in model_name:
             self.llm = ChatOpenAI(model=model_name, temperature=temperature, timeout=100, max_retries=1)
+        elif "deepseek" in model_name:
+            self.llm = ChatDeepSeek(model=model_name, temperature=temperature, timeout=100, max_retries=1)
+        elif "claude" in model_name:
+            self.llm = ChatAnthropic(model=model_name, temperature=temperature, timeout=100, max_retries=1)
+        else:
+            self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=temperature, timeout=100, max_retries=1)
 
     # ---------------------------
     # Logging

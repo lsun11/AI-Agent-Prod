@@ -6,7 +6,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 # src/saving/fonts.py
 
 # BASE_DIR points to src/
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 # ---- CJK + Noto fonts ----
 FONTS_DIR_KAI = BASE_DIR / "fonts" / "KaiShu"

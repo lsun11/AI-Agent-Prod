@@ -140,13 +140,49 @@ export function createCompanyBubbleElement(
     return wrapper;
 }
 
+function buildFormatUrl(baseUrl: string, format: "pdf" | "docx" | "txt"): string {
+    // Adjust this if your backend uses a different format pattern.
+    try {
+        const url = new URL(baseUrl, window.location.origin);
+        url.searchParams.set("format", format);
+        return url.toString();
+    } catch {
+        const sep = baseUrl.includes("?") ? "&" : "?";
+        return `${baseUrl}${sep}format=${format}`;
+    }
+}
+
 /**
  * Creates the “Download summary” button container.
+ *
+ * If multiFormat = false:
+ *   - Single button which opens the given URL.
+ *
+ * If multiFormat = true:
+ *   - Main button + hover menu with [PDF, DOCX, TXT].
+ *   - Clicking a format opens baseUrl with ?format=<fmt>.
  */
+// Overload signatures
 export function createDownloadButtonElement(
     url: string,
     object: string,
-    language: LanguageCode
+    language: LanguageCode,
+    multiFormat?: boolean
+): HTMLDivElement;
+
+export function createDownloadButtonElement(
+    urls: { pdf: string; docx: string; txt: string },
+    object: string,
+    language: LanguageCode,
+    multiFormat: true
+): HTMLDivElement;
+
+// Implementation
+export function createDownloadButtonElement(
+    urlOrUrls: string | { pdf: string; docx: string; txt: string },
+    object: string,
+    language: LanguageCode,
+    multiFormat: boolean = false
 ): HTMLDivElement {
     const downloadContainer = document.createElement("div");
     downloadContainer.className = "download-container";
@@ -159,10 +195,90 @@ export function createDownloadButtonElement(
             ? `Download summary (${object})`
             : `下载总结 (${object})`;
 
-    button.addEventListener("click", () => {
-        window.open(url, "_blank");
+    downloadContainer.appendChild(button);
+
+    const isMultiUrls = typeof urlOrUrls === "object" && urlOrUrls !== null;
+
+    // --- Simple single-file behaviour (slides, or non-multi usage) ---
+    if (!multiFormat || !isMultiUrls) {
+        const singleUrl =
+            typeof urlOrUrls === "string" ? urlOrUrls : urlOrUrls.pdf;
+
+        button.addEventListener("click", () => {
+            window.open(singleUrl, "_blank");
+        });
+
+        return downloadContainer;
+    }
+
+    // --- Fancy multi-format hover menu (PDF / DOCX / TXT) ---
+    const urls = urlOrUrls as { pdf: string; docx: string; txt: string };
+
+    const menu = document.createElement("div");
+    menu.className = "download-format-menu hidden";
+
+    type FormatKey = "pdf" | "docx" | "txt";
+
+    const formats: { key: FormatKey; label: string }[] = [
+        {
+            key: "pdf",
+            label: language === "Eng" ? "PDF" : "PDF 文档",
+        },
+        {
+            key: "docx",
+            label: language === "Eng" ? "DOCX" : "Word 文档",
+        },
+        {
+            key: "txt",
+            label: language === "Eng" ? "TXT" : "纯文本",
+        },
+    ];
+
+    formats.forEach(({ key, label }) => {
+        const fmtBtn = document.createElement("button");
+        fmtBtn.type = "button";
+        fmtBtn.className = "download-format-btn";
+        fmtBtn.textContent = label;
+
+        fmtBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const targetUrl = urls[key];
+            if (targetUrl) {
+                window.open(targetUrl, "_blank");
+            }
+        });
+
+        menu.appendChild(fmtBtn);
     });
 
-    downloadContainer.appendChild(button);
+    downloadContainer.appendChild(menu);
+
+    // Optional: main button click defaults to PDF
+    button.addEventListener("click", () => {
+        if (urls.pdf) {
+            window.open(urls.pdf, "_blank");
+        }
+    });
+
+    // Show / hide on hover
+    let hideTimeout: number | null = null;
+
+    const showMenu = () => {
+        if (hideTimeout !== null) {
+            window.clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        menu.classList.remove("hidden");
+    };
+
+    const hideMenu = () => {
+        hideTimeout = window.setTimeout(() => {
+            menu.classList.add("hidden");
+        }, 120);
+    };
+
+    downloadContainer.addEventListener("mouseenter", showMenu);
+    downloadContainer.addEventListener("mouseleave", hideMenu);
+
     return downloadContainer;
 }

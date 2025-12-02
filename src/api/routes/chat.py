@@ -80,9 +80,16 @@ async def chat_stream(
         )
         print(reply_text)
 
-        text_path = save_result_document_raw(user_query, reply_text)
-        text_filename = os.path.basename(text_path)
-        download_url = f"/download/{text_filename}"
+        paths = save_result_document_raw(user_query, reply_text)
+        pdf_path = paths["pdf"]
+        docx_path = paths["docx"]
+        txt_path = paths["txt"]
+        pdf_filename = os.path.basename(pdf_path)
+        docx_filename = os.path.basename(docx_path)
+        txt_filename = os.path.basename(txt_path)
+        download_pdf_url = f"/download/{pdf_filename}"
+        download_docx_url = f"/download/{docx_filename}"
+        download_txt_url = f"/download/{txt_filename}"
 
         slides_path = save_result_slides(user_query, result)
         slides_filename = os.path.basename(slides_path)
@@ -115,7 +122,9 @@ async def chat_stream(
         final_payload = {
             "type": "final",
             "reply": reply_text,
-            "download_url": download_url,
+            "download_pdf_url": download_pdf_url,
+            "download_docx_url": download_docx_url,
+            "download_txt_url": download_txt_url,
             "slides_download_url": slides_download_url,
             "topic_used": topic_label_display,
             # 👇 send visuals to frontend

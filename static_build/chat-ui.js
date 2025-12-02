@@ -260,15 +260,21 @@ export class ChatUI {
                             this.addMessage(bubbles[i], style, url);
                         }
                         // Download buttons using helper
-                        if (data.download_url) {
+                        if (data.download_pdf_url || data.download_docx_url || data.download_txt_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
-                            const el = createDownloadButtonElement(data.download_url, object, this.language);
+                            const el = createDownloadButtonElement({
+                                pdf: data.download_pdf_url,
+                                docx: data.download_docx_url,
+                                txt: data.download_txt_url
+                            }, object, this.language, true // 👈 enable multi-format menu for the document
+                            );
                             this.messagesEl.appendChild(el);
                             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
                         if (data.slides_download_url) {
                             const object = this.language === "Eng" ? "slides" : "演示文稿";
-                            const el = createDownloadButtonElement(data.slides_download_url, object, this.language);
+                            const el = createDownloadButtonElement(data.slides_download_url, object, this.language // 👈 leave default (single-click)
+                            );
                             this.messagesEl.appendChild(el);
                             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }

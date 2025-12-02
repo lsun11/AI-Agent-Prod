@@ -28,6 +28,18 @@ export declare function splitReplyIntoBubbles(reply: string): string[];
 export declare function createCompanyBubbleElement(text: string, company: CompanyVisual): HTMLDivElement;
 /**
  * Creates the “Download summary” button container.
+ *
+ * If multiFormat = false:
+ *   - Single button which opens the given URL.
+ *
+ * If multiFormat = true:
+ *   - Main button + hover menu with [PDF, DOCX, TXT].
+ *   - Clicking a format opens baseUrl with ?format=<fmt>.
  */
-export declare function createDownloadButtonElement(url: string, object: string, language: LanguageCode): HTMLDivElement;
+export declare function createDownloadButtonElement(url: string, object: string, language: LanguageCode, multiFormat?: boolean): HTMLDivElement;
+export declare function createDownloadButtonElement(urls: {
+    pdf: string;
+    docx: string;
+    txt: string;
+}, object: string, language: LanguageCode, multiFormat: true): HTMLDivElement;
 //# sourceMappingURL=chat-helpers.d.ts.map

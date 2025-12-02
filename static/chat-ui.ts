@@ -348,12 +348,17 @@ export class ChatUI {
                         }
 
                         // Download buttons using helper
-                        if (data.download_url) {
+                        if (data.download_pdf_url || data.download_docx_url || data.download_txt_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
                             const el = createDownloadButtonElement(
-                                data.download_url as string,
+                                {
+                                    pdf: data.download_pdf_url,
+                                    docx: data.download_docx_url,
+                                    txt: data.download_txt_url
+                                },
                                 object,
-                                this.language
+                                this.language,
+                                true  // 👈 enable multi-format menu for the document
                             );
                             this.messagesEl.appendChild(el);
                             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
@@ -364,11 +369,12 @@ export class ChatUI {
                             const el = createDownloadButtonElement(
                                 data.slides_download_url as string,
                                 object,
-                                this.language
+                                this.language        // 👈 leave default (single-click)
                             );
                             this.messagesEl.appendChild(el);
                             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
+
 
                         es.close();
                         this.stopThinking();

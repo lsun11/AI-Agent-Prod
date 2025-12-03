@@ -1,6 +1,5 @@
 # tests/test_chat.py
 import json
-
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -61,21 +60,38 @@ def make_test_app(monkeypatch) -> FastAPI:
         lambda query, result: "formatted result text",
         raising=True,
     )
-    monkeypatch.setattr(
-        chat,
-        "save_result_document_raw",
-        lambda query, text: {
-            "pdf": "saved_docs/fake_doc.pdf",
-            "docx": "saved_docs/fake_doc.docx",
-            "txt": "saved_docs/fake_doc.txt",
-        },
-        raising=True,
-    )
+
+    # --- NEW: mock layout generation + file generation ---
+
+    # This replaces generate_document_and_slides(query, raw_text, language=...)
+    def fake_generate_document_and_slides(query: str, raw_text: str, language: str = "Eng"):
+        class DummyLayout:
+            title = query
+            report_markdown = raw_text
+            slides = []
+        return DummyLayout()
+
+    # This replaces generate_all_files_for_layout(layout, base_folder, base_filename)
+    # IMPORTANT: keys must match chat.py expectations: "pdf", "docx", "txt", "pptx"
+    def fake_generate_all_files_for_layout(layout, base_folder: str, base_filename: str):
+        base = f"{base_folder}/{base_filename}"
+        return {
+            "pdf": f"{base}.pdf",
+            "docx": f"{base}.docx",
+            "txt": f"{base}.txt",
+            "pptx": f"{base}.pptx",
+        }
 
     monkeypatch.setattr(
         chat,
-        "save_result_slides",
-        lambda query, result: "saved_slides/fake_slides.pptx",
+        "generate_document_and_slides",
+        fake_generate_document_and_slides,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        chat,
+        "generate_all_files_for_layout",
+        fake_generate_all_files_for_layout,
         raising=True,
     )
 
@@ -145,7 +161,7 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
     assert final_event["download_txt_url"].startswith("/download/")
     assert final_event["download_txt_url"].endswith(".txt")
 
-    # docx is optional in your code, but in this test we *do* provide one:
+    # docx is optional in real code, but in this test we *do* provide one:
     assert final_event["download_docx_url"].startswith("/download/")
     assert final_event["download_docx_url"].endswith(".docx")
 
@@ -156,14 +172,8 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
     assert final_event["topic_used"] == "Fake Topic"
 
 
-import json
-from fastapi.testclient import TestClient
-from src.api.app import create_app
+# ---- Integration-style test with the real app factory ----
 
-app = create_app()
-client = TestClient(app)
-
-from fastapi.testclient import TestClient
 from src.api.app import create_app
 
 client = TestClient(create_app())
@@ -228,7 +238,42 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
         raising=True,
     )
 
-    # 4) Call the endpoint as an SSE stream
+    # 4) Avoid real formatting / file generation here as well
+    monkeypatch.setattr(
+        "src.api.routes.chat.format_result_text",
+        lambda q, r: "dummy formatted",
+        raising=True,
+    )
+
+    # Mock the LLM layout + file generation in the Chinese branch too
+    def fake_generate_document_and_slides(query: str, raw_text: str, language: str = "Chn"):
+        class DummyLayout:
+            title = query
+            report_markdown = raw_text
+            slides = []
+        return DummyLayout()
+
+    def fake_generate_all_files_for_layout(layout, base_folder: str, base_filename: str):
+        base = f"{base_folder}/{base_filename}"
+        return {
+            "pdf": f"{base}.pdf",
+            "docx": f"{base}.docx",
+            "txt": f"{base}.txt",
+            "pptx": f"{base}.pptx",
+        }
+
+    monkeypatch.setattr(
+        "src.api.routes.chat.generate_document_and_slides",
+        fake_generate_document_and_slides,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        "src.api.routes.chat.generate_all_files_for_layout",
+        fake_generate_all_files_for_layout,
+        raising=True,
+    )
+
+    # 5) Call the endpoint as an SSE stream
     params = {
         "message": "测试中文",
         "model": "gpt-4.1-nano",

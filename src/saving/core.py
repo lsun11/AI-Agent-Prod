@@ -3,7 +3,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict
 
 from .pdf_builder import build_pdf_document
 from .docx_builder import build_docx_document
@@ -16,7 +16,7 @@ class SavedResultPaths(TypedDict):
     txt: str
     docx: Optional[str]
 
-def save_result_document_raw(query: str, result_text: str) -> SavedResultPaths:
+def save_result_document_raw(query: str, result_text: str) -> Dict[str, str]:
     """
     Save the result in three formats:
 
@@ -24,12 +24,18 @@ def save_result_document_raw(query: str, result_text: str) -> SavedResultPaths:
     - If python-docx is available: .docx
     - Always: .pdf
 
-    Returns: path to the preferred file (pdf > docx > txt).
+    Returns: dict with paths {"pdf": ..., "docx": ..., "txt": ...}
     """
+    # ✅ use the original query for filename base
     raw_summary = query.strip() or "research"
 
+    # Normalize unicode so Chinese characters are preserved
     normalized = unicodedata.normalize("NFKC", raw_summary)
+
+    # Replace any invalid filename characters with "_"
     safe = re.sub(r'[<>:"/\\|?*\n\r\t]', "_", normalized)
+
+    # Trim and collapse spaces
     safe = "_".join(safe.split())[:80]
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -56,13 +62,11 @@ def save_result_document_raw(query: str, result_text: str) -> SavedResultPaths:
     pdf_path = os.path.join(folder, base + ".pdf")
     build_pdf_document(query, result_text, pdf_path)
 
-    # Prefer pdf, then docx, then txt
     return {
         "pdf": pdf_path,
         "docx": docx_path,
         "txt": txt_path,
     }
-
 
 def save_result_slides(query: str, result: Any) -> str:
     """Public wrapper around the PPTX saver."""

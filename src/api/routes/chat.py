@@ -1,13 +1,16 @@
 # src/api/routes/chat.py
 import os
 import json
+import re
 import threading
+import unicodedata
+from datetime import datetime
 from typing import Optional
 from queue import Queue
 
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
-from ...save_utils import format_result_text, save_result_document_raw, save_result_slides
+from ...saving import format_result_text, generate_document_and_slides, LanguageCode, generate_all_files_for_layout
 from ..deps import TOPIC_WORKFLOWS, classify_topic_with_llm
 from ..translate import is_chinese, translate_text
 
@@ -17,9 +20,9 @@ SAVED_DOCS_DIR = "saved_docs"
 
 @router.get("/chat_stream")
 async def chat_stream(
-    message: str,
-    model: Optional[str] = Query(None),
-    temperature: Optional[str] = Query(None),
+        message: str,
+        model: Optional[str] = Query(None),
+        temperature: Optional[str] = Query(None),
 ):
     """
     Streaming chat endpoint using Server-Sent Events (SSE).
@@ -80,19 +83,49 @@ async def chat_stream(
         )
         print(reply_text)
 
-        paths = save_result_document_raw(user_query, reply_text)
+        # 2) Let the LLM turn reply_text into a professional layout
+        language: LanguageCode = "Chn" if user_is_chinese else "Eng"
+        layout = generate_document_and_slides(
+            query=user_query,
+            raw_text=reply_text,
+            language=language,
+        )
+
+        # 3) Use the layout to generate txt / pdf / docx / slides
+        #    Build base filename from the user query + timestamp (old behavior)
+        raw_summary = user_query.strip() or "research"
+
+        # Normalize unicode so Chinese characters are preserved
+        normalized = unicodedata.normalize("NFKC", raw_summary)
+
+        # Replace any invalid filename characters with "_"
+        safe = re.sub(r'[<>:"/\\|?*\n\r\t]', "_", normalized)
+
+        # Trim and collapse spaces, limit length
+        safe = "_".join(safe.split())[:80]
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        base_filename = f"{safe}_{timestamp}"
+
+        paths = generate_all_files_for_layout(
+            layout=layout,
+            base_folder="saved_docs",
+            base_filename=base_filename,
+        )
+
         pdf_path = paths["pdf"]
         docx_path = paths["docx"]
         txt_path = paths["txt"]
+        slides_path = paths["pptx"]
+
         pdf_filename = os.path.basename(pdf_path)
         docx_filename = os.path.basename(docx_path)
         txt_filename = os.path.basename(txt_path)
+        slides_filename = os.path.basename(slides_path)
+
         download_pdf_url = f"/download/{pdf_filename}"
         download_docx_url = f"/download/{docx_filename}"
         download_txt_url = f"/download/{txt_filename}"
-
-        slides_path = save_result_slides(user_query, result)
-        slides_filename = os.path.basename(slides_path)
         slides_download_url = f"/download/{slides_filename}"
 
         companies_visual = []
@@ -121,14 +154,14 @@ async def chat_stream(
 
         final_payload = {
             "type": "final",
-            "reply": reply_text,
+            "reply": reply_text,  # human-readable answer for the chat bubble
             "download_pdf_url": download_pdf_url,
             "download_docx_url": download_docx_url,
             "download_txt_url": download_txt_url,
             "slides_download_url": slides_download_url,
             "topic_used": topic_label_display,
-            # 👇 send visuals to frontend
             "companies_visual": companies_visual,
+            # you can also add "resources_visual" if you want it on the frontend
         }
         return final_payload
 

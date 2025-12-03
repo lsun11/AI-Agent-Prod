@@ -1,10 +1,11 @@
 # src/saving/pdf_builder.py
 import re
+from html import escape
 from typing import List
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.colors import Color
+from reportlab.lib.colors import Color, HexColor
 from reportlab.pdfgen.canvas import Canvas
 
 from .fonts import (
@@ -47,31 +48,37 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
     register_cjk_fonts()
 
     # If any emoji present, register emoji font
-    if re.search(r"[\U0001F300-\U0001FAFF]", full_text):
-        register_emoji_font()
+    #if re.search(r"[\U0001F300-\U0001FAFF]", full_text):
+    register_emoji_font()
 
+    # --- base doc (this must ALWAYS run, emoji or not) ---
     doc = SimpleDocTemplate(
         pdf_path,
         pagesize=A4,
         leftMargin=60,
         rightMargin=60,
-        topMargin=50,
-        bottomMargin=50,
+        topMargin=60,
+        bottomMargin=60,
     )
 
     styles = getSampleStyleSheet()
 
+    # ------- COLORS (tweak if you like) -------
+    title_color = HexColor("#1F4E79")  # deep blue
+    h2_bg = HexColor("#EAF2F8")        # very light blue
+    h2_color = HexColor("#154360")
+    h3_color = HexColor("#2E86C1")
+    body_color = HexColor("#333333")
+
     if uses_cjk:
-        # ---- Chinese styles ----
         body_style = ParagraphStyle(
             "BodyCJK",
             parent=styles["Normal"],
             fontName=CJK_FONT_NAME_SONG_2,
-            fontSize=12,
-            leading=18,
-            spaceAfter=12,
-            alignment=0,
-            allowBold=True,
+            fontSize=11.5,
+            leading=17,
+            textColor=body_color,
+            spaceAfter=10,
         )
         title_style = ParagraphStyle(
             "TitleCJK",
@@ -79,10 +86,9 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             fontName=NOTO_FONT_NAME_SERIF,
             fontSize=22,
             leading=26,
-            spaceAfter=20,
-            spaceBefore=0,
-            alignment=1,
-            allowBold=True,
+            textColor=title_color,
+            spaceAfter=12,
+            alignment=1,  # center
         )
         heading2_style = ParagraphStyle(
             "Heading2CJK",
@@ -90,10 +96,12 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             fontName=CJK_FONT_NAME_SONG_2,
             fontSize=16,
             leading=20,
-            spaceBefore=16,
-            spaceAfter=10,
-            textColor="#2c3e50",
-            allowBold=True,
+            textColor=h2_color,
+            backColor=h2_bg,
+            spaceBefore=14,
+            spaceAfter=8,
+            leftIndent=4,
+            rightIndent=4,
         )
         heading3_style = ParagraphStyle(
             "Heading3CJK",
@@ -101,74 +109,92 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             fontName=CJK_FONT_NAME_SONG,
             fontSize=14,
             leading=18,
-            spaceBefore=12,
-            spaceAfter=8,
-            textColor="#34495e",
-            allowBold=True,
+            textColor=h3_color,
+            spaceBefore=10,
+            spaceAfter=4,
         )
     else:
-        # ---- Latin styles (Noto serif) ----
         body_style = ParagraphStyle(
             "BodyLatin",
             parent=styles["Normal"],
-            fontName=NOTO_FONT_NAME_SERIF,
-            fontSize=12,
-            leading=18,
-            spaceAfter=12,
-            alignment=0,
-            allowBold=True,
+            fontName="Times-Roman",
+            fontSize=11.5,
+            leading=17,
+            textColor=body_color,
+            spaceAfter=10,
         )
         title_style = ParagraphStyle(
             "TitleLatin",
             parent=styles["Heading1"],
-            fontName=NOTO_FONT_NAME_SERIF,
-            fontSize=18,
-            leading=24,
-            spaceAfter=16,
-            spaceBefore=0,
+            fontName="Times-Bold",
+            fontSize=20,
+            leading=26,
+            textColor=title_color,
+            spaceAfter=12,
             alignment=1,
-            allowBold=True,
         )
         heading2_style = ParagraphStyle(
             "Heading2Latin",
             parent=styles["Heading2"],
-            fontName=NOTO_FONT_NAME_SERIF,
-            fontSize=14,
+            fontName="Times-Bold",
+            fontSize=15,
             leading=20,
-            spaceBefore=10,
-            spaceAfter=10,
-            textColor="#2c3e50",
-            allowBold=True,
+            textColor=h2_color,
+            backColor=h2_bg,
+            spaceBefore=14,
+            spaceAfter=8,
+            leftIndent=4,
+            rightIndent=4,
         )
         heading3_style = ParagraphStyle(
             "Heading3Latin",
             parent=styles["Heading3"],
-            fontName=NOTO_FONT_NAME_SERIF,
-            fontSize=12,
+            fontName="Times-Bold",
+            fontSize=13,
             leading=18,
-            spaceBefore=8,
-            spaceAfter=8,
-            textColor="#34495e",
-            allowBold=True,
+            textColor=h3_color,
+            spaceBefore=10,
+            spaceAfter=4,
         )
 
-    story: List = []
+    story: list = []
 
-    # Title
-    story.append(Paragraph(markdown_inline_to_html(query, uses_cjk), title_style))
-    story.append(Spacer(1, 12))
+    # -------- Title block ----------
+    title_text = query.strip() or "Research Result"
+    story.append(
+        Paragraph(
+            markdown_inline_to_html(f"📊 {escape(title_text)}", uses_cjk),
+            title_style,
+        )
+    )
+    story.append(Spacer(1, 6))
 
-    # Body
+    subtitle = (
+        "工具评估与架构分析指南"
+        if uses_cjk
+        else "Tool Evaluation & Architecture Analysis Guide"
+    )
+    subtitle_style = ParagraphStyle(
+        "Subtitle",
+        parent=styles["Normal"],
+        fontName=body_style.fontName,
+        fontSize=11,
+        leading=14,
+        textColor=HexColor("#555555"),
+        alignment=1,
+        spaceAfter=16,
+    )
+    story.append(Paragraph(escape(subtitle), subtitle_style))
+
+    # -------- Body: parse headings & paragraphs ----------
     for raw_line in result_text.splitlines():
         line = raw_line.rstrip("\n")
 
-        # Extra spaces after full-width colon `：`
-        line = re.sub(r"：(?=\S)", "：   ", line)
-
         if not line.strip():
-            story.append(Spacer(1, 6))
+            story.append(Spacer(1, 4))
             continue
 
+        # H2: lines starting with "## "
         if line.startswith("## "):
             content = line[3:].strip()
             story.append(
@@ -179,6 +205,7 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             )
             continue
 
+        # H3: lines starting with "### "
         if line.startswith("### "):
             content = line[4:].strip()
             story.append(
@@ -189,6 +216,7 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             )
             continue
 
+        # Normal body
         story.append(
             Paragraph(
                 markdown_inline_to_html(line, uses_cjk),

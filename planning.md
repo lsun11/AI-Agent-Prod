@@ -2,31 +2,44 @@
 
 These give huge benefit with minimal code changes.
 
-✅ 1.1 Fix Markdown Rendering (Headings, bullets, bold)
+[//]: # (✅ 1.1 Fix Markdown Rendering &#40;Headings, bullets, bold&#41;)
 
-Make “# …” properly render as title
+[//]: # ()
+[//]: # (Make “# …” properly render as title)
 
-Fix inline bold/italic
+[//]: # ()
+[//]: # (Fix inline bold/italic)
 
-Improve PDF markdown parser
+[//]: # ()
+[//]: # (Improve PDF markdown parser)
 
-Zero-risk, immediate benefit
+[//]: # ()
+[//]: # (Zero-risk, immediate benefit)
 
-📈 Impact: 10/10
-🛠️ Effort: 1–2 hrs
+[//]: # ()
+[//]: # (📈 Impact: 10/10)
 
-✅ 1.2 Add Colors + Professional Themes to PDFs
+[//]: # (🛠️ Effort: 1–2 hrs)
 
-Background colors for headings
+[//]: # ()
+[//]: # (✅ 1.2 Add Colors + Professional Themes to PDFs)
 
-Light-colored section blocks
+[//]: # ()
+[//]: # (Background colors for headings)
 
-Nicer title page
+[//]: # ()
+[//]: # (Light-colored section blocks)
 
-Improved spacing and typography
+[//]: # ()
+[//]: # (Nicer title page)
 
-📈 Impact: 10/10
-🛠️ Effort: 2–4 hrs
+[//]: # ()
+[//]: # (Improved spacing and typography)
+
+[//]: # ()
+[//]: # (📈 Impact: 10/10)
+
+[//]: # (🛠️ Effort: 2–4 hrs)
 
 ✅ 1.3 Add Comparison Tables (LLM-generated)
 

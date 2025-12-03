@@ -4,6 +4,11 @@ import { markdownToHtml } from "./markdown.js";
 import { mapLanguageValue, translateLabel, getGreetingText, getFollowupText, applyInterfaceLanguage, refreshDropdownLabels } from "./language.js";
 import { extractWebsiteUrl, splitReplyIntoBubbles, createCompanyBubbleElement, createDownloadButtonElement, } from "./chat-helpers.js";
 import { RECOMMENDATION_STARTERS } from "./types.js";
+const STORAGE_KEYS = {
+    language: "ai_research_language",
+    model: "ai_research_model",
+    humanization: "ai_research_humanization",
+};
 export class ChatUI {
     constructor() {
         this.suggestionGrid = null;
@@ -49,6 +54,7 @@ export class ChatUI {
         this.languageSelect = languageSelectEl;
         this.modelSelect = modelSelectEl;
         this.humanizationSelect = humanizationSelectEl;
+        this.restorePersistedSettings();
         // language setup
         this.language = mapLanguageValue(this.languageSelect.value);
         this.updateInterfaceLanguage();
@@ -56,6 +62,12 @@ export class ChatUI {
         this.fetchSuggestions("fast").catch((err) => console.error("Failed to fetch suggestions:", err));
         this.languageSelect.addEventListener("change", () => {
             this.language = mapLanguageValue(this.languageSelect.value);
+            try {
+                window.localStorage.setItem(STORAGE_KEYS.language, this.languageSelect.value);
+            }
+            catch (err) {
+                console.warn("Failed to persist language setting:", err);
+            }
             this.updateInterfaceLanguage();
             refreshDropdownLabels(this.language);
             const switchedMsg = this.language === "Chn"
@@ -65,6 +77,52 @@ export class ChatUI {
             this.addGreeting(this.language);
             this.fetchSuggestions().catch((err) => console.error("Failed to fetch suggestions:", err));
         });
+        // 🔹 Persist model selection
+        this.modelSelect.addEventListener("change", () => {
+            try {
+                window.localStorage.setItem(STORAGE_KEYS.model, this.modelSelect.value);
+            }
+            catch (err) {
+                console.warn("Failed to persist model setting:", err);
+            }
+        });
+        // 🔹 Persist humanization (temperature) selection
+        this.humanizationSelect.addEventListener("change", () => {
+            try {
+                window.localStorage.setItem(STORAGE_KEYS.humanization, this.humanizationSelect.value);
+            }
+            catch (err) {
+                console.warn("Failed to persist humanization setting:", err);
+            }
+        });
+    }
+    restorePersistedSettings() {
+        try {
+            const savedLanguage = window.localStorage.getItem(STORAGE_KEYS.language);
+            const savedModel = window.localStorage.getItem(STORAGE_KEYS.model);
+            const savedHumanization = window.localStorage.getItem(STORAGE_KEYS.humanization);
+            if (savedLanguage && this.languageSelect) {
+                const option = Array.from(this.languageSelect.options).find((opt) => opt.value === savedLanguage);
+                if (option) {
+                    this.languageSelect.value = savedLanguage;
+                }
+            }
+            if (savedModel && this.modelSelect) {
+                const option = Array.from(this.modelSelect.options).find((opt) => opt.value === savedModel);
+                if (option) {
+                    this.modelSelect.value = savedModel;
+                }
+            }
+            if (savedHumanization && this.humanizationSelect) {
+                const option = Array.from(this.humanizationSelect.options).find((opt) => opt.value === savedHumanization);
+                if (option) {
+                    this.humanizationSelect.value = savedHumanization;
+                }
+            }
+        }
+        catch (err) {
+            console.warn("Failed to restore persisted settings:", err);
+        }
     }
     async fetchSuggestions(mode = "slow") {
         const params = new URLSearchParams({ language: this.language, mode: mode });

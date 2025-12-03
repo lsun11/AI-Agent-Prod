@@ -23,6 +23,13 @@ interface SuggestionsApiResponse {
     suggestions: string[];
 }
 
+const STORAGE_KEYS = {
+    language: "ai_research_language",
+    model: "ai_research_model",
+    humanization: "ai_research_humanization",
+};
+
+
 export class ChatUI {
     private form: HTMLFormElement;
     private input: HTMLInputElement;
@@ -87,6 +94,7 @@ export class ChatUI {
         this.modelSelect = modelSelectEl;
         this.humanizationSelect = humanizationSelectEl;
 
+        this.restorePersistedSettings();
         // language setup
         this.language = mapLanguageValue(this.languageSelect.value);
         this.updateInterfaceLanguage();
@@ -97,8 +105,16 @@ export class ChatUI {
 
         this.languageSelect.addEventListener("change", () => {
             this.language = mapLanguageValue(this.languageSelect.value);
-            this.updateInterfaceLanguage();
+            try {
+                window.localStorage.setItem(
+                    STORAGE_KEYS.language,
+                    this.languageSelect.value
+                );
+            } catch (err) {
+                console.warn("Failed to persist language setting:", err);
+            }
 
+            this.updateInterfaceLanguage();
             refreshDropdownLabels(this.language);
 
             const switchedMsg =
@@ -111,7 +127,69 @@ export class ChatUI {
                 console.error("Failed to fetch suggestions:", err)
             );
         });
+        // 🔹 Persist model selection
+        this.modelSelect.addEventListener("change", () => {
+            try {
+                window.localStorage.setItem(
+                    STORAGE_KEYS.model,
+                    this.modelSelect.value
+                );
+            } catch (err) {
+                console.warn("Failed to persist model setting:", err);
+            }
+        });
+
+        // 🔹 Persist humanization (temperature) selection
+        this.humanizationSelect.addEventListener("change", () => {
+            try {
+                window.localStorage.setItem(
+                    STORAGE_KEYS.humanization,
+                    this.humanizationSelect.value
+                );
+            } catch (err) {
+                console.warn("Failed to persist humanization setting:", err);
+            }
+        });
+
     }
+
+        private restorePersistedSettings(): void {
+        try {
+            const savedLanguage = window.localStorage.getItem(STORAGE_KEYS.language);
+            const savedModel = window.localStorage.getItem(STORAGE_KEYS.model);
+            const savedHumanization = window.localStorage.getItem(STORAGE_KEYS.humanization);
+
+            if (savedLanguage && this.languageSelect) {
+                const option = Array.from(this.languageSelect.options).find(
+                    (opt) => opt.value === savedLanguage
+                );
+                if (option) {
+                    this.languageSelect.value = savedLanguage;
+                }
+            }
+
+            if (savedModel && this.modelSelect) {
+                const option = Array.from(this.modelSelect.options).find(
+                    (opt) => opt.value === savedModel
+                );
+                if (option) {
+                    this.modelSelect.value = savedModel;
+                }
+            }
+
+            if (savedHumanization && this.humanizationSelect) {
+                const option = Array.from(this.humanizationSelect.options).find(
+                    (opt) => opt.value === savedHumanization
+                );
+                if (option) {
+                    this.humanizationSelect.value = savedHumanization;
+                }
+            }
+        } catch (err) {
+            console.warn("Failed to restore persisted settings:", err);
+        }
+    }
+
 
     private async fetchSuggestions(mode: string = "slow"): Promise<void> {
         const params = new URLSearchParams({language: this.language, mode: mode});

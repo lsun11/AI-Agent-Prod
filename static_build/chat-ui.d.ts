@@ -14,6 +14,7 @@ export declare class ChatUI {
     private latestCompaniesVisual;
     private currentEventSource?;
     constructor();
+    private restorePersistedSettings;
     private fetchSuggestions;
     private addSuggestionBubble;
     private updateInterfaceLanguage;

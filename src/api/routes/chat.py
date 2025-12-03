@@ -10,9 +10,7 @@ from queue import Queue
 
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
-from ...save_utils import format_result_text
-from ...saving.layout_llm import generate_document_and_slides, LanguageCode
-from ...saving.generate_files import generate_all_files_for_layout
+from ...saving import format_result_text, generate_document_and_slides, LanguageCode, generate_all_files_for_layout
 from ..deps import TOPIC_WORKFLOWS, classify_topic_with_llm
 from ..translate import is_chinese, translate_text
 
@@ -22,9 +20,9 @@ SAVED_DOCS_DIR = "saved_docs"
 
 @router.get("/chat_stream")
 async def chat_stream(
-    message: str,
-    model: Optional[str] = Query(None),
-    temperature: Optional[str] = Query(None),
+        message: str,
+        model: Optional[str] = Query(None),
+        temperature: Optional[str] = Query(None),
 ):
     """
     Streaming chat endpoint using Server-Sent Events (SSE).
@@ -114,7 +112,6 @@ async def chat_stream(
             base_folder="saved_docs",
             base_filename=base_filename,
         )
-
 
         pdf_path = paths["pdf"]
         docx_path = paths["docx"]

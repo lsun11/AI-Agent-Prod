@@ -99,7 +99,8 @@ async def chat_stream(
         entities = [
             {"name": c.name, "website": c.website}
             for c in result.companies or []
-        ]
+        ] if hasattr(result, "companies") else []
+
         layout = generate_document_and_slides(
             query=user_query,
             raw_text=reply_text,

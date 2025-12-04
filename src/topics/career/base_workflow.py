@@ -72,20 +72,28 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
         self._log(f"Finding articles/resources about: {state.query}")
 
         article_query = f"{state.query} {self.article_query_suffix}"
-        search_results = self.firecrawl.search_companies(article_query, num_results=3)
+        query_variants = [
+            article_query,  # keep your original comparison template
+            f"{state.query} developer tools overview",
+            f"{state.query} SaaS platform comparison",
+        ]
 
-        # Normalize Firecrawl search results → web_results (list of docs)
-        if hasattr(search_results, "web"):
-            web_results = search_results.web
-        elif isinstance(search_results, dict):
-            web_results = search_results.get("web", [])
-        else:
-            web_results = search_results
+        merged_content, meta_items = self._multi_pass_articles(
+            state.query,
+            num_results=3,
+            snippet_len=1500,
+            query_variants=query_variants,
+        )
 
-        all_content, _ = self._collect_content_from_web_results(web_results)
+        if not merged_content.strip():
+            self._log("multi-pass search returned no content, falling back to single search")
+            search_results = self.firecrawl.search_companies(article_query, num_results=3)
+            web_results = self._get_web_results(search_results)
+            merged_content, meta_items = self._collect_content_from_web_results(web_results)
+
         messages = [
             SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
-            HumanMessage(content=self.prompts.tool_extraction_user(state.query, all_content)),
+            HumanMessage(content=self.prompts.tool_extraction_user(state.query, merged_content)),
         ]
 
         try:

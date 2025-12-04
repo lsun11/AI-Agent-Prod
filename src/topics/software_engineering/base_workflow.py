@@ -59,11 +59,25 @@ class BaseSoftwareEngWorkflow(RootWorkflow):
         self._log(f"Finding articles/resources about: {state.query}")
 
         article_query = self.article_query_template.format(query=state.query)
-        search_results = self.firecrawl.search_companies(article_query, num_results=3)
-        print("_extract_tools_step, check0")
-        web_results = self._get_web_results(search_results)
-        print("_extract_tools_step, check1")
-        all_content, meta_items = self._collect_content_from_web_results(web_results)
+
+        query_variants = [
+            article_query,  # keep your original comparison template
+            f"{state.query} developer tools overview",
+            f"{state.query} SaaS platform comparison",
+        ]
+
+        merged_content, meta_items = self._multi_pass_articles(
+            state.query,
+            num_results=3,
+            snippet_len=1500,
+            query_variants=query_variants,
+        )
+
+        if not merged_content.strip():
+            self._log("multi-pass search returned no content, falling back to single search")
+            search_results = self.firecrawl.search_companies(article_query, num_results=3)
+            web_results = self._get_web_results(search_results)
+            merged_content, meta_items = self._collect_content_from_web_results(web_results)
 
         # Build resource objects with empty branding fields for now
         resources: List[BaseSoftwareEngResourceSummary] = [
@@ -80,13 +94,13 @@ class BaseSoftwareEngWorkflow(RootWorkflow):
             for meta in meta_items
         ]
 
-        if not all_content:
+        if not merged_content:
             self._log("No content found; continuing with empty extraction.")
             return {"resources": resources, "extracted_keywords": []}
 
         messages = [
             SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
-            HumanMessage(content=self.prompts.tool_extraction_user(state.query, all_content)),
+            HumanMessage(content=self.prompts.tool_extraction_user(state.query, merged_content)),
         ]
 
         try:

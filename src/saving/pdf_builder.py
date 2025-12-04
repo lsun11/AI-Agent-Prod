@@ -4,9 +4,10 @@ from html import escape
 from typing import List
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.colors import Color, HexColor
 from reportlab.pdfgen.canvas import Canvas
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+
 
 from .fonts import (
     register_cjk_fonts,
@@ -65,7 +66,6 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
 
     # Register TTF fonts (CJK + Noto) for all docs
     register_cjk_fonts()
-
     register_emoji_font()
 
     # --- base doc (this must ALWAYS run, emoji or not) ---
@@ -175,6 +175,16 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
         )
 
     story: list = []
+    subtitle_style = ParagraphStyle(
+        "Subtitle",
+        parent=styles["Normal"],
+        fontName=body_style.fontName,
+        fontSize=11,
+        leading=14,
+        textColor=HexColor("#555555"),
+        alignment=1,
+        spaceAfter=16,
+    )
 
     # -------- Title block ----------
     title_text = query.strip() or "Research Result"
@@ -191,35 +201,58 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
         if uses_cjk
         else "Tool Evaluation & Architecture Analysis Guide"
     )
-    subtitle_style = ParagraphStyle(
-        "Subtitle",
-        parent=styles["Normal"],
-        fontName=body_style.fontName,
-        fontSize=11,
-        leading=14,
-        textColor=HexColor("#555555"),
-        alignment=1,
-        spaceAfter=16,
-    )
     story.append(Paragraph(escape(subtitle), subtitle_style))
 
-    # -------- Body: parse headings & paragraphs ----------
-    for raw_line in result_text.splitlines():
+    # -------- Body: parse headings, tables & paragraphs ----------
+    lines = result_text.splitlines()
+    i = 0
+    available_width = doc.width  # total width we can use for tables
+
+    while i < len(lines):
+        raw_line = lines[i]
         line = raw_line.rstrip("\n")
 
+        # blank line → small vertical gap
         if not line.strip():
             story.append(Spacer(1, 4))
+            i += 1
             continue
 
-        # H1: lines starting with "# " (treat as a big section heading)
+        # --- Markdown table detection ---
+        stripped = line.lstrip()
+        if stripped.startswith("|") and i + 1 < len(lines):
+            # Look at the next line; if it's a separator row (---), treat as table start
+            next_line = lines[i + 1].strip()
+            if (
+                next_line.startswith("|")
+                and set(next_line.replace("|", "").replace(":", "").replace("-", "").strip())
+                == set()
+            ):
+                # Collect all contiguous table lines
+                table_lines = [line]
+                i += 1
+                while i < len(lines) and lines[i].lstrip().startswith("|"):
+                    table_lines.append(lines[i])
+                    i += 1
+
+                table = _build_markdown_table(
+                    table_lines, uses_cjk, body_style, available_width
+                )
+                if table is not None:
+                    story.append(table)
+                    story.append(Spacer(1, 8))
+                continue  # already advanced i
+
+        # H1: lines starting with "# " (if they appear, treat as big section)
         if line.startswith("# "):
             content = line[2:].strip()
             story.append(
                 Paragraph(
                     markdown_inline_to_html(content, uses_cjk),
-                    heading2_style,  # or title_style if you want it huge
+                    heading2_style,  # or title_style if you want it bigger
                 )
             )
+            i += 1
             continue
 
         # H2: lines starting with "## "
@@ -231,6 +264,7 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
                     heading2_style,
                 )
             )
+            i += 1
             continue
 
         # H3: lines starting with "### "
@@ -242,18 +276,159 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
                     heading3_style,
                 )
             )
+            i += 1
             continue
 
-        # Normal body
+        # Normal body paragraph
         story.append(
             Paragraph(
                 markdown_inline_to_html(line, uses_cjk),
                 body_style,
             )
         )
+        i += 1
 
     doc.build(
         story,
         onFirstPage=_decorate_page,
         onLaterPages=_decorate_page,
     )
+
+
+
+def extract_markdown_table(lines):
+    """
+    Detect a markdown table starting at lines[0].
+
+    Returns:
+        (table_data, consumed)
+        table_data: list[list[str]] or None
+        consumed: number of lines consumed
+    """
+    if len(lines) < 2:
+        return None, 0
+
+    first = lines[0].strip()
+    second = lines[1].strip()
+
+    # must contain pipes
+    if "|" not in first:
+        return None, 0
+
+    # second line must be separator: --- | :--- | ---:
+    if not all(ch in "-:| " for ch in second):
+        return None, 0
+
+    table_lines = []
+    consumed = 0
+
+    for ln in lines:
+        if "|" not in ln:
+            break
+        table_lines.append(ln)
+        consumed += 1
+
+    # Parse into cells
+    table_data = []
+    for ln in table_lines:
+        parts = [cell.strip() for cell in ln.strip().split("|") if cell.strip()]
+        table_data.append(parts)
+
+    return table_data, consumed
+
+
+def render_table(table_data):
+    tbl = Table(table_data, hAlign="LEFT")
+
+    tbl.setStyle(
+        TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), HexColor("#D9EAF7")),
+            ("TEXTCOLOR", (0,0), (-1,0), HexColor("#154360")),
+            ("ALIGN", (0,0), (-1,-1), "LEFT"),
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+            ("FONTSIZE", (0,0), (-1,-1), 10),
+            ("INNERGRID", (0,0), (-1,-1), 0.5, HexColor("#CCCCCC")),
+            ("BOX", (0,0), (-1,-1), 0.75, HexColor("#154360")),
+            ("BOTTOMPADDING", (0,0), (-1,0), 6),
+        ])
+    )
+
+    return tbl
+
+def _build_markdown_table(
+    raw_lines: List[str],
+    uses_cjk: bool,
+    body_style: ParagraphStyle,
+    table_width: float,
+) -> Table:
+    """
+    Convert GitHub-style markdown table lines into a ReportLab Table
+    with wrapped Paragraph cells.
+    raw_lines should include:
+      - header row
+      - separator row
+      - one or more data rows
+    """
+    if len(raw_lines) < 2:
+        # Not enough to build a table, just bail out
+        return None
+
+    # Split header row
+    header_cells = [
+        cell.strip() for cell in raw_lines[0].strip().strip("|").split("|")
+    ]
+
+    # Data rows
+    data_rows: List[List[str]] = []
+    for line in raw_lines[2:]:  # skip separator row
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        # Pad to header length
+        while len(cells) < len(header_cells):
+            cells.append("")
+        data_rows.append(cells[: len(header_cells)])
+
+    # If no data rows, don't build a table
+    if not data_rows:
+        return None
+
+    # Turn all cells into Paragraphs so text wraps
+    def make_para(text: str) -> Paragraph:
+        return Paragraph(
+            markdown_inline_to_html(text, uses_cjk),
+            body_style,
+        )
+
+    header_paras = [make_para(c) for c in header_cells]
+    data_paras = [[make_para(c) for c in row] for row in data_rows]
+    table_data = [header_paras] + data_paras
+
+    # Column widths: distribute evenly across the available width
+    num_cols = len(header_cells)
+    col_width = table_width / max(num_cols, 1)
+    col_widths = [col_width] * num_cols
+
+    table = Table(table_data, colWidths=col_widths)
+
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), HexColor("#D6EAF8")),  # header bg
+                ("TEXTCOLOR", (0, 0), (-1, 0), HexColor("#154360")),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("INNERGRID", (0, 0), (-1, -1), 0.25, HexColor("#CCCCCC")),
+                ("BOX", (0, 0), (-1, -1), 0.5, HexColor("#999999")),
+                # let paragraphs wrap; height grows automatically
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 3),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+            ]
+        )
+    )
+
+    return table
+

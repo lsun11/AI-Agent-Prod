@@ -81,14 +81,30 @@ async def chat_stream(
             if user_is_chinese
             else reply_text_en
         )
-        print(reply_text)
+        #print(reply_text)
+
+        # Collect resources for citations
+        raw_resources = []
+        for res in getattr(result, "resources", []) or []:
+            raw_resources.append(
+                {
+                    "title": getattr(res, "title", None),
+                    "url": getattr(res, "url", None),
+                }
+            )
 
         # 2) Let the LLM turn reply_text into a professional layout
         language: LanguageCode = "Chn" if user_is_chinese else "Eng"
+        entities = [
+            {"name": c.name, "website": c.website}
+            for c in result.companies or []
+        ]
         layout = generate_document_and_slides(
             query=user_query,
             raw_text=reply_text,
             language=language,
+            sources=raw_resources,
+            entities=entities,
         )
 
         # 3) Use the layout to generate txt / pdf / docx / slides

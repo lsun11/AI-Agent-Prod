@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from typing import List, Literal
+from typing import List, Literal, Optional, Dict, Any
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -36,9 +36,11 @@ class DocumentLayout(BaseModel):
 # Main function
 # -----------------------------
 def generate_document_and_slides(
-    query: str,
-    raw_text: str,
-    language: LanguageCode = "Chn",
+        query: str,
+        raw_text: str,
+        language: LanguageCode = "Chn",
+        sources: Optional[List[Dict[str, Any]]] = None,
+        entities: Optional[List[Dict[str, Any]]] = None,
 ) -> DocumentLayout:
     """
     Given some raw analysis text (any format), ask an LLM to:
@@ -83,6 +85,33 @@ def generate_document_and_slides(
         )
 
     # -----------------------------
+    # Build sources description (for citations)
+    # -----------------------------
+    sources = sources or []
+    if sources:
+        # Assign stable numeric ids [1], [2], ...
+        numbered_sources = []
+        for idx, src in enumerate(sources, start=1):
+            title = (src.get("title") or "").strip() or f"Source {idx}"
+            url = (src.get("url") or "").strip() or ""
+            numbered_sources.append((idx, title, url))
+
+        if language == "Chn":
+            sources_header = "参考资料（供你添加引用使用）："
+        else:
+            sources_header = "Reference sources (for you to use as citations):"
+
+        sources_block_lines = [sources_header, ""]
+        for idx, title, url in numbered_sources:
+            if url:
+                sources_block_lines.append(f"[{idx}] {title} — {url}")
+            else:
+                sources_block_lines.append(f"[{idx}] {title}")
+        sources_block = "\n".join(sources_block_lines)
+    else:
+        sources_block = ""
+
+    # -----------------------------
     # Build the prompt
     # -----------------------------
     prompt = f"""
@@ -95,10 +124,11 @@ The raw analysis text (already in {lang_label}) is:
 
 Original user query:
 {query}
+{sources_block}
 Your job is to turn this into a CLEAN, PROFESSIONAL document package.
 
 ============================================================
-TASK 1 – MARKDOWN REPORT
+MARKDOWN REPORT
 
 Rewrite and reformat the RAW_ANALYSIS into a well-structured Markdown report
 in {lang_label}. The content can be about ANY topic (tools, architecture,
@@ -144,13 +174,68 @@ and professionalism.
 Remove filler, duplication, and chatty phrases. Make it read like a polished,
 structured report that someone would export to PDF.
 
+=== COMPARISON TABLE REQUIREMENTS (VERY IMPORTANT) ===
+
+If RAW_ANALYSIS contains multiple comparable entities (e.g., tools, APIs,
+cloud services, frameworks, databases, products), you MUST:
+
+1) KEEP a detailed subsection for EACH entity, in bullet form, with fields like:
+   - Website
+   - Pricing
+   - Features / Capabilities
+   - Target Users
+   - Strengths
+   - Limitations
+   - Ideal For / Not Suitable For
+   (Use whatever fields are actually present in RAW_ANALYSIS; do NOT delete or
+   over-summarize them.)
+
+2) AFTER those per-entity bullet subsections, create ONE OR MORE comparison tables
+   that summarize the same information in a compact way.
+
+Rules for comparison tables:
+
+- Use GitHub-flavored Markdown tables.
+- The first column is the attribute/feature name.
+- Remaining columns are the entity names.
+- Only include rows when the information is explicitly available in RAW_ANALYSIS.
+- DO NOT invent data. Only reorganize and rewrite what exists.
+- Place comparison tables at the end of the Detailed Analysis section, but BEFORE
+  any Recommendations / Final Analysis / Next Steps sections.
+- If only one entity exists, skip the table entirely.
+
+You may use the provided entity list to help identify comparable items:
+{entities}
+
 Structure the document into clear sections such as:
     {example_sections}
     
     {color_hint}
     
+Citations rules (VERY IMPORTANT):
+
+When a sentence or paragraph clearly depends on a specific source from the
+list above, append a citation marker like [1] or [2] at the END of that
+sentence or paragraph (before the final period is also acceptable).
+
+If multiple sources support the same statement, you may combine them, e.g. [1][3].
+
+Only use citation numbers that exist in the source list you were given.
+
+At the END of the report, add a Markdown section:
+
+Sources
+
+And list each source in the form:
+[n] Title — URL
+
+Where n is the number of the source in the list. should go from 1 to number of citations.
+example: [1] citation 1
+         [2] citation 2
+         ...
+
     ============================================================
-    TASK 2 – SLIDE OUTLINE
+    SLIDE OUTLINE
     
     Create a slide deck outline that summarizes the key points of the report.
     
@@ -183,7 +268,7 @@ Structure the document into clear sections such as:
     
     {{
     "title": "<overall title for the report>",
-    "report_markdown": "<full markdown report in {lang_label}>",
+    "report_markdown": "<full markdown report in {lang_label}, including citations and a final ## Sources section if sources were provided>",
     "slides": [
     {{
     "title": "<slide title>",

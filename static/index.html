@@ -1,30 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Research Assistant</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+    <meta charset="UTF-8"/>
+    <title>AI Research Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css"/>
 </head>
 <body>
-  <div class="chat-container">
-      <div class="header-row">
+<div class="chat-container">
+    <div class="header-row">
         <h2 id="app-title">AI Research Assistant</h2>
         <div id="dropdown-container" class="dropdown-container"></div>
-      </div>
+    </div>
     <div id="messages" class="messages"></div>
     <form id="chat-form" class="input-row">
         <label for="chat-input"></label><input
-        id="chat-input"
-        type="text"
-        placeholder="Ask about dev tools, pricing, alternatives..."
-        autocomplete="off"
-      />
-      <button type="submit">Send</button>
+            id="chat-input"
+            type="text"
+            placeholder="Ask about dev tools, pricing, alternatives..."
+            autocomplete="off"
+    />
+        <button type="submit">Send</button>
     </form>
-      <div id="download-container" class="download-container"></div>
-  </div>
+    <div id="download-container" class="download-container"></div>
+    <div id="file-preview-panel" class="file-preview-panel">
+        <div class="file-preview-header">
+            <div class="file-preview-title" id="file-preview-title"></div>
+            <div class="file-preview-controls">
+                <select id="file-preview-format" class="file-preview-format"></select>
+                <button id="file-preview-download" class="file-preview-download">
+                    ⬇︎
+                </button>
+                <button id="file-preview-close" class="file-preview-close">
+                    ✕
+                </button>
+            </div>
+        </div>
+        <div class="file-preview-body" id="file-preview-body">
+            <!-- iframe or <pre> will be injected here -->
+        </div>
+    </div>
 
-  <!-- Load the compiled JS (from main.ts) -->
-  <script type="module" src="../static_build/main.js"></script>
+</div>
+
+<!-- Load the compiled JS (from main.ts) -->
+<script type="module" src="../static_build/main.js"></script>
 </body>
 </html>

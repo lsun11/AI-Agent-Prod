@@ -112,82 +112,235 @@ function buildFormatUrl(baseUrl, format) {
         return `${baseUrl}${sep}format=${format}`;
     }
 }
-// Implementation
-export function createDownloadButtonElement(urlOrUrls, object, language, multiFormat = false) {
+function getPreviewPanelElements() {
+    const panel = document.getElementById("file-preview-panel");
+    const titleEl = document.getElementById("file-preview-title");
+    const bodyEl = document.getElementById("file-preview-body");
+    const formatSelect = document.getElementById("file-preview-format");
+    const downloadBtn = document.getElementById("file-preview-download");
+    const closeBtn = document.getElementById("file-preview-close");
+    return { panel, titleEl, bodyEl, formatSelect, downloadBtn, closeBtn };
+}
+/**
+ * Open / update the side preview panel for pdf/txt/pptx.
+ */
+export function openFilePreview(config) {
+    const { panel, titleEl, bodyEl, formatSelect, downloadBtn, closeBtn } = getPreviewPanelElements();
+    if (!panel || !titleEl || !bodyEl || !formatSelect || !downloadBtn || !closeBtn) {
+        console.warn("file preview panel elements not found in DOM");
+        return;
+    }
+    // Decide available formats
+    const availableFormats = [];
+    if (config.urls.pdf)
+        availableFormats.push("pdf");
+    if (config.urls.txt)
+        availableFormats.push("txt");
+    if (config.urls.pptx)
+        availableFormats.push("pptx");
+    if (availableFormats.length === 0) {
+        console.warn("No previewable formats found", config.urls);
+        return;
+    }
+    // Pick initial format: preferred → pdf → txt → pptx
+    const preferred = config.preferred;
+    let currentFormat = (preferred && availableFormats.includes(preferred)) ? preferred :
+        (availableFormats.includes("pdf") ? "pdf" :
+            availableFormats.includes("txt") ? "txt" : "pptx");
+    // Populate title
+    titleEl.textContent = config.title;
+    // Populate format selector
+    formatSelect.innerHTML = "";
+    for (const fmt of availableFormats) {
+        const opt = document.createElement("option");
+        opt.value = fmt;
+        opt.textContent =
+            fmt === "pdf" ? "PDF" :
+                fmt === "txt" ? "Text" :
+                    "Slides (PPTX)";
+        if (fmt === currentFormat)
+            opt.selected = true;
+        formatSelect.appendChild(opt);
+    }
+    function renderBody(format) {
+        const url = format === "pdf" ? config.urls.pdf :
+            format === "txt" ? config.urls.txt :
+                config.urls.pptx;
+        if (!url)
+            return;
+        bodyEl.innerHTML = "";
+        if (format === "txt") {
+            fetch(url)
+                .then((res) => res.text())
+                .then((text) => {
+                const pre = document.createElement("pre");
+                pre.textContent = text;
+                bodyEl.appendChild(pre);
+            })
+                .catch((err) => {
+                console.error("Failed to load txt preview:", err);
+                const pre = document.createElement("pre");
+                pre.textContent = "Failed to load text preview.";
+                bodyEl.appendChild(pre);
+            });
+        }
+        else if (format === "pdf") {
+            const embed = document.createElement("embed");
+            embed.src = url + "#view=FitH";
+            embed.type = "application/pdf";
+            embed.style.width = "100%";
+            embed.style.height = "100%";
+            bodyEl.appendChild(embed);
+        }
+        else {
+            // PPTX: browser will usually download; show helper message + link
+            const msg = document.createElement("div");
+            msg.style.padding = "12px";
+            msg.style.fontSize = "13px";
+            msg.textContent =
+                "Slides preview is limited in this view. Click “Open” to view or download the PPTX file.";
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.style.marginTop = "8px";
+            btn.textContent = "Open PPTX";
+            btn.onclick = () => window.open(url, "_blank");
+            msg.appendChild(document.createElement("br"));
+            msg.appendChild(btn);
+            bodyEl.appendChild(msg);
+        }
+    }
+    // initial render
+    renderBody(currentFormat);
+    // wire format selector
+    formatSelect.onchange = () => {
+        const val = formatSelect.value;
+        if (availableFormats.includes(val)) {
+            currentFormat = val;
+            renderBody(currentFormat);
+        }
+    };
+    // download button
+    downloadBtn.onclick = () => {
+        const url = currentFormat === "pdf" ? config.urls.pdf :
+            currentFormat === "txt" ? config.urls.txt :
+                config.urls.pptx;
+        if (url) {
+            window.open(url, "_blank");
+        }
+    };
+    function hidePanel() {
+        bodyEl.innerHTML = "";
+        panel.classList.remove("visible");
+        panel.style.display = "none";
+    }
+    // close button
+    closeBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        hidePanel();
+    };
+    // finally show the panel
+    panel.style.display = "flex";
+    panel.classList.add("visible");
+}
+/**
+ * Creates the “Download summary” button container.
+ *
+ * If multiFormat = false:
+ *   - Single button which opens the given URL.
+ *
+ * If multiFormat = true:
+ *   - Main button + hover menu with [PDF, DOCX, TXT].
+ *   - Clicking a format opens baseUrl with ?format=<fmt>.
+ */
+export function createDownloadButtonElement(urlsOrUrl, object, language, enableMultiFormatMenu = false) {
     const downloadContainer = document.createElement("div");
     downloadContainer.className = "download-container";
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "download-button";
-    button.textContent =
+    const mainButton = document.createElement("button");
+    mainButton.type = "button";
+    mainButton.className = "download-button";
+    mainButton.textContent =
         language === "Eng"
             ? `Download summary (${object})`
             : `下载总结 (${object})`;
-    downloadContainer.appendChild(button);
-    const isMultiUrls = typeof urlOrUrls === "object" && urlOrUrls !== null;
-    // --- Simple single-file behaviour (slides, or non-multi usage) ---
-    if (!multiFormat || !isMultiUrls) {
-        const singleUrl = typeof urlOrUrls === "string" ? urlOrUrls : urlOrUrls.pdf;
-        button.addEventListener("click", () => {
-            window.open(singleUrl, "_blank");
+    let urls = null;
+    // Legacy: simple string url
+    if (typeof urlsOrUrl === "string") {
+        const url = urlsOrUrl;
+        mainButton.addEventListener("click", () => {
+            window.open(url, "_blank");
         });
+        downloadContainer.appendChild(mainButton);
         return downloadContainer;
     }
-    // --- Fancy multi-format hover menu (PDF / DOCX / TXT) ---
-    const urls = urlOrUrls;
-    const menu = document.createElement("div");
-    menu.className = "download-format-menu hidden";
-    const formats = [
-        {
-            key: "pdf",
-            label: language === "Eng" ? "PDF" : "PDF 文档",
-        },
-        {
-            key: "docx",
-            label: language === "Eng" ? "DOCX" : "Word 文档",
-        },
-        {
-            key: "txt",
-            label: language === "Eng" ? "TXT" : "纯文本",
-        },
-    ];
-    formats.forEach(({ key, label }) => {
-        const fmtBtn = document.createElement("button");
-        fmtBtn.type = "button";
-        fmtBtn.className = "download-format-btn";
-        fmtBtn.textContent = label;
-        fmtBtn.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            const targetUrl = urls[key];
-            if (targetUrl) {
-                window.open(targetUrl, "_blank");
+    // Multi-format map: { pdf, docx, txt, pptx? }
+    urls = urlsOrUrl;
+    // Default click: if multi-format menu is enabled, open best format (pdf > txt > docx > pptx)
+    mainButton.addEventListener("click", () => {
+        var _a, _b, _c;
+        const url = (_c = (_b = (_a = urls === null || urls === void 0 ? void 0 : urls.pdf) !== null && _a !== void 0 ? _a : urls === null || urls === void 0 ? void 0 : urls.txt) !== null && _b !== void 0 ? _b : urls === null || urls === void 0 ? void 0 : urls.docx) !== null && _c !== void 0 ? _c : urls === null || urls === void 0 ? void 0 : urls.pptx;
+        if (url) {
+            window.open(url, "_blank");
+        }
+    });
+    downloadContainer.appendChild(mainButton);
+    // Optional hover menu for per-format downloads (what you had before)
+    if (enableMultiFormatMenu && urls) {
+        const menu = document.createElement("div");
+        menu.className = "download-menu";
+        menu.style.display = "none";
+        function addFormatButton(label, fmtKey) {
+            const url = urls && urls[fmtKey];
+            if (!url)
+                return;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "download-option";
+            btn.textContent = label;
+            btn.addEventListener("click", (ev) => {
+                ev.stopPropagation();
+                window.open(url, "_blank");
+            });
+            menu.appendChild(btn);
+        }
+        // e.g. "PDF", "DOCX", "TXT"
+        if (language === "Eng") {
+            addFormatButton("PDF", "pdf");
+            addFormatButton("DOCX", "docx");
+            addFormatButton("Text (TXT)", "txt");
+        }
+        else {
+            addFormatButton("PDF 文件", "pdf");
+            addFormatButton("Word 文档 (DOCX)", "docx");
+            addFormatButton("纯文本 (TXT)", "txt");
+        }
+        downloadContainer.appendChild(menu);
+        downloadContainer.addEventListener("mouseenter", () => {
+            if (menu.childElementCount > 0) {
+                menu.style.display = "flex";
             }
         });
-        menu.appendChild(fmtBtn);
-    });
-    downloadContainer.appendChild(menu);
-    // Optional: main button click defaults to PDF
-    button.addEventListener("click", () => {
-        if (urls.pdf) {
-            window.open(urls.pdf, "_blank");
-        }
-    });
-    // Show / hide on hover
-    let hideTimeout = null;
-    const showMenu = () => {
-        if (hideTimeout !== null) {
-            window.clearTimeout(hideTimeout);
-            hideTimeout = null;
-        }
-        menu.classList.remove("hidden");
-    };
-    const hideMenu = () => {
-        hideTimeout = window.setTimeout(() => {
-            menu.classList.add("hidden");
-        }, 120);
-    };
-    downloadContainer.addEventListener("mouseenter", showMenu);
-    downloadContainer.addEventListener("mouseleave", hideMenu);
+        downloadContainer.addEventListener("mouseleave", () => {
+            menu.style.display = "none";
+        });
+    }
+    // === Preview button: open in-app panel (pdf/txt/pptx) ===
+    if (urls) {
+        const previewBtn = document.createElement("button");
+        previewBtn.type = "button";
+        previewBtn.className = "preview-button";
+        previewBtn.textContent = language === "Eng" ? "Preview" : "预览";
+        previewBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openFilePreview({
+                title: language === "Eng"
+                    ? `Preview: ${object}`
+                    : `预览：${object}`,
+                urls,
+                preferred: "pdf",
+            });
+        });
+        downloadContainer.appendChild(previewBtn);
+    }
     return downloadContainer;
 }
 //# sourceMappingURL=chat-helpers.js.map

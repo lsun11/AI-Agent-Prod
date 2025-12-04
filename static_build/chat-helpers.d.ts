@@ -13,6 +13,12 @@ export interface ResourceVisual {
     primary_color: string | null;
     brand_colors: Record<string, string> | null;
 }
+export interface DownloadFormatUrls {
+    pdf?: string | null;
+    docx?: string | null;
+    txt?: string | null;
+    pptx?: string | null;
+}
 /**
  * Extracts a website URL from a chunk of markdown/text.
  */
@@ -26,6 +32,16 @@ export declare function splitReplyIntoBubbles(reply: string): string[];
  * Builds a company bubble DOM node with a tiled, semi-transparent logo background.
  */
 export declare function createCompanyBubbleElement(text: string, company: CompanyVisual): HTMLDivElement;
+type PreviewFormat = "pdf" | "txt" | "pptx";
+interface PreviewConfig {
+    title: string;
+    urls: DownloadFormatUrls;
+    preferred?: PreviewFormat;
+}
+/**
+ * Open / update the side preview panel for pdf/txt/pptx.
+ */
+export declare function openFilePreview(config: PreviewConfig): void;
 /**
  * Creates the “Download summary” button container.
  *
@@ -36,10 +52,6 @@ export declare function createCompanyBubbleElement(text: string, company: Compan
  *   - Main button + hover menu with [PDF, DOCX, TXT].
  *   - Clicking a format opens baseUrl with ?format=<fmt>.
  */
-export declare function createDownloadButtonElement(url: string, object: string, language: LanguageCode, multiFormat?: boolean): HTMLDivElement;
-export declare function createDownloadButtonElement(urls: {
-    pdf: string;
-    docx: string;
-    txt: string;
-}, object: string, language: LanguageCode, multiFormat: true): HTMLDivElement;
+export declare function createDownloadButtonElement(urlsOrUrl: string | DownloadFormatUrls, object: string, language: LanguageCode, enableMultiFormatMenu?: boolean): HTMLDivElement;
+export {};
 //# sourceMappingURL=chat-helpers.d.ts.map

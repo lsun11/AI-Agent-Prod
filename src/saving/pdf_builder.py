@@ -85,6 +85,7 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
     h2_bg = HexColor("#EAF2F8")        # very light blue
     h2_color = HexColor("#154360")
     h3_color = HexColor("#2E86C1")
+    h4_color = HexColor("#0d2436")
     body_color = HexColor("#333333")
 
     if uses_cjk:
@@ -130,6 +131,16 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             spaceBefore=10,
             spaceAfter=4,
         )
+        heading4_style = ParagraphStyle(
+            "Heading3CJK",
+            parent=styles["Heading4"],
+            fontName=CJK_FONT_NAME_SONG,
+            fontSize=12,
+            leading=18,
+            textColor=h4_color,
+            spaceBefore=10,
+            spaceAfter=4,
+        )
     else:
         body_style = ParagraphStyle(
             "BodyLatin",
@@ -170,6 +181,16 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             fontSize=13,
             leading=18,
             textColor=h3_color,
+            spaceBefore=10,
+            spaceAfter=4,
+        )
+        heading4_style = ParagraphStyle(
+            "Heading4Latin",
+            parent=styles["Heading4"],
+            fontName="Times-Bold",
+            fontSize=12,
+            leading=18,
+            textColor=h4_color,
             spaceBefore=10,
             spaceAfter=4,
         )
@@ -279,6 +300,17 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
             i += 1
             continue
 
+        # H4: lines starting with "#### "
+        if line.startswith("#### "):
+            content = line[4:].strip()
+            story.append(
+                Paragraph(
+                    markdown_inline_to_html(content, uses_cjk),
+                    heading4_style,
+                )
+            )
+            i += 1
+            continue
         # Normal body paragraph
         story.append(
             Paragraph(

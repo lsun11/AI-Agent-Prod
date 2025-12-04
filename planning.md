@@ -41,54 +41,81 @@ These give huge benefit with minimal code changes.
 
 [//]: # (🛠️ Effort: 2–4 hrs)
 
-✅ 1.3 Add Comparison Tables (LLM-generated)
+[//]: # (✅ 1.3 Add Comparison Tables &#40;LLM-generated&#41;)
 
-Just tell the LLM:
-“Extract all comparable entities → output a table”.
+[//]: # ()
+[//]: # (Just tell the LLM:)
 
-📈 Impact: 10/10
-🛠️ Effort: 1 hr
+[//]: # (“Extract all comparable entities → output a table”.)
 
-✅ 1.4 Add Citations Section
+[//]: # ()
+[//]: # (📈 Impact: 10/10)
 
-LLM adds [1], [2] citations and a final Sources section.
+[//]: # (🛠️ Effort: 1 hr)
 
-📈 Impact: 9/10
-🛠️ Effort: 1–2 hrs
+[//]: # ()
+[//]: # (✅ 1.4 Add Citations Section)
 
-✅ 1.5 Add Auto-Titles for Reports
+[//]: # ()
+[//]: # (LLM adds [1], [2] citations and a final Sources section.)
 
-LLM generates a catchy, descriptive title for the PDF.
+[//]: # ()
+[//]: # (📈 Impact: 9/10)
 
-📈 Impact: 8/10
-🛠️ Effort: <1 hr
+[//]: # (🛠️ Effort: 1–2 hrs)
 
-✅ 1.6 Improve Slide Output (PPTX visual formatting)
+[//]: # ()
+[//]: # (✅ 1.5 Add Auto-Titles for Reports)
 
-Bigger fonts
+[//]: # ()
+[//]: # (LLM generates a catchy, descriptive title for the PDF.)
 
-Colored title bar
+[//]: # ()
+[//]: # (📈 Impact: 8/10)
 
-Cleaner bullets
+[//]: # (🛠️ Effort: <1 hr)
 
-Logo watermark
+[//]: # ()
+[//]: # (✅ 1.6 Improve Slide Output &#40;PPTX visual formatting&#41;)
 
-📈 Impact: 8/10
-🛠️ Effort: 2–3 hrs
+[//]: # ()
+[//]: # (Bigger fonts)
 
-✅ 1.7 Add In-App File Preview (PDF/PPTX/TXT)
+[//]: # ()
+[//]: # (Colored title bar)
 
-Simple iframe or react component.
+[//]: # ()
+[//]: # (Cleaner bullets)
 
-📈 Impact: 8/10
-🛠️ Effort: 3–5 hrs
+[//]: # ()
+[//]: # (Logo watermark)
 
-✅ 1.8 Smart History (Save past reports)
+[//]: # ()
+[//]: # (📈 Impact: 8/10)
 
-Store queries + generated files.
+[//]: # (🛠️ Effort: 2–3 hrs)
 
-📈 Impact: 7/10
-🛠️ Effort: 1–2 hrs
+[//]: # ()
+[//]: # (✅ 1.7 Add In-App File Preview &#40;PDF/PPTX/TXT&#41;)
+
+[//]: # ()
+[//]: # (Simple iframe or react component.)
+
+[//]: # ()
+[//]: # (📈 Impact: 8/10)
+
+[//]: # (🛠️ Effort: 3–5 hrs)
+
+[//]: # ()
+[//]: # (✅ 1.8 Smart History &#40;Save past reports&#41;)
+
+[//]: # ()
+[//]: # (Store queries + generated files.)
+
+[//]: # ()
+[//]: # (📈 Impact: 7/10)
+
+[//]: # (🛠️ Effort: 1–2 hrs)
 
 🟡 2. MEDIUM EFFORT + STRONG VALUE ADD (STRATEGIC FEATURES)
 

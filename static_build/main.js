@@ -1,3 +1,7 @@
 import { ChatUI } from "./chat-ui.js";
-document.addEventListener("DOMContentLoaded", () => { new ChatUI(); });
+import { initHistoryPanel } from "./history.js";
+document.addEventListener("DOMContentLoaded", () => {
+    new ChatUI();
+    void initHistoryPanel();
+});
 //# sourceMappingURL=main.js.map

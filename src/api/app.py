@@ -4,8 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-
-from .routes import downloads, suggestions, topics, chat
+from .routes import downloads, suggestions, topics, chat, history
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -37,5 +36,6 @@ def create_app() -> FastAPI:
   app.include_router(suggestions.router, prefix="")
   app.include_router(chat.router, prefix="")
   app.include_router(downloads.router, prefix="")
+  app.include_router(history.router, prefix="")
 
   return app

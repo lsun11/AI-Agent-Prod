@@ -7,7 +7,8 @@ import unicodedata
 from datetime import datetime
 from typing import Optional
 from queue import Queue
-
+import uuid
+from ...history.store import HistoryEntry, add_history_entry
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 from ...saving import format_result_text, generate_document_and_slides, LanguageCode, generate_all_files_for_layout
@@ -167,6 +168,23 @@ async def chat_stream(
                     "brand_colors": getattr(res, "brand_colors", None),
                 }
             )
+
+        # ----------------- Save to history -----------------
+        entry_id = str(uuid.uuid4())
+        created_at = datetime.utcnow().isoformat() + "Z"
+
+        history_entry = HistoryEntry(
+            id=entry_id,
+            query=user_query,
+            topic=topic_label_display,
+            language="Chn" if user_is_chinese else "Eng",
+            created_at=created_at,
+            download_pdf_url=download_pdf_url,
+            download_docx_url=download_docx_url,
+            download_txt_url=download_txt_url,
+            slides_download_url=slides_download_url,
+        )
+        add_history_entry(history_entry)
 
         final_payload = {
             "type": "final",

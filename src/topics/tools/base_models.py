@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
+from ..knowledge_extraction import KnowledgeExtractionResult
+
 
 class ToolComparisonRecommendation(BaseModel):
     """
@@ -152,3 +154,5 @@ class BaseResearchState(BaseModel):
     log_messages: List[str] = Field(default_factory=list)
 
     sources: List[Dict[str, str]] = []
+
+    knowledge: Optional[KnowledgeExtractionResult] = None

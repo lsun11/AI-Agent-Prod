@@ -1,4 +1,4 @@
-from typing import Dict, Any, Callable, Optional, List, Type
+from typing import Dict, Any, Callable, Optional, List, Type, cast
 
 from langchain_anthropic import ChatAnthropic
 from langchain_deepseek import ChatDeepSeek
@@ -6,6 +6,7 @@ from langgraph.graph import StateGraph, END
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from ..knowledge_extraction import KnowledgeExtractionResult
 from ...firecrawl import FirecrawlService
 from .base_models import (
     BaseSoftwareEngState,
@@ -35,8 +36,42 @@ class BaseSoftwareEngWorkflow(RootWorkflow):
             default_model=model,
             default_temperature=temperature,
         )
+        self.knowledge_llm = self.llm.with_structured_output(KnowledgeExtractionResult)
         self.prompts = self.prompts_cls()
         self.workflow = self._build_workflow()
+
+
+    def _node_extract_knowledge(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        # 1) Build some aggregated text to feed into the LLM.
+        #    You can tweak this however you like.
+        if not state.resources:
+            return state
+
+        # Very simple aggregation example: title + key_points for each resource
+        parts: list[str] = []
+        for res in state.resources:
+            parts.append(f"# {res.title}\n{res.url}\n")
+            if res.key_points:
+                parts.append("- " + "\n- ".join(res.key_points))
+        aggregated_markdown = "\n\n".join(parts)
+
+        if not aggregated_markdown.strip():
+            return state
+
+        # 2) Build prompt using your new helper
+        user_msg = self.prompts.knowledge_extraction_user(aggregated_markdown)
+
+        # 3) Call structured-output LLM
+        result: KnowledgeExtractionResult = self.knowledge_llm.invoke(
+            [
+                {"role": "system", "content": self.prompts.KNOWLEDGE_EXTRACTION_SYSTEM},
+                {"role": "user", "content": user_msg},
+            ]
+        )
+
+        # 4) Return a *new* state with knowledge filled in
+        #    Pydantic-friendly and type-safe.
+        return state.model_copy(update={"knowledge": result})
 
     # ------------------------------------------------------------------ #
     # Graph setup
@@ -45,10 +80,12 @@ class BaseSoftwareEngWorkflow(RootWorkflow):
         graph = StateGraph(self.state_model)
         graph.add_node("extract_resources", self._extract_resources_step)
         graph.add_node("analyze", self._analyze_step)
+        graph.add_node("extract_knowledge", self._node_extract_knowledge)
         graph.add_node("recommend", self._recommend_step)
         graph.set_entry_point("extract_resources")
         graph.add_edge("extract_resources", "analyze")
-        graph.add_edge("analyze", "recommend")
+        graph.add_edge("analyze", "extract_knowledge")
+        graph.add_edge("extract_knowledge", "recommend")
         graph.add_edge("recommend", END)
         return graph.compile()
 

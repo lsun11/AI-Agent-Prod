@@ -1,8 +1,8 @@
 # src/topics/career/base_prompts.py
 
 from __future__ import annotations
-
 from typing import Protocol
+from ..root_prompts import BaseRootPrompts
 
 CAREER_PROMPT_GUIDELINES = """
 You are part of a multi-topic research agent focused on career development.
@@ -48,7 +48,7 @@ class HasToolPrompts(Protocol):
         ...
 
 
-class CareerBasePrompts:
+class CareerBasePrompts(BaseRootPrompts):
     """
     Base prompts for career-related research and planning.
 

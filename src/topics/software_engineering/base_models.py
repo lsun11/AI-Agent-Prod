@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
-
+from ..knowledge_extraction import KnowledgeExtractionResult
 
 class BaseSoftwareEngResourceSummary(BaseModel):
     """
@@ -77,3 +77,6 @@ class BaseSoftwareEngState(BaseModel):
 
     # final actionable recommendation for the current project/team
     analysis: Optional[BaseSoftwareEngRecommendation] = None
+
+    # structured knowledge layer (entities, pros/cons, risks, timeline, etc.)
+    knowledge: Optional[KnowledgeExtractionResult] = None

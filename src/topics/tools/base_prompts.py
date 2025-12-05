@@ -5,8 +5,10 @@ from __future__ import annotations
 from abc import ABC
 from typing import ClassVar
 
+from ..root_prompts import BaseRootPrompts
 
-class BaseCSResearchPrompts(ABC):
+
+class BaseCSResearchPrompts(BaseRootPrompts, ABC):
     """
     Base prompt class for analyzing and recommending software tools,
     digital products, online services, developer platforms, and consumer apps.

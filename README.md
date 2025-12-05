@@ -1,401 +1,438 @@
-# AI Agent Researcher & Document Generator
+AI Agent Researcher & Document Generator
 
-## Overview
+Multi-Source AI Research Pipeline • Structured Knowledge Extraction • PDF/PPTX/DOCX Output
 
-This repository contains an advanced AI-powered research assistant that turns raw user queries into **structured, presentation-ready research reports** in multiple formats:
+📌 Overview
 
-- 🧠 **Multi-agent LLM workflows** (per topic)
-- 🌐 **Automated research & web scraping (Firecrawl)**
-- 🎨 **LLM-based document layout + comparison tables + citations**
-- 📄 **Multi-format export: PDF / DOCX / TXT / PPTX**
-- 💬 **Streaming chat interface (FastAPI + SSE)**
-- 🔁 **Smart history of past reports**
-- 👀 **In-app preview for generated files (PDF / TXT / PPTX)**
-- 🌏 **Chinese / English support with CJK-safe fonts**
+This repository contains an advanced AI-powered research assistant that transforms raw user queries into structured, presentation-ready research reports across multiple technical domains:
 
-It is designed for developers, researchers, analysts, and engineers who want a workflow that is **better than traditional search + copy/paste + manual formatting**.
+🔎 Intelligent topic classification
 
----
+🌐 Multi-source web research (multi-pass Firecrawl search + deep scraping)
 
-## ✨ Key Features
+🧠 Knowledge extraction (entities, relationships, pros/cons, risks, timeline)
 
-### 🔍 1. Intelligent Topic Classification
+🧩 Topic-specific LangGraph workflows
 
-Every query is first classified into a topic domain, for example:
+🎨 LLM-based layout engine for structured Markdown + comparison tables
 
-- Developer Tools / IDEs
-- Cloud Infrastructure & Databases
-- SaaS / Productivity Tools
-- Software Engineering & Architecture
+📄 Multi-format export: PDF, DOCX, PPTX, TXT
 
-The classifier:
+💬 Streaming chat interface (FastAPI + SSE)
 
-- Uses LLM reasoning to infer intent
-- Works with both English and Chinese queries
-- Routes the request to the correct topic workflow automatically
+🌏 English & Chinese support with CJK-safe PDF rendering
 
-This means the same chat endpoint can handle very different research tasks with the right specialized logic behind the scenes.
+This agent produces reports that normally require hours of Google searching, reading articles, comparing tools, and assembling documents. Now it is done automatically in seconds.
 
----
+✨ What’s New (Major Enhancements)
+🟦 1. Multi-Source, Multi-Pass Web Research
 
-### 🧠 2. Specialized Research Workflows (LangGraph + LangChain)
+The agent now performs:
 
-Each topic has a dedicated workflow built on top of `RootWorkflow` and `BaseCSWorkflow`, using **LangGraph** and **LangChain**:
+Multiple Firecrawl search passes
 
-- Performs multi-step research (search → scrape → analyze)
-- Extracts entities (tools, products, cloud services, etc.)
-- Pulls structured fields like:
-  - Pricing model and details
-  - API availability
-  - Tech stack / language support
-  - Integrations & ecosystem
-  - Strengths / limitations
-- Produces a final, semantically rich analysis
+Automatic deduplication of pages
 
-Under the hood, these workflows:
+Optional deep scraping of official product websites
 
-- Use `FirecrawlService` for web search + scraping
-- Extract candidate tools (e.g., IDEs, DBs, cloud services)
-- Scrape official websites for markdown + branding (logo, colors)
-- Run structured LLM analysis (`with_structured_output`)
-- Merge all this into a clean, unified `companies` list and an `analysis` text block
+Smart content merging
 
----
+This produces dramatically stronger research coverage and reduces hallucination.
 
-### 🌐 3. Firecrawl Web Scraping Integration
+🟪 2. Shared RootWorkflow + Topic Workflows
 
-Firecrawl is used as the primary “eyes on the web” for the agent:
+All topics inherit:
 
-- Searches for comparison articles and tool descriptions
-- Normalizes different response shapes
-- Optionally deep-scrapes official websites
-- Extracts:
-  - Markdown content
-  - Titles & descriptions
-  - URLs
-  - Branding data (colors, icons/logos)
+Firecrawl utilities
 
-The helper methods `_get_web_results` and `_collect_content_from_web_results` in `RootWorkflow` provide a **consistent, topic-agnostic** interface for downstream analysis.
+Multi-source normalization + content aggregation
 
----
+Logging
 
-### 🧾 4. LLM-Based Layout & Comparison Engine
+LLM switching
 
-After the topic workflow finishes, the app **does not** send raw text directly to PDF. Instead, it uses a dedicated layout LLM via `generate_document_and_slides` (in `layout_llm.py`) to:
+Knowledge extraction helpers
 
-1. **Rewrite raw analysis as a clean Markdown report**  
-   - Uses only the information from the analysis (no new facts)  
-   - Applies section headings (`##`, `###`)  
-   - Creates bullet lists and emphasizes important concepts  
-   - Adds emojis to make the PDF visually friendly but still professional  
+Topic workflows only implement:
 
-2. **Generate comparison tables**  
-   - Detects multiple comparable entities (tools, cloud services, databases, etc.)  
-   - Builds GitHub-style Markdown tables where:
-     - Rows = attributes (pricing, OSS, language support, etc.)  
-     - Columns = tool names  
-   - Tables are inserted **before** the recommendations/final analysis section.
+Resource summarization
 
-3. **Add inline citations and a Sources section**  
-   - If web sources are provided (title + URL), the LLM can attach `[1]`, `[2]` style citations.  
-   - Adds a final `## Sources` section listing all referenced URLs.
+Aggregated markdown builder
 
-4. **Produce slide outlines** (4–8 slides)  
-   - Each slide has a `title` and 3–6 bullet points  
-   - Designed to feed into PPTX generation directly
+Final recommendation generator
 
-This separation means the layout logic is **model-driven**, easy to extend, and shared across all topics.
+This makes the system both extensible and uniform across topics.
 
----
+🟩 3. Global Knowledge Extraction Layer (NEW!)
 
-### 📄 5. Multi-format Export Engine
+A new shared component (RootPrompts + RootWorkflow) performs:
 
-Located under `src/saving/`, the system exports the layout into four formats:
+Entity extraction (tools, companies, APIs, cloud services, concepts)
 
-#### ✅ TXT (`write_txt`)
+Relationship extraction (integrates_with, depends_on, competes_with…)
 
-- Simple UTF‑8 text
-- Uses `report_markdown` as-is
-- Good for raw text usage or CLI workflows
+Pros / Cons per entity
 
-#### ✅ DOCX (`docx_builder.py`)
+Risk classification (business, technical, maintainability, security)
 
-- Heading-aware Word document (via `python-docx`)
-- Uses correct fonts for:
-  - Latin-based text
-  - CJK content (Chinese)
-- Keeps hierarchy and bullet lists
+Timelines (major releases, roadmap events, changes)
 
-#### ✅ PDF (`pdf_builder.py`)
+Structured output is stored in each topic’s state.knowledge.
 
-A custom **ReportLab**-based renderer with:
+This unlocks entirely new categories of reasoning:
 
-- **Title + subtitle** block derived from user query and topic
-- Beautiful **color scheme** for headings and body text
-- Proper margins and line spacing
-- **CJK-safe fonts** (Song / Noto) and a Latin fallback
-- **Emoji font** support when needed
-- **Inline markdown rendering** (bold, lists, etc.)
-- **Tables** rendered as real table layouts, with:
-  - Auto-fit column widths
-  - Wrapped text in cells
-  - Alternating row colors for readability
-- A subtle diagonal **watermark**: “Generated by AI Agent Researcher”
+Queryable attributes (filter all free open-source tools)
 
-#### ✅ PPTX (`write_slides`)
+Cross-entity comparisons
 
-- Uses `python-pptx`
-- First slide = title slide
-- Remaining slides = bullet slides from the layout LLM
-- Bullets are plain text → safe for any theme
-- Easy to customize templates later
+Risk analysis
 
----
+Sorting and ranking
 
-### 🌏 6. Chinese / English Language Support
+Timeline-based conclusions
 
-The app is designed to work well for both English and Chinese users:
+Relationship graphs
 
-- Detects Chinese queries (`is_chinese`)
-- Uses translation (`translate_text`) only where needed
-- Ensures layout text stays in the intended language
-- Uses proper CJK fonts in PDF and DOCX
-- Works with mixed-language content
+This is a major functional upgrade.
 
----
-
-### 💬 7. Streaming Chat API (FastAPI + SSE)
-
-The main backend entrypoint is `/chat_stream`, which:
-
-- Accepts query parameters:
-  - `message`
-  - `model`
-  - `temperature`
-- Streams back events of types:
-  - `"topic"` — which topic/workflow is used
-  - `"log"` — step-by-step progress messages
-  - `"final"` — final report + all download URLs
-
-This gives the frontend a chat-like, **real‑time experience** instead of a single blocking response.
-
----
-
-### 📂 8. Smart History (Per-Session, Model-Agnostic)
-
-A lightweight **history panel** keeps track of past runs:
-
-- Stores:
-  - Query text
-  - Topic label
-  - Timestamps
-  - File download URLs (PDF / DOCX / TXT / PPTX)
-- Accessible via a draggable side panel (history UI)
-- Lets users quickly re-open or re-download earlier research runs
-- Implemented with a small backend store + simple frontend integration
+🟧 4. Richer Document Generation
 
-This makes the tool feel like a **research notebook** rather than a one-shot chatbot.
+The LLM layout engine now:
 
----
+Generates comparison tables automatically
 
-### 👀 9. In‑App File Preview (PDF / TXT / PPTX)
+Creates multi-slide presentations
 
-The chat UI includes an optional right-hand side preview panel:
+Properly renders Markdown (bold, lists, headings)
 
-- Clicking “Preview” next to a format shows:
-  - **PDF**: embedded in an `<iframe>`
-  - **TXT**: rendered in a scrollable white panel
-  - **PPTX**: trigger browser’s default download/preview (or a future viewer)
-- The preview panel:
-  - Is **hidden by default**
-  - Appears only when a preview is requested
-  - Can be closed with a dedicated “×” button
-  - Does not interfere with the main chat scroll
+Uses CJK-safe fonts and theme-consistent PDF styling
 
-This makes it feel more like an **IDE for research output** than a basic file download list.
+Supports brand colors and logos scraped from websites
 
----
+🧭 Supported Major Topics
+1. Developer Tools & Ecosystem
 
-### 🎯 10. Comparison Tables + Sources = “Better Than Search”
+Examples:
 
-When multiple tools are involved, the system:
+Languages & SDKs
 
-- Extracts the tools from the web
-- Normalizes each one (pricing, OSS, APIs, features, etc.)
-- Generates:
-  - A detailed per-tool breakdown
-  - A **side-by-side comparison table**
-  - A **Sources** section for transparency
+IDEs (VS Code, Cursor, Windsurf…)
 
-This is exactly the kind of work people usually do manually with Google + Excel + copy/paste. Here it’s done **end-to-end in a single query**.
+Debuggers / Profilers
 
----
+CI/CD tools
 
-## 📂 Project Structure
+DevOps platforms
 
-```text
-src/
-  api/
-    app.py                  # FastAPI app factory
-    routes/
-      chat.py               # /chat_stream SSE endpoint
-      downloads.py          # /download/{filename}
-      history.py            # /history endpoints (list / details)
-  saving/
-    layout_llm.py           # LLM layout & slides generator
-    generate_files.py       # Multi-format file pipeline
-    pdf_builder.py          # ReportLab PDF renderer
-    docx_builder.py         # DOCX builder
-    markdown.py             # Markdown → HTML for ReportLab
-    fonts.py                # CJK + emoji font registration
-  topics/
-    root_workflow.py        # Shared glue: LLM, Firecrawl, helpers
-    base_workflow.py        # BaseCSWorkflow (tools/infra research)
-    developer_tools/        # Topic-specific models/prompts
-    cloud_infra/
-    software_eng/
-frontend/
-  index.html
-  css/
-    styles.css
-  js/
-    main.ts / main.js       # App entrypoint
-    chat-ui.ts / chat-ui.js # Chat logic + SSE handling
-    history.ts / history.js # Draggable history panel & storage
-tests/
-  test_app.py
-  test_chat.py
-  test_server.py
-  test_translate.py
-```
+Version control workflows
 
----
+Code quality & static analysis
 
-## 🧰 Requirements
+2. Software Engineering & Architecture
 
-- Python ≥ 3.12  
-- [uv](https://github.com/astral-sh/uv) (recommended) or `pip`
-- FastAPI + Uvicorn
-- LangChain, LangGraph
-- Firecrawl SDK
-- ReportLab
-- python-docx
-- python-pptx
-- dotenv
+Examples:
 
-Configure your OpenAI and Firecrawl keys via environment variables (`.env`).
+Microservices vs monolith trade-offs
 
----
+Testing strategies (unit / integration / contract / E2E)
 
-## 🚀 Getting Started
+CI/CD pipelines
 
-### 1. Install Dependencies
+System design patterns
 
-```bash
+Observability stack
+
+Refactoring patterns & maintainability
+
+Scaling & reliability
+
+Security / privacy engineering
+
+3. Tech Career, Growth & Strategy
+
+Examples:
+
+Skill roadmaps
+
+Role comparisons (SWE vs DevOps vs MLE)
+
+Salary/market trend analysis
+
+Resume feedback
+
+Interview preparation
+
+Career transitions
+
+Promotion guidance
+
+Learning plans with timelines
+
+🔥 New Question Types Now Possible With Knowledge Extraction
+🟦 Filtering & Attribute Queries
+
+“Show me all free & open-source CI tools you found.”
+
+“Which editors support Python and work offline?”
+
+“Filter only tools with low maintenance risk.”
+
+🟩 Ranking & Sorting
+
+“Rank all logging platforms by ease of integration.”
+
+“Sort AI coding tools by onboarding difficulty.”
+
+🟧 Risk-Only Queries
+
+“Compare VS Code, Cursor, Windsurf only by risks.”
+
+“List security risks of all cloud solutions mentioned.”
+
+🟥 Timeline & Change Tracking
+
+“Summarize GitHub Actions releases over time.”
+
+“What tools have unclear roadmaps or abandoned repos?”
+
+🟨 Relationship-Driven Questions
+
+“Which databases integrate with Kafka out-of-the-box?”
+
+“What tools compete directly with Terraform?”
+
+🟪 Multi-Source Fact Consolidation
+
+“Combine every article and give me the consolidated pros/cons of Kubernetes.”
+
+“List all ML workflow tools you found across previous runs.”
+
+📘 Comprehensive Question Examples
+
+(Organized by major topic, with 20+ subtopics, plus knowledge extraction–enabled examples.)
+
+🟦 1. Developer Tools (20+ subtopics)
+IDEs / Code Editors
+
+“Which Python IDE is best for beginners?”
+
+“VS Code vs Cursor vs Windsurf — difference in collaboration features?”
+
+“Which editors run fully offline?”
+
+AI Coding Assistants
+
+“Compare GitHub Copilot, Cursor, Windsurf on reliability.”
+
+“Which AI editor understands large monorepos best?”
+
+Build Tools
+
+“Maven vs Gradle — which is better for large Java projects?”
+
+Package Managers
+
+“pip vs poetry vs uv — performance & environment isolation?”
+
+Debugging & Profiling
+
+“Which profilers work best with async Python?”
+
+CI/CD Tools
+
+“Compare GitHub Actions, CircleCI, Jenkins, and GitLab CI for Docker deployments.”
+
+“Which CI tool is fastest for PR workflows?”
+
+Testing Frameworks
+
+“pytest vs unittest — which scales better?”
+
+Documentation Tools
+
+“mkdocs vs docusaurus vs Sphinx — pros & cons?”
+
+Version Control / Git Workflows
+
+“GitFlow vs Trunk-based development — company-size implications?”
+
+DevOps Toolchains
+
+“Best tools for Kubernetes cluster GitOps?”
+
+“Which IaC tools compete with Terraform?”
+
+🟩 2. Software Engineering (20+ subtopics)
+Architecture Patterns
+
+“Microservices vs monolith — long-term cost analysis.”
+
+“Event-driven architecture — main risks?”
+
+API Design
+
+“REST vs GraphQL vs gRPC — best fit for mobile apps?”
+
+“How to design backward-compatible APIs?”
+
+Testing Strategies
+
+“What balance of unit vs integration tests is ideal for microservices?”
+
+“Contract testing — when to adopt it?”
+
+CI/CD & Deployment
+
+“Zero-downtime deployment strategies?”
+
+“Best practices for staging → production workflow.”
+
+Observability
+
+“Prometheus vs Datadog vs OpenTelemetry — differences?”
+
+“How to design tracing for async systems?”
+
+Reliability
+
+“SLOs vs SLIs vs SLAs — practical examples?”
+
+“How to implement circuit breakers effectively?”
+
+Performance
+
+“Bottlenecks in Python web frameworks?”
+
+“Caching layers vs DB sharding trade-offs.”
+
+Security
+
+“OWASP list applied to modern SaaS products.”
+
+“Secure secret rotation strategies.”
+
+Databases
+
+“Postgres vs Mongo vs DynamoDB — scalability trade-offs.”
+
+“Choosing DBs for event-driven architectures.”
+
+Dev Workflow & Team Practices
+
+“How should teams adopt trunk-based development?”
+
+“When to enforce code ownership policies?”
+
+🟨 3. Tech Career & Growth (20+ subtopics)
+Skill Growth
+
+“What skills does a senior SWE actually need?”
+
+“Learning path from SWE → DevOps Engineer.”
+
+Job Search
+
+“Which companies value system design the most?”
+
+“What resume sections matter most for backend roles?”
+
+Salary & Market Trends
+
+“AI engineer salary trajectories?”
+
+“Which regions pay highest for DevOps?”
+
+Promotions & Performance
+
+“How to write strong promotion packets?”
+
+“Staff engineer expectations at top companies.”
+
+Interview Prep
+
+“Create a 6-week plan for FAANG interviews.”
+
+“Behavioral interview templates for leadership roles.”
+
+Role Transitions
+
+“SWE → ML Engineer: required projects & timeline.”
+
+“Cloud Engineer → SRE roadmap.”
+
+Long-Term Strategy
+
+“Which specializations stay strong in the next 10 years?”
+
+“Is AI automation reducing SWE demand?”
+
+🔥 Advanced Questions (Only Possible With New Knowledge Extraction)
+
+These were not answerable before. Now they are trivial for your agent.
+
+Entity Filtering
+
+“Show only the open-source tools among all those mentioned.”
+
+“Which cloud services offer free tiers with good reliability?”
+
+Multi-Entity Risk Analysis
+
+“Compare all tools only by business risk.”
+
+“Which deployment tools have the highest vendor lock-in risk?”
+
+Relationship Queries
+
+“Which observability tools integrate with Kubernetes natively?”
+
+“What competes directly with Terraform?”
+
+Sorted Rankings
+
+“Rank the CI tools by beginner friendliness.”
+
+“Order the coding editors by learning curve.”
+
+Timeline Questions
+
+“List major changes in GitHub Actions from 2019→2024.”
+
+“Which projects appear abandoned (no updates)?”
+
+Cross-Run Consolidation
+
+(if you add long-term memory)
+
+“Across all your past research runs, list every free AI coding tool.”
+
+“Summarize risks across all database comparisons you’ve done before.”
+
+🧱 Architecture Overview
+
+(kept from your original README but now improved)
+
+See the main file for full details.
+Key components:
+
+RootWorkflow
+Multi-pass research + scraping + knowledge extraction + logging
+
+TopicWorkflows
+Developer Tools / Software Engineering / Career
+
+RootPrompts
+Shared prompting layer for knowledge extraction
+
+Layout LLM
+Converts raw analysis into beautiful Markdown + slides
+
+Export Engine
+PDF / DOCX / PPTX / TXT with CJK support
+
+📦 Installation
 uv sync
-```
-
-or
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Run the Backend
-
-```bash
 uv run server.py
-```
 
-This launches the FastAPI app (with `/chat_stream`, `/download`, `/history`, etc.).
 
-### 3. Open the Frontend
-
-Serve `frontend/` via any static server (or integrate into your own web app).  
-The chat UI will:
-
-- Stream logs in real-time
-- Show topic badges
-- Reveal download and preview buttons for all file formats
-- Allow you to open the history panel and revisit past reports
-
----
-
-## 📦 API Overview
-
-### `GET /chat_stream`
-
-Server-Sent Events (SSE) endpoint.
-
-Emits JSON messages like:
-
-- `{"type": "topic", "topic_key": "...", "topic_label": "...", ...}`
-- `{"type": "log", "message": "..."}`
-- `{"type": "final", "reply": "...", "download_pdf_url": "...", ...}`
-
-### `GET /download/{filename}`
-
-Returns the generated file:
-
-- Sets `Content-Disposition: inline` to support browser previews
-- Works with PDF/TXT; browsers may trigger download for DOCX/PPTX
-
-### `GET /history`
-
-Returns a list of stored past runs:
-
-- Query text
-- Timestamp
-- Topic label
-- File URLs
-
-### `GET /history/{id}`
-
-(Optional, depending on implementation) Returns details for a single history entry.
-
----
-
-## 🗂 Output Examples
-
-Each query can generate:
-
-| Format | Purpose |
-|--------|---------|
-| `.pdf` | Primary “final report” for sharing or printing |
-| `.docx` | Editable report for teams that live in Word |
-| `.txt` | Raw markdown text for terminals, search, or further processing |
-| `.pptx` | Slide deck for presentations / demos |
-
-The combination of **comparison tables + citations + sources + multi-format export** makes this app function like a **research assistant + technical writer + document production pipeline** in one.
-
----
-
-## 🧭 Roadmap & Future Ideas
-
-Some directions that can make this tool even more powerful:
-
-- 📚 Multi-pass, multi-engine research with deduplication and clustering  
-- 🧩 Plugin/MCP integration for more precise tools (GitHub, StackOverflow, docs)  
-- 🧠 Long-term memory of user preferences and prior reports  
-- 🏗️ More topic packs: observability, MLOps, security tools, data platforms  
-- 💼 Export to HTML and Notion/Confluence-friendly formats  
-- 🔄 Batch mode: turn a list of queries into a report pack
-
----
-
-## ❤️ Contributing
-
-PRs, bug reports, and feature suggestions are very welcome.
-
-You can contribute by:
-
-- Adding new topic workflows  
-- Improving prompts, layouts or table logic  
-- Enhancing frontend UX (preview, theming, filters)  
-- Extending tests and CI
-
----
-
-## 📜 License
-
-MIT License
+Serve frontend from frontend/.

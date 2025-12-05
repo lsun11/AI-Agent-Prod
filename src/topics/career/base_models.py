@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
-
+from ..knowledge_extraction import KnowledgeExtractionResult
 
 class CareerGoal(BaseModel):
     """
@@ -161,4 +161,5 @@ class CareerBaseResearchState(BaseModel):
     # Final output
     plan: Optional[CareerActionPlan] = None
     analysis: Optional[str] = None  # free-form summary if needed
+    knowledge: Optional[KnowledgeExtractionResult] = None
 

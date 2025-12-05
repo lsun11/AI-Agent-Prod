@@ -1,11 +1,16 @@
 # src/topics/root_workflow.py
 from __future__ import annotations
 from typing import Optional, Callable, Any, List, Dict, Tuple
+
 from langchain_openai import ChatOpenAI
 from langchain_deepseek import ChatDeepSeek
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
+
 from ..firecrawl import FirecrawlService
+from .knowledge_extraction import KnowledgeExtractionResult
+from .root_prompts import BaseRootPrompts
+
 from urllib.parse import urlparse
 
 
@@ -15,19 +20,25 @@ class RootWorkflow:
 
     Common responsibilities:
     - Hold the primary LLM instance (`self.llm`)
+    - Hold the structured-output LLM for knowledge extraction (`self.knowledge_llm`)
     - Manage log callbacks (`set_log_callback`, `_log`)
     - Switch models dynamically (`set_llm`)
+    - Provide shared web/Firecrawl helpers
     """
 
     # Subclasses are expected to define a topic_label if they want nicer logs.
     topic_label: str = "GenericTopic"
     topic_tag: str = "GenericSubTopic"
+
     def __init__(
         self,
         default_model: str = "gpt-4o-mini",
         default_temperature: float = 0.1,
     ) -> None:
         self.llm = ChatOpenAI(model=default_model, temperature=default_temperature)
+        # ✅ structured-output LLM for knowledge extraction
+        self.knowledge_llm = self.llm.with_structured_output(KnowledgeExtractionResult)
+
         self._log_callback: Optional[Callable[[str], None]] = None
         self.firecrawl = FirecrawlService()
 
@@ -52,6 +63,9 @@ class RootWorkflow:
         else:
             self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=temperature, timeout=100, max_retries=1)
 
+        # ✅ whenever we swap `self.llm`, also rebuild the structured-output LLM
+        self.knowledge_llm = self.llm.with_structured_output(KnowledgeExtractionResult)
+
     # ---------------------------
     # Logging
     # ---------------------------
@@ -72,6 +86,51 @@ class RootWorkflow:
             # If you prefer the full text, use `text` instead of `msg`
             self._log_callback(msg)
 
+    # ------------------------------------------------------------------ #
+    # ✅ Shared Knowledge Extraction Helper
+    # ------------------------------------------------------------------ #
+    def _node_extract_knowledge(
+        self,
+        *,
+        aggregated_markdown: str,
+        prompts: BaseRootPrompts,
+    ) -> Optional[KnowledgeExtractionResult]:
+        """
+        Topic-agnostic knowledge extraction.
+
+        This does NOT know or touch the topic-specific State model.
+        It just:
+          - builds the prompt
+          - calls the structured-output LLM
+          - returns a KnowledgeExtractionResult (or None)
+
+        Topic workflows are responsible for:
+          - building `aggregated_markdown` for their state
+          - storing the result into their own state model.
+        """
+        if not aggregated_markdown or not aggregated_markdown.strip():
+            return None
+
+        # Build user message using shared root prompts
+        user_msg = prompts.knowledge_extraction_user(aggregated_markdown)
+
+        # Call structured-output LLM
+        self._log("Running knowledge extraction on aggregated markdown...")
+        result: KnowledgeExtractionResult = self.knowledge_llm.invoke(
+            [
+                {"role": "system", "content": prompts.KNOWLEDGE_EXTRACTION_SYSTEM},
+                {"role": "user", "content": user_msg},
+            ]
+        )
+        self._log(f"Knowledge extraction completed: "
+                  f"{len(result.entities)} entities, "
+                  f"{len(result.relationships)} relationships, "
+                  f"{len(result.pros)} pros, "
+                  f"{len(result.cons)} cons, "
+                  f"{len(result.risks)} risks, "
+                  f"{len(result.timeline)} timeline items.")
+
+        return result
 
     # ------------------------------------------------------------------ #
     # Helper: normalize Firecrawl search results

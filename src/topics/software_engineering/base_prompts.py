@@ -33,6 +33,18 @@ class BaseSoftwareEngPrompts(ABC):
         "Emphasize specific steps, not generic advice."
     )
 
+    KNOWLEDGE_EXTRACTION_SYSTEM: str = (
+        "You are an AI research assistant helping build a structured knowledge base from "
+        "software-engineering articles, docs, and notes.\n"
+        "Your goal is to extract:\n"
+        "- entities (companies, products, tools, APIs, concepts)\n"
+        "- relationships (offers, integrates_with, competes_with, depends_on, etc.)\n"
+        "- pros and cons (per entity/aspect)\n"
+        "- risks (technical, integration, security, compliance, maintainability, business, reliability)\n"
+        "- timeline events (releases, major updates, roadmap items, funding, deprecations).\n"
+        "Be concise and deduplicate similar entries."
+    )
+
     COMPATIBILITY_NOTE: str = (
         "This prompt set is fully compatible with the agent's expectations.\n\n"
         "NOTE: All attribute and method names are kept the same as the original\n"
@@ -85,3 +97,26 @@ class BaseSoftwareEngPrompts(ABC):
             "- applicable_scenarios: optional list of scenarios where this plan is most suitable.\n\n"
             "Return ONLY a valid JSON object."
         ).format(query=query, resources=serialized_resources[:4000])
+
+    @staticmethod
+    def knowledge_extraction_user(aggregated_markdown: str) -> str:
+        return (
+            "You are given aggregated research notes in markdown form. "
+            "These notes may include multiple tools, companies, products, and techniques.\n\n"
+            "Your job is to extract structured knowledge that can be used in a knowledge graph "
+            "or JSON schema. Focus on:\n"
+            "1) Entities: important companies, tools, products, APIs, and concepts.\n"
+            "2) Relationships: how these entities relate (offers, uses, integrates_with, depends_on, "
+            "   competes_with, replaces, etc.).\n"
+            "3) Pros: advantages, strengths, or benefits, tied to entities/aspects when possible.\n"
+            "4) Cons: limitations, trade-offs, or weaknesses, tied to entities/aspects when possible.\n"
+            "5) Risks: technical, integration, security, compliance, maintainability, business, or "
+            "   reliability risks.\n"
+            "6) Timeline: important events with best-guess dates (releases, major updates, roadmap items, "
+            "   funding, deprecations).\n\n"
+            "Source content:\n"
+            "----------------\n"
+            f"{aggregated_markdown[:8000]}\n"
+            "----------------\n"
+            "Be concise and deduplicate similar items."
+        )

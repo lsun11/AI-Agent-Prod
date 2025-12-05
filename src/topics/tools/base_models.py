@@ -150,3 +150,5 @@ class BaseResearchState(BaseModel):
 
     # Debug logs, trace messages, etc.
     log_messages: List[str] = Field(default_factory=list)
+
+    sources: List[Dict[str, str]] = []

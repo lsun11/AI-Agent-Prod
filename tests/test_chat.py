@@ -64,11 +64,18 @@ def make_test_app(monkeypatch) -> FastAPI:
     # --- NEW: mock layout generation + file generation ---
 
     # This replaces generate_document_and_slides(query, raw_text, language=...)
-    def fake_generate_document_and_slides(query: str, raw_text: str, language: str = "Eng"):
+    def fake_generate_document_and_slides(
+            query: str,
+            raw_text: str,
+            language: str = "Eng",
+            sources=None,  # Add this
+            entities=None  # Add this
+    ):
         class DummyLayout:
             title = query
             report_markdown = raw_text
             slides = []
+
         return DummyLayout()
 
     # This replaces generate_all_files_for_layout(layout, base_folder, base_filename)
@@ -134,7 +141,7 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
         assert response.status_code == 200
         assert response.headers["content-type"].startswith("text/event-stream")
         events = _collect_sse_events(response)
-
+        print("!!!!!!!!!!!!!!!!!!!!!!", events)
     # We expect at least:
     #  - first event: topic
     #  - one or more log events
@@ -246,13 +253,19 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
     )
 
     # Mock the LLM layout + file generation in the Chinese branch too
-    def fake_generate_document_and_slides(query: str, raw_text: str, language: str = "Chn"):
+    def fake_generate_document_and_slides(
+            query: str,
+            raw_text: str,
+            language: str = "Chn",
+            sources=None,  # Add this
+            entities=None  # Add this
+    ):
         class DummyLayout:
             title = query
             report_markdown = raw_text
             slides = []
-        return DummyLayout()
 
+        return DummyLayout()
     def fake_generate_all_files_for_layout(layout, base_folder: str, base_filename: str):
         base = f"{base_folder}/{base_filename}"
         return {

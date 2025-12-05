@@ -121,12 +121,15 @@ These give huge benefit with minimal code changes.
 
 These differentiate your app from standard chatbots.
 
-⭐ 2.1 Multi-Pass Research (Cross-search + dedup)
+[//]: # (⭐ 2.1 Multi-Pass Research &#40;Cross-search + dedup&#41;)
 
-Two rounds of search → extract → merge.
+[//]: # ()
+[//]: # (Two rounds of search → extract → merge.)
 
-📈 Impact: 10/10
-🛠️ Effort: 1–2 days
+[//]: # ()
+[//]: # (📈 Impact: 10/10)
+
+[//]: # (🛠️ Effort: 1–2 days)
 
 ⭐ 2.2 Knowledge Extraction → Structured Data (Entities, relationships)
 

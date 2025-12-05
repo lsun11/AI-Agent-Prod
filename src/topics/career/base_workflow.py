@@ -1,8 +1,13 @@
 # src/topics/career/base_workflow.py
+from __future__ import annotations
+
+import json
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Callable
+
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
+
 from ..tools.base_workflow import CompanyT
 from .base_models import (
     CareerBaseCompanyAnalysis,
@@ -11,7 +16,6 @@ from .base_models import (
     CareerGoal,
     CareerActionPlan,
 )
-
 from .base_prompts import CareerBasePrompts, HasToolPrompts
 from ..root_workflow import RootWorkflow
 
@@ -24,11 +28,15 @@ TPrompts = TypeVar("TPrompts", bound=CareerBasePrompts)
 class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompts]):
     """
     Generic workflow for career-related topics.
-    Subclasses customize:
-      - state_cls, info_cls, analysis_cls, prompts_cls
-      - topic_label
-      - article_query_suffix
-      - official_site_suffix
+
+    7-step pipeline:
+      1) interpret_query         – normalize goal
+      2) collect_articles        – multi-pass article search
+      3) extract_tools           – extract platforms/resources
+      4) research                – per-platform research
+      5) extract_knowledge       – global entities/pros/cons/risks/timeline
+      6) analyze                 – structured CareerActionPlan
+      7) generate_analysis       – final analysis string (kept JSON for compatibility)
     """
 
     state_cls: Type[TState] = CareerBaseResearchState  # type: ignore
@@ -45,37 +53,59 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
         model: str = "gpt-4o-mini",
         temperature: float = 0.1,
     ) -> None:
-        # initialize RootWorkflow (sets self.llm and _log_callback)
-        super().__init__(
-            default_model=model,
-            default_temperature=temperature,
-        )
+        super().__init__(default_model=model, default_temperature=temperature)
         self.prompts = self.prompts_cls()
         self.workflow = self._build_workflow()
 
-    # ---- Graph building ----
-
+    # ------------------------------------------------------------------ #
+    # Graph building (7 steps)
+    # ------------------------------------------------------------------ #
     def _build_workflow(self):
         graph = StateGraph(self.state_cls)
+
+        graph.add_node("interpret_query", self._interpret_query_step)
+        graph.add_node("collect_articles", self._collect_articles_step)
         graph.add_node("extract_tools", self._extract_tools_step)
         graph.add_node("research", self._research_step)
+        graph.add_node("extract_knowledge", self._extract_knowledge_step)
         graph.add_node("analyze", self._analyze_step)
-        graph.set_entry_point("extract_tools")
+        graph.add_node("generate_analysis", self._generate_analysis_step)
+
+        graph.set_entry_point("interpret_query")
+        graph.add_edge("interpret_query", "collect_articles")
+        graph.add_edge("collect_articles", "extract_tools")
         graph.add_edge("extract_tools", "research")
-        graph.add_edge("research", "analyze")
-        graph.add_edge("analyze", END)
+        graph.add_edge("research", "extract_knowledge")
+        graph.add_edge("extract_knowledge", "analyze")
+        graph.add_edge("analyze", "generate_analysis")
+        graph.add_edge("generate_analysis", END)
+
         return graph.compile()
 
+    # ------------------------------------------------------------------ #
+    # Step 1: interpret_query – normalize goal
+    # ------------------------------------------------------------------ #
+    def _interpret_query_step(self, state: TState) -> Dict[str, Any]:
+        self._log(f"🎯 Starting career workflow for query: {state.query}")
 
-    # ---- Steps ----
-    def _extract_tools_step(self, state: TState) -> Dict[str, Any]:
+        # Minimal: create a CareerGoal shell. You can later replace this
+        # with an LLM-based goal interpreter if you want.
+        if state.goal is None:
+            goal = CareerGoal(raw_query=state.query)
+            return {"goal": goal}
+        return {}
+
+    # ------------------------------------------------------------------ #
+    # Step 2: collect_articles – multi-pass search
+    # ------------------------------------------------------------------ #
+    def _collect_articles_step(self, state: TState) -> Dict[str, Any]:
         self._log(f"Finding articles/resources about: {state.query}")
 
         article_query = f"{state.query} {self.article_query_suffix}"
         query_variants = [
-            article_query,  # keep your original comparison template
-            f"{state.query} developer tools overview",
-            f"{state.query} SaaS platform comparison",
+            article_query,
+            f"{state.query} interview prep platforms comparison",
+            f"{state.query} career resources overview",
         ]
 
         merged_content, meta_items = self._multi_pass_articles(
@@ -91,6 +121,22 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
             web_results = self._get_web_results(search_results)
             merged_content, meta_items = self._collect_content_from_web_results(web_results)
 
+        self._log(f"Collected {len(meta_items)} sources for career research.")
+        return {
+            "aggregated_markdown": merged_content,
+            "sources": meta_items,
+        }
+
+    # ------------------------------------------------------------------ #
+    # Step 3: extract_tools – extract platforms/resources from content
+    # ------------------------------------------------------------------ #
+    def _extract_tools_step(self, state: TState) -> Dict[str, Any]:
+        merged_content = state.aggregated_markdown or ""
+
+        if not merged_content.strip():
+            self._log("No aggregated content to extract platforms from; returning empty list.")
+            return {"extracted_tools": []}
+
         messages = [
             SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
             HumanMessage(content=self.prompts.tool_extraction_user(state.query, merged_content)),
@@ -98,17 +144,24 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
 
         try:
             response = self.llm.invoke(messages)
+            text = response.content if hasattr(response, "content") else str(response)
             tool_names = [
                 name.strip()
-                for name in response.content.strip().split("\n")
+                for name in text.split("\n")
                 if name.strip()
             ]
-            self._log(f"Extracted tools/platforms: {', '.join(tool_names[:5])}")
+            if tool_names:
+                self._log(f"Extracted career platforms/resources: {', '.join(tool_names[:5])}")
+            else:
+                self._log("No platforms/resources extracted from content.")
             return {"extracted_tools": tool_names}
         except Exception as e:
             self._log(f"Extraction error: {e}")
             return {"extracted_tools": []}
 
+    # ------------------------------------------------------------------ #
+    # Shared helpers: analyze + research single tool
+    # ------------------------------------------------------------------ #
     def _analyze_company_content(self, name: str, content: str) -> TAnalysis:
         structured_llm = self.llm.with_structured_output(self.analysis_cls)
 
@@ -137,7 +190,7 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
 
     def _research_single_tool(self, tool_name: str) -> Optional[CompanyT]:
         self._log(f"researching: {tool_name}")
-        tool_query = f"{tool_name} official site"
+        tool_query = f"{tool_name} {self.official_site_suffix}"
 
         tool_search_results = self.firecrawl.search_companies(tool_query, num_results=1)
         web_results = self._get_web_results(tool_search_results)
@@ -169,23 +222,19 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
             competitors=[],
         )
 
-        # Prefer search markdown if available
         content = getattr(doc, "markdown", None)
 
-        # --- fields for branding info ---
         primary_color = None
         brand_colors = None
         logo_url = None
 
         scraped = self.firecrawl.scrape_company_pages(url)
         if scraped:
-            # FirecrawlApp.scrape often returns {"data": {...}}
             if isinstance(scraped, dict):
                 data = scraped.get("data", scraped)
             else:
                 data = scraped
 
-            # markdown from scrape (override search markdown if present)
             scraped_markdown = (
                 data.get("markdown")
                 if isinstance(data, dict)
@@ -194,14 +243,12 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
             if scraped_markdown:
                 content = scraped_markdown
 
-            # ---- Branding block (colors + images) ----
             if isinstance(data, dict):
                 branding = data.get("branding")
             else:
                 branding = getattr(data, "branding", None)
 
             if branding is not None:
-                # colors can be attribute or dict field
                 if isinstance(branding, dict):
                     colors = branding.get("colors")
                     images = branding.get("images")
@@ -209,18 +256,16 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
                     colors = getattr(branding, "colors", None)
                     images = getattr(branding, "images", None)
 
-                # colors: pick full map + primary
                 if isinstance(colors, dict) and colors:
                     brand_colors = colors
                     primary_color = colors.get("primary") or primary_color
 
-                # images: favicon → ogImage → logo
                 if isinstance(images, dict) and images:
                     logo_url = (
-                            images.get("favicon")
-                            or images.get("ogImage")
-                            or images.get("logo")
-                            or logo_url
+                        images.get("favicon")
+                        or images.get("ogImage")
+                        or images.get("logo")
+                        or logo_url
                     )
 
         if not content:
@@ -230,9 +275,9 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
                 content = scraped.markdown
 
         if content:
-            print("Checking:", company.name)
+            self._log(f"Checking: {company.name}")
             analysis = self._analyze_company_content(company.name, content)
-            print("Done checking:", company.name)
+            self._log(f"Done checking: {company.name}")
             company.pricing_model = analysis.pricing_model
             company.pricing_details = analysis.pricing_details
             company.is_open_source = analysis.is_open_source
@@ -253,21 +298,18 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
         if logo_url:
             company.logo_url = logo_url
 
-
         return company
 
+    # ------------------------------------------------------------------ #
+    # Step 4: research – per-platform research (parallel)
+    # ------------------------------------------------------------------ #
     def _research_step(self, state: TState) -> Dict[str, Any]:
         extracted = getattr(state, "extracted_tools", [])
 
         if not extracted:
             self._log("⚠️ No extracted tools found, falling back to direct search")
             search_results = self.firecrawl.search_companies(state.query, num_results=4)
-            if hasattr(search_results, "web"):
-                web_results = search_results.web
-            elif isinstance(search_results, dict):
-                web_results = search_results.get("web", [])
-            else:
-                web_results = search_results
+            web_results = self._get_web_results(search_results)
 
             tool_names = [
                 getattr(doc, "metadata", None).title
@@ -282,7 +324,7 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
 
         companies: List[TInfo] = []
 
-        max_workers = min(4, len(tool_names))  # cap to avoid too many parallel calls
+        max_workers = min(4, len(tool_names))
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_name = {
                 executor.submit(self._research_single_tool, name): name
@@ -299,12 +341,45 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
                     self._log(f"error while researching {tool_name}: {e}")
         return {"companies": companies}
 
-    import json  # make sure this is at the top of the file
+    # ------------------------------------------------------------------ #
+    # Step 5: extract_knowledge – global entities/pros/cons/risks/timeline
+    # ------------------------------------------------------------------ #
+    def _extract_knowledge_step(self, state: TState) -> Dict[str, Any]:
+        aggregated = (state.aggregated_markdown or "").strip()
 
+        if state.companies:
+            blocks: List[str] = []
+            for c in state.companies:
+                blocks.append(f"# {c.name}\n{c.description}\n")
+            company_block = "\n\n".join(blocks).strip()
+            if company_block:
+                aggregated = (aggregated + "\n\n---\n\n" + company_block) if aggregated else company_block
+
+        if not aggregated:
+            self._log("No aggregated content available; skipping knowledge extraction.")
+            return {}
+
+        result = self._extract_knowledge_from_markdown(
+            aggregated_markdown=aggregated,
+            prompts=self.prompts,
+        )
+        if result is None:
+            return {}
+
+        return {"knowledge": result}
+
+    # ------------------------------------------------------------------ #
+    # Step 6: analyze – structured CareerActionPlan (kept mostly as-is)
+    # ------------------------------------------------------------------ #
     def _analyze_step(self, state: TState) -> Dict[str, Any]:
         self._log("Generating career action plan and recommendations")
 
-        company_data = ", ".join([c.model_dump_json() for c in state.companies])
+        # Include companies + knowledge (if present) in the payload
+        payload = {
+            "companies": [c.model_dump() for c in state.companies],
+            "knowledge": state.knowledge.model_dump() if state.knowledge else None,
+        }
+        company_data = json.dumps(payload, ensure_ascii=False)
 
         messages = [
             SystemMessage(content=self.prompts.RECOMMENDATIONS_SYSTEM),
@@ -317,11 +392,10 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
             plan: CareerActionPlan = structured_llm.invoke(messages)  # type: ignore[assignment]
             self._log("Successfully generated CareerActionPlan")
 
-            goal = CareerGoal(raw_query=state.query)
+            goal = state.goal or CareerGoal(raw_query=state.query)
 
             return {
-                # 🔹 Keep `analysis` as a string – JSON-serialized plan
-                #    (your to_document() will parse and pretty-print this)
+                # Keep analysis as JSON string for compatibility with existing to_document()
                 "analysis": plan.model_dump_json(indent=2, ensure_ascii=False),
                 "plan": plan,
                 "goal": goal,
@@ -329,23 +403,39 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis, TPrompt
 
         except Exception as e:
             self._log(f"❌ Error generating CareerActionPlan: {e}")
-            # Fallback: plain-text analysis string, as before
             try:
                 fallback = self.llm.invoke(messages)
+                goal = state.goal or CareerGoal(raw_query=state.query)
                 return {
-                    "analysis": fallback.content,
+                    "analysis": getattr(fallback, "content", str(fallback)),
                     "plan": None,
-                    "goal": CareerGoal(raw_query=state.query),
+                    "goal": goal,
                 }
             except Exception as inner_e:
                 self._log(f"❌ Fallback recommendation error: {inner_e}")
+                goal = state.goal or CareerGoal(raw_query=state.query)
                 return {
                     "analysis": "Failed to generate a structured career plan.",
                     "plan": None,
-                    "goal": CareerGoal(raw_query=state.query),
+                    "goal": goal,
                 }
 
-    # Public entry
+    # ------------------------------------------------------------------ #
+    # Step 7: generate_analysis – final analysis string (no-op for now)
+    # ------------------------------------------------------------------ #
+    def _generate_analysis_step(self, state: TState) -> Dict[str, Any]:
+        """
+        For now, keep analysis as returned by _analyze_step (JSON string or fallback text).
+        This step exists to match the 7-step pipeline and can later be extended
+        to build a human-readable summary or markdown document if needed.
+        """
+        # You could, for example, wrap the JSON in a markdown code block,
+        # or generate a short natural-language summary from `state.plan`.
+        return {}
+
+    # ------------------------------------------------------------------ #
+    # Public entry – used by chat.py
+    # ------------------------------------------------------------------ #
     def run(self, query: str) -> TState:
         initial_state = self.state_cls(query=query)
         final_state = self.workflow.invoke(initial_state)

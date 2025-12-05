@@ -1,299 +1,237 @@
-from typing import Dict, Any, Callable, Optional, List, Type, cast
+# src/topics/software_eng/workflow.py
+from __future__ import annotations
 
-from langchain_anthropic import ChatAnthropic
-from langchain_deepseek import ChatDeepSeek
-from langgraph.graph import StateGraph, END
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+import json
+from typing import List
 
-from ..knowledge_extraction import KnowledgeExtractionResult
-from ...firecrawl import FirecrawlService
+from langgraph.graph import StateGraph
+
+from ..root_workflow import RootWorkflow
+from .base_prompts import BaseSoftwareEngPrompts
 from .base_models import (
     BaseSoftwareEngState,
     BaseSoftwareEngResourceSummary,
     BaseSoftwareEngRecommendation,
 )
-from .base_prompts import BaseSoftwareEngPrompts
-from ..root_workflow import RootWorkflow
-
-LogCallback = Callable[[str], None]
 
 
-class BaseSoftwareEngWorkflow(RootWorkflow):
-    state_model: Type[BaseSoftwareEngState] = BaseSoftwareEngState
-    resource_model: Type[BaseSoftwareEngResourceSummary] = BaseSoftwareEngResourceSummary
-    recommendation_model: Type[BaseSoftwareEngRecommendation] = BaseSoftwareEngRecommendation
-    prompts_cls: Type[BaseSoftwareEngPrompts] = BaseSoftwareEngPrompts
-    topic_label: str = "Software Engineering"
-    article_query_template: str = "{query} best practices guide"
+class BaseSoftwareEngWorkflow(RootWorkflow[BaseSoftwareEngState]):
+    topic_label = "SoftwareEngineering"
+    topic_tag = "Base"
 
-    def __init__(
-        self,
-        model: str = "gpt-4o-mini",
-        temperature: float = 0.1,
-    ) -> None:
-        super().__init__(
-            default_model=model,
-            default_temperature=temperature,
+    def __init__(self) -> None:
+        super().__init__()
+        self.state_model = BaseSoftwareEngState
+        self.prompts = BaseSoftwareEngPrompts()
+        self.workflow = self.build_graph()
+
+    # -------------------------
+    # Step 1: interpret query
+    # -------------------------
+    def step_1_interpret_query(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        # For now, we just log. Later you can add intent classification here.
+        self._log(f"Interpreting query: {state.query}")
+        return state
+
+    # -------------------------
+    # Step 2: plan search strategy + collect sources
+    # -------------------------
+    def step_2_collect_sources(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        self._log("Collecting multi-pass articles for software engineering topic...")
+        merged_content, meta_items = self._multi_pass_articles(state.query)
+
+        # Populate aggregated_markdown
+        new_state = state.model_copy(update={"aggregated_markdown": merged_content})
+
+        # Initialize resources with basic title/url from meta
+        resources: List[BaseSoftwareEngResourceSummary] = []
+        for item in meta_items:
+            resources.append(
+                BaseSoftwareEngResourceSummary(
+                    title=item.get("title") or "(untitled)",
+                    url=item.get("url") or "",
+                )
+            )
+
+        if resources:
+            new_state = new_state.model_copy(update={"resources": resources})
+
+        return new_state
+
+    # -------------------------
+    # Step 3: summarize resources / extract keywords
+    # -------------------------
+    def step_3_summarize(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        if not state.aggregated_markdown:
+            self._log("No aggregated markdown available; skipping summarization.")
+            return state
+
+        self._log("Summarizing aggregated content into keywords / key points...")
+
+        user_msg = self.prompts.tool_extraction_user(
+            query=state.query,
+            content=state.aggregated_markdown,
         )
-        self.knowledge_llm = self.llm.with_structured_output(KnowledgeExtractionResult)
-        self.prompts = self.prompts_cls()
-        self.workflow = self._build_workflow()
 
-
-    def _node_extract_knowledge(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
-        # 1) Build some aggregated text to feed into the LLM.
-        #    You can tweak this however you like.
-        if not state.resources:
-            return state
-
-        # Very simple aggregation example: title + key_points for each resource
-        parts: list[str] = []
-        for res in state.resources:
-            parts.append(f"# {res.title}\n{res.url}\n")
-            if res.key_points:
-                parts.append("- " + "\n- ".join(res.key_points))
-        aggregated_markdown = "\n\n".join(parts)
-
-        if not aggregated_markdown.strip():
-            return state
-
-        # 2) Build prompt using your new helper
-        user_msg = self.prompts.knowledge_extraction_user(aggregated_markdown)
-
-        # 3) Call structured-output LLM
-        result: KnowledgeExtractionResult = self.knowledge_llm.invoke(
+        raw_response = self.llm.invoke(
             [
-                {"role": "system", "content": self.prompts.KNOWLEDGE_EXTRACTION_SYSTEM},
+                {"role": "system", "content": self.prompts.TOOL_EXTRACTION_SYSTEM},
                 {"role": "user", "content": user_msg},
             ]
         )
 
-        # 4) Return a *new* state with knowledge filled in
-        #    Pydantic-friendly and type-safe.
+        text = raw_response.content if hasattr(raw_response, "content") else str(raw_response)
+        lines = [line.strip("-• ").strip() for line in text.splitlines() if line.strip()]
+        keywords = [line for line in lines if line]
+
+        # Put them both into extracted_keywords and into the first resource key_points
+        new_state = state.model_copy(update={"extracted_keywords": keywords})
+
+        if not new_state.resources:
+            # Create a synthetic resource if none exist
+            synthetic = BaseSoftwareEngResourceSummary(
+                title="Aggregated software engineering research",
+                url="",
+                key_points=keywords,
+            )
+            new_state = new_state.model_copy(update={"resources": [synthetic]})
+        else:
+            # Attach key points to the first resource as a simple approach
+            first = new_state.resources[0].model_copy(update={"key_points": keywords})
+            remaining = new_state.resources[1:]
+            new_state = new_state.model_copy(update={"resources": [first, *remaining]})
+
+        return new_state
+
+    # -------------------------
+    # Step 4: knowledge extraction
+    # -------------------------
+    def step_4_extract_knowledge(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        if not state.aggregated_markdown:
+            self._log("No aggregated markdown; skipping knowledge extraction.")
+            return state
+
+        result = self._extract_knowledge_from_markdown(
+            aggregated_markdown=state.aggregated_markdown,
+            prompts=self.prompts,
+        )
+        if result is None:
+            return state
+
         return state.model_copy(update={"knowledge": result})
 
-    # ------------------------------------------------------------------ #
-    # Graph setup
-    # ------------------------------------------------------------------ #
-    def _build_workflow(self):
-        graph = StateGraph(self.state_model)
-        graph.add_node("extract_resources", self._extract_resources_step)
-        graph.add_node("analyze", self._analyze_step)
-        graph.add_node("extract_knowledge", self._node_extract_knowledge)
-        graph.add_node("recommend", self._recommend_step)
-        graph.set_entry_point("extract_resources")
-        graph.add_edge("extract_resources", "analyze")
-        graph.add_edge("analyze", "extract_knowledge")
-        graph.add_edge("extract_knowledge", "recommend")
-        graph.add_edge("recommend", END)
-        return graph.compile()
+    # -------------------------
+    # Step 5: higher-level analysis / recommendation
+    # -------------------------
+    def step_5_analyze(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        self._log("Generating software engineering recommendation from resources + knowledge...")
 
-    # ------------------------------------------------------------------ #
-    # Node: extract_resources
-    # ------------------------------------------------------------------ #
-    def _extract_resources_step(self, state: BaseSoftwareEngState) -> Dict[str, Any]:
-        self._log(f"Finding articles/resources about: {state.query}")
+        # Serialize a light-weight view of resources and (optionally) knowledge
+        resources_payload = {
+            "resources": [r.model_dump() for r in state.resources],
+            "knowledge": state.knowledge.model_dump() if state.knowledge else None,
+        }
+        serialized = json.dumps(resources_payload, ensure_ascii=False)
 
-        article_query = self.article_query_template.format(query=state.query)
-
-        query_variants = [
-            article_query,  # keep your original comparison template
-            f"{state.query} developer tools overview",
-            f"{state.query} SaaS platform comparison",
-        ]
-
-        merged_content, meta_items = self._multi_pass_articles(
-            state.query,
-            num_results=3,
-            snippet_len=1500,
-            query_variants=query_variants,
+        user_msg = self.prompts.recommendations_user(
+            query=state.query,
+            serialized_resources=serialized,
         )
 
-        if not merged_content.strip():
-            self._log("multi-pass search returned no content, falling back to single search")
-            search_results = self.firecrawl.search_companies(article_query, num_results=3)
-            web_results = self._get_web_results(search_results)
-            merged_content, meta_items = self._collect_content_from_web_results(web_results)
-
-        # Build resource objects with empty branding fields for now
-        resources: List[BaseSoftwareEngResourceSummary] = [
-            self.resource_model(
-                title=(meta.get("title") or "Untitled resource"),
-                url=meta.get("url") or "",
-                key_points=[],
-                concepts=[],
-                recommended_tools=[],
-                logo_url=None,
-                primary_color=None,
-                brand_colors=None,
-            )
-            for meta in meta_items
-        ]
-
-        if not merged_content:
-            self._log("No content found; continuing with empty extraction.")
-            return {"resources": resources, "extracted_keywords": []}
-
-        messages = [
-            SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
-            HumanMessage(content=self.prompts.tool_extraction_user(state.query, merged_content)),
-        ]
-
-        try:
-            response = self.llm.invoke(messages)
-            lines = [
-                ln.strip()
-                for ln in response.content.split("\n")
-                if ln.strip()
+        raw_response = self.llm.with_structured_output(BaseSoftwareEngRecommendation).invoke(
+            [
+                {"role": "system", "content": self.prompts.RECOMMENDATIONS_SYSTEM},
+                {"role": "user", "content": user_msg},
             ]
-            self._log(f"Extracted keywords/concepts: {', '.join(lines[:10])}")
-            return {
-                "resources": resources,
-                "extracted_keywords": lines,
-            }
-        except Exception as e:
-            self._log(f"Extraction failed: {e}")
-            return {"resources": resources, "extracted_keywords": []}
-
-    # ------------------------------------------------------------------ #
-    # Node: analyze
-    #   - Scrape each resource URL
-    #   - Aggregate markdown content
-    #   - Populate logo_url / primary_color / brand_colors on each resource
-    # ------------------------------------------------------------------ #
-    def _analyze_step(self, state: BaseSoftwareEngState) -> Dict[str, Any]:
-        self._log("Analyzing aggregated resources")
-
-        combined = ""
-
-        for res in state.resources[:3]:
-            if not res.url:
-                continue
-
-            scraped = self.firecrawl.scrape_company_pages(res.url)
-            if not scraped:
-                continue
-
-            if isinstance(scraped, dict):
-                data = scraped.get("data", scraped)
-            else:
-                data = scraped
-
-            scraped_markdown = (
-                data.get("markdown")
-                if isinstance(data, dict)
-                else getattr(data, "markdown", None)
-            )
-            if scraped_markdown:
-                combined += scraped_markdown[:2000] + "\n\n"
-
-            branding = (
-                data.get("branding")
-                if isinstance(data, dict)
-                else getattr(data, "branding", None)
-            )
-
-            local_primary_color = None
-            local_brand_colors = None
-            local_logo_url = None
-
-            if branding is not None:
-                if isinstance(branding, dict):
-                    colors = branding.get("colors")
-                    images = branding.get("images")
-                else:
-                    colors = getattr(branding, "colors", None)
-                    images = getattr(branding, "images", None)
-
-                if isinstance(colors, dict) and colors:
-                    local_brand_colors = colors
-                    local_primary_color = colors.get("primary")
-
-                if isinstance(images, dict) and images:
-                    local_logo_url = (
-                            images.get("favicon")
-                            or images.get("ogImage")
-                            or images.get("logo")
-                    )
-
-            # write back onto this resource
-            if local_primary_color:
-                res.primary_color = local_primary_color
-            if local_brand_colors:
-                res.brand_colors = local_brand_colors
-            if local_logo_url:
-                res.logo_url = local_logo_url
-
-        if not combined:
-            self._log("No detailed content to analyze; skipping analysis.")
-            # still return resources so they carry branding to final state
-            return {"resources": state.resources}
-
-        structured_llm = self.llm.with_structured_output(self.recommendation_model)
-        messages = [
-            SystemMessage(content=self.prompts.TOOL_ANALYSIS_SYSTEM),
-            HumanMessage(content=self.prompts.tool_analysis_user(self.topic_label, combined)),
-        ]
-        try:
-            analysis = structured_llm.invoke(messages)
-            self._log("Analysis step completed")
-            # 🔑 return both analysis AND resources
-            return {"analysis": analysis, "resources": state.resources}
-        except Exception as e:
-            self._log(f"Analysis failed: {e}")
-            fallback = self.recommendation_model(
-                summary="Analysis failed.",
-                best_practices=[],
-                pitfalls=[],
-                suggested_action_plan=[],
-            )
-            return {"analysis": fallback, "resources": state.resources}
-
-    # ------------------------------------------------------------------ #
-    # Node: recommend
-    # ------------------------------------------------------------------ #
-    def _recommend_step(self, state: BaseSoftwareEngState) -> Dict[str, Any]:
-        self._log("Generating final recommendations")
-
-        import json
-
-        resources_json = json.dumps(
-            [r.model_dump() for r in state.resources],
-            ensure_ascii=False,
         )
 
-        structured_llm = self.llm.with_structured_output(self.recommendation_model)
+        recommendation: BaseSoftwareEngRecommendation = raw_response
+        return state.model_copy(update={"analysis": recommendation})
 
-        messages = [
-            SystemMessage(content=self.prompts.RECOMMENDATIONS_SYSTEM),
-            HumanMessage(
-                content=self.prompts.recommendations_user(
-                    state.query,
-                    resources_json,
-                )
-            ),
-        ]
+    # -------------------------
+    # Step 6: generate final markdown report
+    # -------------------------
+    def step_6_generate_report(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
+        self._log("Building final markdown report for software engineering topic...")
 
-        try:
-            new_analysis = structured_llm.invoke(messages)
-            return {"analysis": new_analysis}
-        except Exception as e:
-            self._log(f"Recommendation step failed: {e}")
-            if state.analysis:
-                return {"analysis": state.analysis}
-            fallback = self.recommendation_model(
-                summary="Recommendation step failed.",
-                best_practices=[],
-                pitfalls=[],
-                suggested_action_plan=[],
-            )
-            return {"analysis": fallback}
+        parts: List[str] = []
 
-    # ------------------------------------------------------------------ #
-    # Public API
-    # ------------------------------------------------------------------ #
-    def run(self, query: str) -> BaseSoftwareEngState:
-        initial_state = self.state_model(query=query)
-        final_state = self.workflow.invoke(initial_state)
-        return self.state_model(**final_state)
+        parts.append(f"# Software Engineering Report\n")
+        parts.append(f"## Query\n{state.query}\n")
+
+        if state.resources:
+            parts.append("## Key Resources\n")
+            for r in state.resources:
+                parts.append(f"- **{r.title}** — {r.url}")
+            parts.append("")
+
+        if state.extracted_keywords:
+            parts.append("## Extracted Key Points\n")
+            for k in state.extracted_keywords:
+                parts.append(f"- {k}")
+            parts.append("")
+
+        if state.knowledge:
+            parts.append("## Structured Knowledge (Entities & Risks)\n")
+            if state.knowledge.entities:
+                parts.append("### Entities\n")
+                for e in state.knowledge.entities:
+                    type_str = f" ({e.type})" if e.type else ""
+                    parts.append(f"- **{e.name}**{type_str}: {e.description or ''}")
+            if state.knowledge.risks:
+                parts.append("\n### Risks\n")
+                for r in state.knowledge.risks:
+                    prefix = f"[{r.category}] " if r.category else ""
+                    parts.append(f"- {prefix}{r.text}")
+            parts.append("")
+
+        if state.analysis:
+            parts.append("## Recommendation\n")
+            parts.append(f"**Summary**\n{state.analysis.summary}\n")
+            if state.analysis.best_practices:
+                parts.append("**Best Practices**")
+                for bp in state.analysis.best_practices:
+                    parts.append(f"- {bp}")
+            if state.analysis.pitfalls:
+                parts.append("\n**Pitfalls**")
+                for p in state.analysis.pitfalls:
+                    parts.append(f"- {p}")
+            if state.analysis.suggested_action_plan:
+                parts.append("\n**Suggested Action Plan (Next 1–4 weeks)**")
+                for step in state.analysis.suggested_action_plan:
+                    parts.append(f"- {step}")
+            if state.analysis.suggested_tools:
+                parts.append("\n**Suggested Tools**")
+                for t in state.analysis.suggested_tools:
+                    parts.append(f"- {t}")
+            if state.analysis.applicable_scenarios:
+                parts.append("\n**Applicable Scenarios**")
+                for s in state.analysis.applicable_scenarios:
+                    parts.append(f"- {s}")
+            parts.append("")
+
+        final_markdown = "\n".join(parts).strip()
+        return state.model_copy(update={"final_markdown": final_markdown})
+
+    # -------------------------
+    # Build LangGraph graph
+    # -------------------------
+    def build_graph(self):
+        graph = StateGraph(BaseSoftwareEngState)
+
+        graph.add_node("interpret_query", self.step_1_interpret_query)
+        graph.add_node("collect_sources", self.step_2_collect_sources)
+        graph.add_node("summarize", self.step_3_summarize)
+        graph.add_node("extract_knowledge", self.step_4_extract_knowledge)
+        graph.add_node("analyze", self.step_5_analyze)
+        graph.add_node("generate_report", self.step_6_generate_report)
+
+        graph.set_entry_point("interpret_query")
+        graph.add_edge("interpret_query", "collect_sources")
+        graph.add_edge("collect_sources", "summarize")
+        graph.add_edge("summarize", "extract_knowledge")
+        graph.add_edge("extract_knowledge", "analyze")
+        graph.add_edge("analyze", "generate_report")
+        graph.set_finish_point("generate_report")
+
+        return graph.compile()

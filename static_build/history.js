@@ -111,31 +111,79 @@ export async function initHistoryPanel() {
         header.textContent = "History";
         panel.prepend(header);
     }
+    // 🔽 Add expand/collapse toggle button
+    setupHistoryToggle(panel, header, list);
     // Make the panel draggable by its header
     makePanelDraggable(panel, header);
     try {
         const items = await fetchHistory(30);
-        list.innerHTML = "";
-        if (items.length === 0) {
-            const empty = document.createElement("div");
-            empty.className = "history-empty";
-            empty.textContent = "No past reports yet.";
-            list.appendChild(empty);
-            return;
-        }
-        for (const item of items) {
-            list.appendChild(renderHistoryItem(item));
+        if (list) {
+            list.innerHTML = "";
+            if (items.length === 0) {
+                const empty = document.createElement("div");
+                empty.className = "history-empty";
+                empty.textContent = "No past reports yet.";
+                list.appendChild(empty);
+                return;
+            }
+            for (const item of items) {
+                list.appendChild(renderHistoryItem(item));
+            }
         }
     }
     catch (err) {
         console.error("Failed to load history:", err);
-        list.innerHTML = "";
-        const errorEl = document.createElement("div");
-        errorEl.className = "history-empty";
-        errorEl.textContent = "Failed to load history.";
-        list.appendChild(errorEl);
+        if (list) {
+            list.innerHTML = "";
+            const errorEl = document.createElement("div");
+            errorEl.className = "history-empty";
+            errorEl.textContent = "Failed to load history.";
+            list.appendChild(errorEl);
+        }
     }
-    makePanelDraggable(panel, header);
+}
+/**
+ * Add a small expand/collapse toggle in the header.
+ * - Click on header (not button) → drag panel
+ * - Click on button → collapse/expand list
+ */
+function setupHistoryToggle(panel, header, listEl) {
+    let toggleBtn = header.querySelector(".history-toggle");
+    if (!toggleBtn) {
+        toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "history-toggle";
+        toggleBtn.title = "Collapse / expand history";
+        // Default state: expanded (▲); collapsed (▼)
+        toggleBtn.textContent = "▲";
+        // Prevent drag start when interacting with the button
+        toggleBtn.addEventListener("pointerdown", (event) => {
+            event.stopPropagation();
+        });
+        toggleBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const collapsed = panel.classList.toggle("history-panel--collapsed");
+            if (listEl) {
+                listEl.style.display = collapsed ? "none" : "";
+            }
+            toggleBtn.textContent = collapsed ? "▼" : "▲";
+            toggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        });
+        header.appendChild(toggleBtn);
+    }
+    // Ensure initial visual state matches DOM (not collapsed by default)
+    if (panel.classList.contains("history-panel--collapsed")) {
+        if (listEl)
+            listEl.style.display = "none";
+        toggleBtn.textContent = "▼";
+        toggleBtn.setAttribute("aria-expanded", "false");
+    }
+    else {
+        if (listEl)
+            listEl.style.display = "";
+        toggleBtn.textContent = "▲";
+        toggleBtn.setAttribute("aria-expanded", "true");
+    }
 }
 function makePanelDraggable(panel, handle) {
     let isDragging = false;

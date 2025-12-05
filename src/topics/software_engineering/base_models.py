@@ -69,14 +69,20 @@ class BaseSoftwareEngState(BaseModel):
 
     query: str
 
+    # raw aggregated markdown from web sources
+    aggregated_markdown: Optional[str] = None
+
     # extracted ideas / keywords / techniques from content
     extracted_keywords: List[str] = Field(default_factory=list)
 
     # useful resources (articles, docs, etc.) that were summarized
     resources: List[BaseSoftwareEngResourceSummary] = Field(default_factory=list)
 
-    # final actionable recommendation for the current project/team
+    # structured knowledge (entities, relationships, pros/cons, risks, timeline)
+    knowledge: Optional[KnowledgeExtractionResult] = None
+
+    # final actionable recommendation
     analysis: Optional[BaseSoftwareEngRecommendation] = None
 
-    # structured knowledge layer (entities, pros/cons, risks, timeline, etc.)
-    knowledge: Optional[KnowledgeExtractionResult] = None
+    # optional: final markdown report
+    final_markdown: Optional[str] = None

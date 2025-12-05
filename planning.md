@@ -131,20 +131,27 @@ These differentiate your app from standard chatbots.
 
 [//]: # (🛠️ Effort: 1–2 days)
 
-⭐ 2.2 Knowledge Extraction → Structured Data (Entities, relationships)
+[//]: # (⭐ 2.2 Knowledge Extraction → Structured Data &#40;Entities, relationships&#41;)
 
-Use LLM to extract:
+[//]: # ()
+[//]: # (Use LLM to extract:)
 
-entities
+[//]: # ()
+[//]: # (entities)
 
-pros & cons
+[//]: # ()
+[//]: # (pros & cons)
 
-risks
+[//]: # ()
+[//]: # (risks)
 
-timeline
+[//]: # ()
+[//]: # (timeline)
 
-📈 Impact: 9/10
-🛠️ Effort: 1–2 days
+[//]: # ()
+[//]: # (📈 Impact: 9/10)
+
+[//]: # (🛠️ Effort: 1–2 days)
 
 ⭐ 2.3 Clean Research Pipeline (Steps 1–7)
 

@@ -34,61 +34,36 @@ class ToolComparisonRecommendation(BaseModel):
 class BaseCompanyAnalysis(BaseModel):
     """
     Generic structured output for LLM analysis of a product/service/platform.
-
-    This now covers *any* CS-related tools:
-      - dev tools and SDKs
-      - hosted SaaS/services
-      - APIs and platforms
-      - cloud infra, monitoring, CI, etc.
-      - even career platforms / learning tools (from a product angle)
     """
 
     # Pricing and licensing
     pricing_model: str  # Free, Freemium, Paid, Enterprise, Unknown
-    pricing_details: Optional[str] = None  # e.g. "from $20/month"
+    pricing_details: Optional[str] = None
 
-    is_open_source: Optional[bool] = None  # true / false / null if unclear
+    is_open_source: Optional[bool] = None
 
     # Category and positioning
-    category: Optional[str] = None  # e.g. "Cloud database", "CI/CD platform"
-    primary_use_case: Optional[str] = None  # short phrase, e.g. "API monitoring"
-    target_users: List[str] = Field(
-        default_factory=list
-    )  # e.g. ["Backend engineers", "Small startups"]
+    category: Optional[str] = None
+    primary_use_case: Optional[str] = None
+    target_users: List[str] = Field(default_factory=list)
 
     # Technical aspects
-    tech_stack: List[str] = Field(
-        default_factory=list
-    )  # languages, frameworks, infra, etc.
-    description: str = ""  # 1-sentence developer-focused description
+    tech_stack: List[str] = Field(default_factory=list)
+    description: str = ""
 
-    api_available: Optional[bool] = None  # REST/GraphQL/SDK etc.
-    language_support: List[str] = Field(default_factory=list)  # programming languages
-    integration_capabilities: List[str] = Field(
-        default_factory=list
-    )  # e.g. GitHub, VS Code, AWS, Slack
+    api_available: Optional[bool] = None
+    language_support: List[str] = Field(default_factory=list)
+    integration_capabilities: List[str] = Field(default_factory=list)
 
-    # Recommendation-related fields
-    strengths: List[str] = Field(
-        default_factory=list
-    )  # what this tool is especially good at
-    limitations: List[str] = Field(
-        default_factory=list
-    )  # notable gaps / downsides
-    ideal_for: List[str] = Field(
-        default_factory=list
-    )  # ideal scenarios, team types, workloads
-    not_suited_for: List[str] = Field(
-        default_factory=list
-    )  # where this is probably a bad fit
+    strengths: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+    ideal_for: List[str] = Field(default_factory=list)
+    not_suited_for: List[str] = Field(default_factory=list)
 
 
 class BaseCompanyInfo(BaseModel):
     """
     Generic representation of a tool/service/platform being researched.
-
-    This is intentionally broad: dev tools, SaaS, APIs, infra, learning platforms,
-    career platforms viewed as *products*, etc.
     """
 
     name: str
@@ -119,21 +94,20 @@ class BaseCompanyInfo(BaseModel):
     not_suited_for: List[str] = Field(default_factory=list)
 
     logo_url: Optional[str] = None
-    primary_color: Optional[str] = None       # e.g. "#0B5FFF"
-    brand_colors: Optional[Dict[str, str]] = None  # full color map if you want
+    primary_color: Optional[str] = None
+    brand_colors: Optional[Dict[str, str]] = None
+
 
 class BaseResearchState(BaseModel):
     """
     Shared runtime state for any 'tool / product research' workflow.
-
-    This now supports broad CS queries and expects:
-      - multiple candidate tools/services
-      - structured comparison
-      - final recommendation
     """
 
     # Original user query
     query: str
+
+    # Raw aggregated markdown from multi-pass article search
+    aggregated_markdown: Optional[str] = None
 
     # Names extracted from search/scraped content
     extracted_tools: List[str] = Field(default_factory=list)
@@ -141,7 +115,7 @@ class BaseResearchState(BaseModel):
     # Structured info about each candidate
     companies: List[BaseCompanyInfo] = Field(default_factory=list)
 
-    # Raw search results / intermediate info
+    # Raw search results / intermediate info (optional)
     search_results: List[Dict[str, Any]] = Field(default_factory=list)
 
     # Final overall analysis / recommendation text (for UI display)
@@ -153,6 +127,8 @@ class BaseResearchState(BaseModel):
     # Debug logs, trace messages, etc.
     log_messages: List[str] = Field(default_factory=list)
 
-    sources: List[Dict[str, str]] = []
+    # Simple list of sources {title, url}
+    sources: List[Dict[str, str]] = Field(default_factory=list)
 
+    # Global structured knowledge (entities, relationships, pros/cons, risks, timeline)
     knowledge: Optional[KnowledgeExtractionResult] = None

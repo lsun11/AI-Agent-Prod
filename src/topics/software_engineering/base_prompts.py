@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC
-
 from ..root_prompts import BaseRootPrompts
 
 

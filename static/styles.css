@@ -709,13 +709,25 @@ body.topic-bg-software_engineering::before {
 }
 
 .history-header {
-    cursor: move;
-    user-select: none;
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 6px;
-    opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+
+.history-toggle {
+  margin-left: 8px;
+    color: #f5f5f5;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Example: shrink panel when collapsed */
+.history-panel.history-panel--collapsed {
+  height: auto;
+}
+
 
 #history-list {
     display: flex;

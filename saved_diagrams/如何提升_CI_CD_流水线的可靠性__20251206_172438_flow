@@ -1,0 +1,27 @@
+digraph {
+	rankdir=TB
+	fontsize=14 label="Pipeline Improvement Action Plan" labelloc=t
+	start [label=Start shape=oval]
+	step1 [label="Audit & fix flaky tests" shape=box]
+	step2 [label="Implement pipeline metrics dashboard" shape=box]
+	step3 [label="Add automated dependency updates" shape=box]
+	step4 [label="Create standardized pipeline templates" shape=box]
+	step5 [label="Implement automated rollback config" shape=box]
+	step6 [label="Set up staging environment" shape=box]
+	step7 [label="Add logging & alerting for failures" shape=box]
+	step8 [label="Optimize build times" shape=box]
+	step9 [label="Document runbooks & recovery" shape=box]
+	step10 [label="Conduct 'game day' exercises" shape=box]
+	end [label=End shape=oval]
+	start -> step1
+	step1 -> step2
+	step2 -> step3
+	step3 -> step4
+	step4 -> step5
+	step5 -> step6
+	step6 -> step7
+	step7 -> step8
+	step8 -> step9
+	step9 -> step10
+	step10 -> end
+}

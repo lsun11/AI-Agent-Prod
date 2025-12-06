@@ -1,12 +1,19 @@
 # src/saving/pdf_builder.py
 import re
 from html import escape
-from typing import List
+from typing import List, Optional
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import Color, HexColor
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+    Image,
+)
 
 
 from .fonts import (
@@ -57,7 +64,13 @@ def _decorate_page(canvas: Canvas, doc) -> None:
     canvas.restoreState()
 
 
-def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
+def build_pdf_document(
+    query: str,
+    result_text: str,
+    pdf_path: str,
+    flowchart_png_path: Optional[str] = None,
+) -> None:
+
     """
     Build a PDF with 4 styles (Title, H2, H3, Body) and simple markdown support.
     """
@@ -224,10 +237,49 @@ def build_pdf_document(query: str, result_text: str, pdf_path: str) -> None:
     )
     story.append(Paragraph(escape(subtitle), subtitle_style))
 
+    # Width available for tables/images
+    available_width = doc.width  # total width we can use
+    available_height = doc.height
+
+    # -------- OPTIONAL: Flowchart image ----------
+    if flowchart_png_path:
+        try:
+            img = Image(flowchart_png_path)
+            # Scale image to fit page width while preserving aspect ratio
+            orig_w, orig_h = float(img.imageWidth), float(img.imageHeight)
+            if orig_w > 0 and orig_h > 0:
+                # Allow the diagram to take up, say, 40% of the page height max
+                max_w = available_width
+                max_h = available_height * 0.4
+
+                scale_w = max_w / orig_w
+                scale_h = max_h / orig_h
+
+                # Use the stricter scale so we don't overflow either dimension
+                scale = min(scale_w, scale_h)
+
+                img.drawWidth = orig_w * scale
+                img.drawHeight = orig_h * scale
+
+            story.append(Spacer(1, 12))
+            story.append(
+                Paragraph(
+                    markdown_inline_to_html("🗺 Action Plan Flowchart", uses_cjk),
+                    # use H3/H4 so it doesn't overpower main title
+                    styles["Heading3"] if not uses_cjk else styles["Heading3"],
+                )
+            )
+            story.append(Spacer(1, 6))
+            story.append(img)
+            story.append(Spacer(1, 16))
+        except Exception as e:
+            # Don't break the PDF if the image fails
+            print("Failed to add flowchart image:", e)
+
     # -------- Body: parse headings, tables & paragraphs ----------
     lines = result_text.splitlines()
     i = 0
-    available_width = doc.width  # total width we can use for tables
+    available_width = doc.width
 
     while i < len(lines):
         raw_line = lines[i]

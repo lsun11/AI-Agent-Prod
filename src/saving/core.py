@@ -3,12 +3,12 @@ import os
 import re
 import unicodedata
 from datetime import datetime
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, Optional, TypedDict  # <- moved Optional, TypedDict here
 
 from .pdf_builder import build_pdf_document
 from .docx_builder import build_docx_document
-from .slides import save_result_slides as _save_result_slides
-from typing import Optional, TypedDict
+from .slides import _save_result_slides
 
 
 class SavedResultPaths(TypedDict):
@@ -16,7 +16,12 @@ class SavedResultPaths(TypedDict):
     txt: str
     docx: Optional[str]
 
-def save_result_document_raw(query: str, result_text: str) -> Dict[str, str]:
+
+def save_result_document_raw(
+    query: str,
+    result_text: str,
+    flowchart_png_path: Optional[str] = None,  # 🔹 NEW
+) -> Dict[str, str]:
     """
     Save the result in three formats:
 
@@ -53,14 +58,15 @@ def save_result_document_raw(query: str, result_text: str) -> Dict[str, str]:
     try:
         import docx  # noqa: F401
     except ImportError:
-        docx_path = None
+        docx_path: Optional[str] = None
     else:
         docx_path = os.path.join(folder, base + ".docx")
         build_docx_document(docx_path, query, result_text)
 
     # 3) pdf
     pdf_path = os.path.join(folder, base + ".pdf")
-    build_pdf_document(query, result_text, pdf_path)
+    # 🔹 pass the optional flowchart path into the PDF builder
+    build_pdf_document(query, result_text, pdf_path, flowchart_png_path=flowchart_png_path)
 
     return {
         "pdf": pdf_path,
@@ -68,6 +74,21 @@ def save_result_document_raw(query: str, result_text: str) -> Dict[str, str]:
         "txt": txt_path,
     }
 
-def save_result_slides(query: str, result: Any) -> str:
-    """Public wrapper around the PPTX saver."""
-    return _save_result_slides(query, result)
+
+def save_result_slides(
+    output_path: str | Path,
+    layout: Any,
+    flowchart_png_path: Optional[str] = None,
+) -> None:
+    """
+    Thin wrapper that delegates to the layout-based PPTX builder in slides.py.
+
+    This keeps the `src.saving.core.save_result_slides` name working for callers
+    (like generate_files.write_slides), but the real logic lives in slides.py.
+    """
+    return _save_result_slides(
+        output_path=output_path,
+        layout=layout,
+        flowchart_png_path=flowchart_png_path,
+    )
+

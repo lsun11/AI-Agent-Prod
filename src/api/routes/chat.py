@@ -14,6 +14,14 @@ from fastapi.responses import StreamingResponse
 from ...saving import format_result_text, generate_document_and_slides, LanguageCode, generate_all_files_for_layout
 from ..deps import TOPIC_WORKFLOWS, classify_topic_with_llm
 from ..translate import is_chinese, translate_text
+from pathlib import Path
+from typing import Optional
+
+from ...diagram.flowchart_from_plan import (
+    build_flowchart_from_se_recommendation,
+)
+from ...diagram.flowchart_render import render_flowchart_png
+from ...topics.software_engineering.base_models import BaseSoftwareEngRecommendation
 
 router = APIRouter()
 SAVED_DOCS_DIR = "saved_docs"
@@ -82,7 +90,7 @@ async def chat_stream(
             if user_is_chinese
             else reply_text_en
         )
-        #print(reply_text)
+        # print(reply_text)
 
         # Collect resources for citations
         raw_resources = []
@@ -125,12 +133,40 @@ async def chat_stream(
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         base_filename = f"{safe}_{timestamp}"
 
+        flowchart_png_path: Optional[str] = None
+        try:
+            print("###############", topic_label, topic_domain, topic_key)
+            # Adjust this condition to however you name your topic
+            if topic_domain.lower().startswith("software"):
+                analysis_obj = getattr(result, "analysis", None)
+
+                # We expect a BaseSoftwareEngRecommendation (has suggested_action_plan)
+                print("&&&&&&&&&&&&&&&&&", analysis_obj)
+                if isinstance(analysis_obj, BaseSoftwareEngRecommendation):
+                    spec = build_flowchart_from_se_recommendation(
+                        workflow.llm,  # uses the same llm as the workflow
+                        analysis_obj,
+                    )
+                    if spec is not None:
+                        diagrams_dir = Path("saved_diagrams")
+                        png_path = render_flowchart_png(
+                            spec,
+                            output_dir=diagrams_dir,
+                            filename_prefix=base_filename + "_flow",
+                        )
+                        print("((((((((((((((((((((((", png_path)
+                        if png_path is not None:
+                            flowchart_png_path = str(png_path)
+        except Exception as e:
+            print("Flowchart generation failed:", e)
+
         paths = generate_all_files_for_layout(
             layout=layout,
             base_folder="saved_docs",
             base_filename=base_filename,
+            flowchart_png_path=flowchart_png_path,
         )
-
+        print("!!!!!!!!!!!!!!!!", paths)
         pdf_path = paths["pdf"]
         docx_path = paths["docx"]
         txt_path = paths["txt"]

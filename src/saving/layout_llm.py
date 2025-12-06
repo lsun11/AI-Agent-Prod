@@ -228,7 +228,6 @@ Sources
 
 And list each source in the form:
 [n] Title — URL
-
 Where n is the number of the source in the list. should go from 1 to number of citations.
 example: [1] citation 1
          [2] citation 2

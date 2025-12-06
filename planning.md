@@ -153,12 +153,15 @@ These differentiate your app from standard chatbots.
 
 [//]: # (🛠️ Effort: 1–2 days)
 
-⭐ 2.3 Clean Research Pipeline (Steps 1–7)
+[//]: # (⭐ 2.3 Clean Research Pipeline &#40;Steps 1–7&#41;)
 
-LLM breaks query into tasks → executes steps → merges results.
+[//]: # ()
+[//]: # (LLM breaks query into tasks → executes steps → merges results.)
 
-📈 Impact: 9/10
-🛠️ Effort: 2–3 days
+[//]: # ()
+[//]: # (📈 Impact: 9/10)
+
+[//]: # (🛠️ Effort: 2–3 days)
 
 ⭐ 2.4 Upgrade Document Templates
 

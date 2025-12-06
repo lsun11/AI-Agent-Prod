@@ -12,6 +12,7 @@ wheels/
 node_modules/
 saved_docs/
 saved_slides/
+saved_diagrams/
 .
 # Virtual environments
 .venv

@@ -234,12 +234,12 @@ class RootWorkflow(Generic[StateT]):
             self._log(f"Multi-pass search [pass {idx+1}/{len(query_variants)}]: {pass_query}")
 
             try:
-                web_results = self.firecrawl.search_companies(pass_query, num_results=num_results)
+                search_results = self.firecrawl.search_companies(pass_query, num_results=num_results)
             except Exception as e:
                 self._log(f"multi-pass search error in pass {idx+1}: {e}")
                 continue
 
-            ### web_results = self._get_web_results(search_results)
+            web_results = self._get_web_results(search_results)
             if not web_results:
                 self._log(f"multi-pass search pass {idx+1}: no web results")
                 continue

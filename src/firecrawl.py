@@ -1,7 +1,6 @@
 import os
 import concurrent.futures
 from typing import Any
-from firecrawl.types import SearchData, SearchResultWeb
 from firecrawl import FirecrawlApp
 from dotenv import load_dotenv
 
@@ -41,12 +40,11 @@ class FirecrawlService:
         print(f"[Firecrawl] Searching web for: {query}")
 
         def _do_search():
-            res: SearchData = self.app.search(
+            res = self.app.search(
                 query=query,  # 👈 use query as-is
                 limit=num_results,
                 scrape_options={"formats": [{"type": "markdown"}]},
             )
-            print("RAW FIRECRAWL RESPONSE:", repr(res))
             return res
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:

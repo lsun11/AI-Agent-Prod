@@ -3,7 +3,7 @@ import { DROPDOWN_OPTIONS_BY_ID } from "./configs.js";
 import { markdownToHtml } from "./markdown.js";
 import { mapLanguageValue, translateLabel, getGreetingText, getFollowupText, applyInterfaceLanguage, refreshDropdownLabels } from "./language.js";
 import { extractWebsiteUrl, splitReplyIntoBubbles, createCompanyBubbleElement, createDownloadButtonElement, } from "./chat-helpers.js";
-import { RECOMMENDATION_STARTERS } from "./types.js";
+import { setHistoryHeaderLanguage } from "./history.js";
 const STORAGE_KEYS = {
     language: "ai_research_language",
     model: "ai_research_model",
@@ -70,6 +70,8 @@ export class ChatUI {
             }
             this.updateInterfaceLanguage();
             refreshDropdownLabels(this.language);
+            // ✅ keep history header in sync without wiping the button
+            setHistoryHeaderLanguage(this.language);
             const switchedMsg = this.language === "Chn"
                 ? "🌐 已切换到中文界面"
                 : "🌐 Switched to English interface";

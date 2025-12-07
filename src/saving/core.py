@@ -3,6 +3,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict
 
 from .pdf_builder import build_pdf_document
@@ -68,6 +69,9 @@ def save_result_document_raw(query: str, result_text: str) -> Dict[str, str]:
         "txt": txt_path,
     }
 
-def save_result_slides(query: str, result: Any) -> str:
+
+def save_result_slides(output_path: str | Path,
+                       layout: Any,
+                       flowchart_png_path: Optional[str] = None) -> None:
     """Public wrapper around the PPTX saver."""
-    return _save_result_slides(query, result)
+    return _save_result_slides(output_path, layout, flowchart_png_path)

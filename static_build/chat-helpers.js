@@ -115,14 +115,13 @@ function buildFormatUrl(baseUrl, format) {
 }
 function getPreviewPanelElements() {
     const panel = document.getElementById("file-preview-panel");
-    const headerEl = document.getElementById("file-preview-header");
     const titleEl = document.getElementById("file-preview-title");
     const bodyEl = document.getElementById("file-preview-body");
     const formatSelect = document.getElementById("file-preview-format");
     const downloadBtn = document.getElementById("file-preview-download");
     const closeBtn = document.getElementById("file-preview-close");
-    if (panel && headerEl) {
-        makePanelDraggable(panel, headerEl);
+    if (panel && titleEl) {
+        makePanelDraggable(panel, titleEl);
     }
     return { panel, titleEl, bodyEl, formatSelect, downloadBtn, closeBtn };
 }

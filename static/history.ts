@@ -2,17 +2,6 @@
 import {makePanelDraggable} from "./drag.js";
 import type {LanguageCode} from "./types.js";
 
-function setHistoryHeaderText(header: HTMLElement, language: LanguageCode | string) {
-    const langCode = (typeof language === "string" ? language : "Eng") as string;
-
-    // If you're using "Chn"/"Eng" internally:
-    if (langCode === "Chn") {
-        header.textContent = "历史记录";
-    } else {
-        header.textContent = "History";
-    }
-}
-
 type HistoryEntry = {
     id: string;
     query: string;
@@ -152,28 +141,6 @@ export async function initHistoryPanel(): Promise<void> {
         panel.prepend(header);
     }
 
-    // // 🔹 Read stored language and set initial label
-    // let storedLang: string | null = null;
-    // try {
-    //     storedLang = window.localStorage.getItem("ai_research_language");
-    // } catch {
-    //     storedLang = null;
-    // }
-    //
-    // // Map whatever is stored ("Eng"/"Chn"/"english"/"chinese") to our code
-    // const langCode =
-    //     storedLang && storedLang.toLowerCase().includes("ch")
-    //         ? "Chn"
-    //         : "Eng";
-    //
-    // setHistoryHeaderText(header, langCode);
-    //
-    // // 🔹 Listen for runtime language changes from ChatUI
-    // window.addEventListener("ai-research-language-changed", (event: Event) => {
-    //     const custom = event as CustomEvent<{ language: string }>;
-    //     setHistoryHeaderText(header!, custom.detail.language);
-    // });
-
     // 🔽 Add expand/collapse toggle button
     setupHistoryToggle(panel, header, list);
 
@@ -227,6 +194,40 @@ function setupHistoryToggle(
     labelSpan.className = "history-header-label";
     labelSpan.textContent = "History";
     header.prepend(labelSpan);
+  }
+
+    // ---------- Clear button ----------
+  let clearBtn = header.querySelector(".history-clear") as HTMLButtonElement | null;
+  if (!clearBtn) {
+    clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "history-clear";
+    clearBtn.title = "Clear history";
+
+    // label will be updated by language sync
+    clearBtn.textContent = "Clear";
+
+    clearBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
+    clearBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+
+      const ok = window.confirm(
+        panel.dataset.lang === "Chn"
+          ? "确定要清空历史记录吗？"
+          : "Clear all history?"
+      );
+      if (!ok) return;
+
+      try {
+        const res = await fetch("/history/clear", { method: "POST" });
+        if (!res.ok) throw new Error("Failed");
+        if (listEl) listEl.innerHTML = "";
+      } catch (err) {
+        alert("Failed to clear history");
+      }
+    });
+
+    header.appendChild(clearBtn);
   }
 
   let toggleBtn = header.querySelector(".history-toggle") as HTMLButtonElement | null;

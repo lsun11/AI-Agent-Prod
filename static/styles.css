@@ -616,13 +616,17 @@ body.topic-bg-software_engineering::before {
 .file-preview-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 8px 12px;
   border-bottom: 1px solid #eee;
   background: linear-gradient(90deg, #f7fbff, #eef4ff);
+  gap: 8px;
 }
 
 .file-preview-title {
+  flex: 1 1 auto;
+    width: 80%;
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   color: #222;
@@ -633,8 +637,10 @@ body.topic-bg-software_engineering::before {
 
 .file-preview-controls {
   display: flex;
-  gap: 4px;
   align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .file-preview-format {
@@ -785,4 +791,19 @@ body.topic-bg-software_engineering::before {
     font-size: 11px;
     opacity: 0.7;
     padding: 4px 0;
+}
+
+.history-clear {
+  margin-left: auto;      /* push buttons right */
+  font-size: 12px;
+  padding: 1px 8px;
+  border: 1px solid #ddd;
+  background: rgba(185, 250, 255, 0.63);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+.history-clear:hover {
+  background: #f0f0f0;
 }

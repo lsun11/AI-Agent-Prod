@@ -60,6 +60,7 @@ export class ChatUI {
         this.updateInterfaceLanguage();
         this.addGreeting(this.language);
         this.fetchSuggestions("fast").catch((err) => console.error("Failed to fetch suggestions:", err));
+        setHistoryHeaderLanguage(this.language);
         this.languageSelect.addEventListener("change", () => {
             this.language = mapLanguageValue(this.languageSelect.value);
             try {

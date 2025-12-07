@@ -1,12 +1,15 @@
 # src/api/routes/history.py
 from typing import List
-
 from fastapi import APIRouter, Query
-
-from ...history.store import list_history
+from ...history.store import list_history, clear_all_history_entries
 
 router = APIRouter()
 
+
+@router.post("/history/clear")
+def clear_history():
+    clear_all_history_entries()  # <- your storage helper
+    return {"ok": True}
 
 @router.get("/history")
 def get_history(limit: int = Query(20, ge=1, le=100)) -> List[dict]:

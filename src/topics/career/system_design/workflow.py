@@ -14,7 +14,6 @@ class SystemDesignPlatformsWorkflow(
         SystemDesignPlatformResearchState,
         SystemDesignPlatformInfo,
         SystemDesignPlatformAnalysis,
-        SystemDesignPlatformsPrompts,
     ]
 ):
     topic_tag = "System Design Interview Platforms"

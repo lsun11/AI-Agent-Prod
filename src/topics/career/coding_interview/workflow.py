@@ -14,7 +14,6 @@ class CodingInterviewPlatformsWorkflow(
         CodingInterviewPlatformResearchState,
         CodingInterviewPlatformInfo,
         CodingInterviewPlatformAnalysis,
-        CodingInterviewPlatformsPrompts,
     ]
 ):
     topic_tag = "Coding Interview Platforms"

@@ -14,7 +14,6 @@ class BehavioralInterviewToolsWorkflow(
         BehavioralInterviewToolResearchState,
         BehavioralInterviewToolInfo,
         BehavioralInterviewToolAnalysis,
-        BehavioralInterviewToolsPrompts,
     ]
 ):
     topic_tag = "Behavioral Interview & Coaching Tools"

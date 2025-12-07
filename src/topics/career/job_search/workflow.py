@@ -14,7 +14,6 @@ class JobSearchWorkflow(
         JobSearchResearchState,
         JobSearchCompanyInfo,
         JobSearchCompanyAnalysis,
-        JobSearchPrompts,
     ]
 ):
     topic_tag = "Job Search Platforms & Market Analysis"

@@ -14,7 +14,6 @@ class ResumeToolsWorkflow(
         ResumeToolsResearchState,
         ResumeToolsCompanyInfo,
         ResumeToolsCompanyAnalysis,
-        ResumeToolsPrompts,
     ]
 ):
     topic_tag = "Resume Optimization & ATS Tools"

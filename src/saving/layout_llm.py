@@ -227,12 +227,11 @@ At the END of the report, add a Markdown section:
 Sources
 
 And list each source in the form:
-[n] Title — URL
+[1] Title1 — URL1
+[2] Title2 — URL2
+[3] Title3 — URL3
+...
 
-Where n is the number of the source in the list. should go from 1 to number of citations.
-example: [1] citation 1
-         [2] citation 2
-         ...
 
     ============================================================
     SLIDE OUTLINE

@@ -14,7 +14,6 @@ class LearningPlatformsWorkflow(
         LearningPlatformResearchState,
         LearningPlatformInfo,
         LearningPlatformAnalysis,
-        LearningPlatformsPrompts,
     ]
 ):
     topic_tag = "Learning Platforms & Skill Roadmaps"

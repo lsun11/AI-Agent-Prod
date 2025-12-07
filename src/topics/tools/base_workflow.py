@@ -6,7 +6,7 @@ from typing import Type, TypeVar, Generic, Dict, Any, List, Callable, Optional
 
 import json
 
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
@@ -65,7 +65,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
         self.workflow = self._build_workflow()
 
     # ------------------------------------------------------------------ #
-    # Graph setup (7 steps)
+    # Graph setup (7 steps) – now state-in / state-out like SoftwareEng
     # ------------------------------------------------------------------ #
     def _build_workflow(self):
         graph = StateGraph(self.state_model)
@@ -85,22 +85,22 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
         graph.add_edge("research_tools", "extract_knowledge")
         graph.add_edge("extract_knowledge", "compare_and_recommend")
         graph.add_edge("compare_and_recommend", "generate_analysis")
-        graph.add_edge("generate_analysis", END)
+        graph.set_finish_point("generate_analysis")
 
         return graph.compile()
 
     # ------------------------------------------------------------------ #
     # Step 1: interpret_query
     # ------------------------------------------------------------------ #
-    def _interpret_query_step(self, state: StateT) -> Dict[str, Any]:
+    def _interpret_query_step(self, state: StateT) -> StateT:
         self._log(f"🔍 Starting tool/product research for query: {state.query}")
         # In the future you can add intent classification here.
-        return {}
+        return state
 
     # ------------------------------------------------------------------ #
     # Step 2: collect_articles – multi-pass Firecrawl search
     # ------------------------------------------------------------------ #
-    def _collect_articles_step(self, state: StateT) -> Dict[str, Any]:
+    def _collect_articles_step(self, state: StateT) -> StateT:
         self._log(f"Finding comparison articles/resources about: {state.query}")
 
         article_query = self.article_query_template.format(query=state.query)
@@ -125,15 +125,18 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
             merged_content, meta_items = self._collect_content_from_web_results(web_results)
 
         self._log(f"Collected {len(meta_items)} sources for tools research.")
-        return {
-            "aggregated_markdown": merged_content,
-            "sources": meta_items,
-        }
+
+        return state.model_copy(
+            update={
+                "aggregated_markdown": merged_content,
+                "sources": meta_items,
+            }
+        )
 
     # ------------------------------------------------------------------ #
     # Step 3: extract_tools – use LLM to extract candidate tool names
     # ------------------------------------------------------------------ #
-    def _extract_tools_step(self, state: StateT) -> Dict[str, Any]:
+    def _extract_tools_step(self, state: StateT) -> StateT:
         content = state.aggregated_markdown or ""
 
         # If for some reason aggregated_markdown is empty, do a quick direct search.
@@ -146,7 +149,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
         if not content.strip():
             self._log("Still no content found to extract tool names from.")
-            return {"extracted_tools": []}
+            return state.model_copy(update={"extracted_tools": []})
 
         messages = [
             SystemMessage(content=self.prompts.TOOL_EXTRACTION_SYSTEM),
@@ -166,10 +169,11 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
                 self._log(f"Extracted tools/platforms: {', '.join(tool_names[:5])}")
             else:
                 self._log("No tool names extracted from content.")
-            return {"extracted_tools": tool_names}
+
+            return state.model_copy(update={"extracted_tools": tool_names})
         except Exception as e:
             self._log(f"Extraction error: {e}")
-            return {"extracted_tools": []}
+            return state.model_copy(update={"extracted_tools": []})
 
     # ------------------------------------------------------------------ #
     # Helper: analyze one company's content into structured fields
@@ -326,7 +330,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
     # ------------------------------------------------------------------ #
     # Step 4: research_tools – run per-tool research in parallel
     # ------------------------------------------------------------------ #
-    def _research_tools_step(self, state: StateT) -> Dict[str, Any]:
+    def _research_tools_step(self, state: StateT) -> StateT:
         extracted_tools = getattr(state, "extracted_tools", [])
 
         if not extracted_tools:
@@ -366,12 +370,12 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
                 except Exception as e:
                     self._log(f"Error while researching {tool_name}: {e}")
 
-        return {"companies": companies}
+        return state.model_copy(update={"companies": companies})
 
     # ------------------------------------------------------------------ #
     # Step 5: extract_knowledge – global entities/pros/cons/risks/timeline
     # ------------------------------------------------------------------ #
-    def _extract_knowledge_step(self, state: StateT) -> Dict[str, Any]:
+    def _extract_knowledge_step(self, state: StateT) -> StateT:
         # Prefer aggregated_markdown from articles; extend with company info where helpful.
         aggregated = (state.aggregated_markdown or "").strip()
 
@@ -389,24 +393,24 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
 
         if not aggregated:
             self._log("No aggregated content available; skipping knowledge extraction.")
-            return {}
+            return state
 
         result = self._extract_knowledge_from_markdown(
             aggregated_markdown=aggregated,
             prompts=self.prompts,
         )
         if result is None:
-            return {}
+            return state
 
-        return {"knowledge": result}
+        return state.model_copy(update={"knowledge": result})
 
     # ------------------------------------------------------------------ #
     # Step 6: compare_and_recommend – structured ToolComparisonRecommendation
     # ------------------------------------------------------------------ #
-    def _compare_and_recommend_step(self, state: StateT) -> Dict[str, Any]:
+    def _compare_and_recommend_step(self, state: StateT) -> StateT:
         if not state.companies:
             self._log("No companies found; skipping structured recommendation.")
-            return {"recommendation": None}
+            return state.model_copy(update={"recommendation": None})
 
         payload = {
             "query": state.query,
@@ -427,15 +431,15 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
             self._log(
                 f"Primary choice from recommendation: {recommendation.primary_choice or 'None'}"
             )
-            return {"recommendation": recommendation}
+            return state.model_copy(update={"recommendation": recommendation})
         except Exception as e:
             self._log(f"Error generating structured recommendation: {e}")
-            return {"recommendation": None}
+            return state.model_copy(update={"recommendation": None})
 
     # ------------------------------------------------------------------ #
     # Step 7: generate_analysis – final human-readable text for UI
     # ------------------------------------------------------------------ #
-    def _generate_analysis_step(self, state: StateT) -> Dict[str, Any]:
+    def _generate_analysis_step(self, state: StateT) -> StateT:
         rec = state.recommendation
         parts: List[str] = []
 
@@ -473,7 +477,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
                 parts.append(f"- {step}")
 
         analysis_text = "\n".join(parts).strip()
-        return {"analysis": analysis_text}
+        return state.model_copy(update={"analysis": analysis_text})
 
     # ------------------------------------------------------------------ #
     # Public API (kept for compatibility – used by chat.py)
@@ -481,7 +485,22 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
     def run(self, query: str) -> StateT:
         """
         Keeps your existing contract: chat.py calls workflow.run(query).
+
+        Returns a StateT (BaseResearchState subclass) – same as before.
         """
         initial_state = self.state_model(query=query)
         final_state = self.workflow.invoke(initial_state)
-        return self.state_model(**final_state)
+
+        # Handle both dict and model returns safely
+        if isinstance(final_state, self.state_model):
+            return final_state
+        if isinstance(final_state, BaseModel):
+            return self.state_model(**final_state.model_dump())
+        if isinstance(final_state, dict):
+            return self.state_model(**final_state)
+
+        # Fallback: best-effort conversion
+        data = getattr(final_state, "model_dump", None)
+        if callable(data):
+            return self.state_model(**data())
+        return self.state_model(**getattr(final_state, "__dict__", {}))

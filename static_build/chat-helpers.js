@@ -1,6 +1,7 @@
 // static/chat-helpers.ts
 import { markdownToHtml } from "./markdown.js";
 import { RECOMMENDATION_STARTERS } from "./types.js";
+import { makePanelDraggable } from "./drag.js";
 /**
  * Extracts a website URL from a chunk of markdown/text.
  */
@@ -119,6 +120,9 @@ function getPreviewPanelElements() {
     const formatSelect = document.getElementById("file-preview-format");
     const downloadBtn = document.getElementById("file-preview-download");
     const closeBtn = document.getElementById("file-preview-close");
+    if (panel && titleEl) {
+        makePanelDraggable(panel, titleEl);
+    }
     return { panel, titleEl, bodyEl, formatSelect, downloadBtn, closeBtn };
 }
 /**

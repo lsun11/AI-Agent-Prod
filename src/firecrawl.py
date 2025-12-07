@@ -1,14 +1,14 @@
 import os
 import concurrent.futures
 from typing import Any
-
 from firecrawl import FirecrawlApp
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class FirecrawlService:
-    def __init__(self, timeout_seconds: float = 30.0):
+    def __init__(self, timeout_seconds: float = 90.0):
         api_key = os.getenv("FIRECRAWL_API_KEY")
         if not api_key:
             raise ValueError("Environment variable FIRECRAWL_API_KEY not found")
@@ -40,12 +40,12 @@ class FirecrawlService:
         print(f"[Firecrawl] Searching web for: {query}")
 
         def _do_search():
-            return self.app.search(
+            res = self.app.search(
                 query=query,  # 👈 use query as-is
                 limit=num_results,
-                scrape_options={"formats": ["markdown"]},
+                scrape_options={"formats": [{"type": "markdown"}]},
             )
-
+            return res
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_do_search)

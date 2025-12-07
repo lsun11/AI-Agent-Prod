@@ -17,7 +17,7 @@ import {
     type CompanyVisual,
 } from "./chat-helpers.js";
 import type {Sender, LanguageCode} from "./types.js";
-import {RECOMMENDATION_STARTERS} from "./types.js";
+import {setHistoryHeaderLanguage} from "./history.js";
 
 interface SuggestionsApiResponse {
     suggestions: string[];
@@ -102,6 +102,7 @@ export class ChatUI {
         this.fetchSuggestions("fast").catch((err) =>
             console.error("Failed to fetch suggestions:", err)
         );
+        setHistoryHeaderLanguage(this.language);
 
         this.languageSelect.addEventListener("change", () => {
             this.language = mapLanguageValue(this.languageSelect.value);
@@ -116,6 +117,9 @@ export class ChatUI {
 
             this.updateInterfaceLanguage();
             refreshDropdownLabels(this.language);
+
+            // ✅ keep history header in sync without wiping the button
+            setHistoryHeaderLanguage(this.language);
 
             const switchedMsg =
                 this.language === "Chn"
@@ -153,7 +157,7 @@ export class ChatUI {
 
     }
 
-        private restorePersistedSettings(): void {
+    private restorePersistedSettings(): void {
         try {
             const savedLanguage = window.localStorage.getItem(STORAGE_KEYS.language);
             const savedModel = window.localStorage.getItem(STORAGE_KEYS.model);

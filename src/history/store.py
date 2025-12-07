@@ -76,3 +76,10 @@ def list_history(limit: int = 20) -> List[Dict[str, Any]]:
 
     entries_sorted = sorted(entries, key=key_fn, reverse=True)
     return entries_sorted[:limit]
+
+def clear_all_history_entries() -> None:
+    """
+    Remove all history entries (thread-safe).
+    """
+    with _HISTORY_LOCK:
+        _save_all([])

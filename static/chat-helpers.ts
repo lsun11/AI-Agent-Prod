@@ -1,6 +1,7 @@
 // static/chat-helpers.ts
 import {markdownToHtml} from "./markdown.js";
 import {type LanguageCode, RECOMMENDATION_STARTERS} from "./types.js";
+import { makePanelDraggable } from "./drag.js";
 
 export interface CompanyVisual {
     name: string | null;
@@ -166,6 +167,7 @@ function getPreviewPanelElements() {
     const formatSelect = document.getElementById("file-preview-format") as HTMLSelectElement | null;
     const downloadBtn = document.getElementById("file-preview-download") as HTMLButtonElement | null;
     const closeBtn = document.getElementById("file-preview-close") as HTMLButtonElement | null;
+    if (panel && titleEl) {makePanelDraggable(panel, titleEl);}
     return {panel, titleEl, bodyEl, formatSelect, downloadBtn, closeBtn};
 }
 

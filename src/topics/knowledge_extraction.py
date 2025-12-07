@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import List, Optional, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Entity(BaseModel):
@@ -42,30 +42,52 @@ class ProConItem(BaseModel):
     text: str = Field(..., description="The actual pro or con statement.")
 
 
+ALLOWED_CATEGORIES = {
+    "technical",
+    "integration",
+    "security",
+    "compliance",
+    "maintainability",
+    "business",
+    "reliability",
+    "other",
+}
+
+CATEGORY_SYNONYMS = {
+    "cost": "business",
+    "pricing": "business",
+    "performance": "technical",
+    # add more if needed
+}
+
 class RiskItem(BaseModel):
-    entity: Optional[str] = Field(
-        default=None,
-        description="Entity this risk is about (tool, vendor, approach).",
-    )
-    category: Optional[
-        Literal[
-            "technical",
-            "integration",
-            "security",
-            "compliance",
-            "maintainability",
-            "business",
-            "reliability",
-            "other",
-        ]
-    ] = Field(
-        default="other",
-        description="High-level risk category.",
-    )
-    text: str = Field(..., description="Description of the risk.")
-    severity: Optional[Literal["low", "medium", "high", "critical"]] = Field(
-        default=None, description="Optional severity level."
-    )
+    entity: Optional[str] = None
+    category: Literal[
+        "technical",
+        "integration",
+        "security",
+        "compliance",
+        "maintainability",
+        "business",
+        "reliability",
+        "other",
+    ]
+    text: str
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, v: str) -> str:
+        if not isinstance(v, str):
+            return "other"
+        v_lower = v.lower().strip()
+        # map synonyms first
+        if v_lower in CATEGORY_SYNONYMS:
+            return CATEGORY_SYNONYMS[v_lower]
+        # if it's already allowed, keep it
+        if v_lower in ALLOWED_CATEGORIES:
+            return v_lower
+        # fallback: treat unknown labels as "other"
+        return "other"
 
 
 class TimelineItem(BaseModel):

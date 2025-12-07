@@ -54,7 +54,6 @@ def register_cjk_fonts() -> None:
 
         try:
             pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
-            print(f"[INFO] Registered CJK font '{font_name}' from {font_path}")
         except Exception as e:
             print(f"[ERROR] Failed to register CJK font '{font_name}' from {font_path}: {e}")
 
@@ -65,7 +64,6 @@ def register_emoji_font() -> None:
         return
     try:
         pdfmetrics.registerFont(TTFont(EMOJI_FONT_NAME_EMOJI, str(EMOJI_FONT_PATH)))
-        print(f"[INFO] Registered emoji font '{EMOJI_FONT_NAME_EMOJI}' from {EMOJI_FONT_PATH}")
     except Exception as e:
         print(f"[ERROR] Failed to register emoji font from {EMOJI_FONT_PATH}: {e}")
 

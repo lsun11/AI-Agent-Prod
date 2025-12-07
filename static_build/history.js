@@ -1,4 +1,5 @@
 // static/history.ts
+import { makePanelDraggable } from "./drag.js";
 function formatDateForHistory(iso) {
     if (!iso)
         return "";
@@ -13,7 +14,7 @@ function formatDateForHistory(iso) {
 function openDownload(url) {
     window.open(url, "_blank");
 }
-async function fetchHistory(limit = 30) {
+async function fetchHistory(limit = 20) {
     const res = await fetch(`/history?limit=${limit}`);
     if (!res.ok)
         return [];
@@ -108,7 +109,6 @@ export async function initHistoryPanel() {
     if (!header) {
         header = document.createElement("div");
         header.className = "history-header";
-        header.textContent = "History";
         panel.prepend(header);
     }
     // 🔽 Add expand/collapse toggle button
@@ -148,13 +148,50 @@ export async function initHistoryPanel() {
  * - Click on button → collapse/expand list
  */
 function setupHistoryToggle(panel, header, listEl) {
+    // ensure there is always a label span
+    let labelSpan = header.querySelector(".history-header-label");
+    if (!labelSpan) {
+        labelSpan = document.createElement("span");
+        labelSpan.className = "history-header-label";
+        labelSpan.textContent = "History";
+        header.prepend(labelSpan);
+    }
+    // ---------- Clear button ----------
+    let clearBtn = header.querySelector(".history-clear");
+    if (!clearBtn) {
+        clearBtn = document.createElement("button");
+        clearBtn.type = "button";
+        clearBtn.className = "history-clear";
+        clearBtn.title = "Clear history";
+        // label will be updated by language sync
+        clearBtn.textContent = "Clear";
+        clearBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
+        clearBtn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const ok = window.confirm(panel.dataset.lang === "Chn"
+                ? "确定要清空历史记录吗？"
+                : "Clear all history?");
+            if (!ok)
+                return;
+            try {
+                const res = await fetch("/history/clear", { method: "POST" });
+                if (!res.ok)
+                    throw new Error("Failed");
+                if (listEl)
+                    listEl.innerHTML = "";
+            }
+            catch (err) {
+                alert("Failed to clear history");
+            }
+        });
+        header.appendChild(clearBtn);
+    }
     let toggleBtn = header.querySelector(".history-toggle");
     if (!toggleBtn) {
         toggleBtn = document.createElement("button");
         toggleBtn.type = "button";
         toggleBtn.className = "history-toggle";
         toggleBtn.title = "Collapse / expand history";
-        // Default state: expanded (▲); collapsed (▼)
         toggleBtn.textContent = "▲";
         // Prevent drag start when interacting with the button
         toggleBtn.addEventListener("pointerdown", (event) => {
@@ -171,80 +208,24 @@ function setupHistoryToggle(panel, header, listEl) {
         });
         header.appendChild(toggleBtn);
     }
-    // Ensure initial visual state matches DOM (not collapsed by default)
-    if (panel.classList.contains("history-panel--collapsed")) {
-        if (listEl)
-            listEl.style.display = "none";
-        toggleBtn.textContent = "▼";
-        toggleBtn.setAttribute("aria-expanded", "false");
+    // Ensure initial visual state matches DOM (collapsed by default now)
+    const collapsed = panel.classList.contains("history-panel--collapsed");
+    if (listEl) {
+        listEl.style.display = collapsed ? "none" : "";
     }
-    else {
-        if (listEl)
-            listEl.style.display = "";
-        toggleBtn.textContent = "▲";
-        toggleBtn.setAttribute("aria-expanded", "true");
-    }
+    toggleBtn.textContent = collapsed ? "▼" : "▲";
+    toggleBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
 }
-function makePanelDraggable(panel, handle) {
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let startLeft = 0;
-    let startTop = 0;
-    let prevUserSelect = null;
-    // Ensure we can move it freely
-    panel.style.position = panel.style.position || "fixed";
-    const onPointerDown = (event) => {
-        isDragging = true;
-        const rect = panel.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
-        startX = event.clientX;
-        startY = event.clientY;
-        // Improve UX: prevent text selection while dragging
-        prevUserSelect = document.body.style.userSelect;
-        document.body.style.userSelect = "none";
-        handle.setPointerCapture(event.pointerId);
-    };
-    const onPointerMove = (event) => {
-        if (!isDragging)
-            return;
-        const dx = event.clientX - startX;
-        const dy = event.clientY - startY;
-        let nextLeft = startLeft + dx;
-        let nextTop = startTop + dy;
-        // Clamp inside viewport
-        const panelRect = panel.getBoundingClientRect();
-        const maxLeft = window.innerWidth - panelRect.width;
-        const maxTop = window.innerHeight - panelRect.height;
-        if (nextLeft < 0)
-            nextLeft = 0;
-        if (nextTop < 0)
-            nextTop = 0;
-        if (nextLeft > maxLeft)
-            nextLeft = maxLeft;
-        if (nextTop > maxTop)
-            nextTop = maxTop;
-        panel.style.left = `${nextLeft}px`;
-        panel.style.top = `${nextTop}px`;
-    };
-    const onPointerUp = (event) => {
-        if (!isDragging)
-            return;
-        isDragging = false;
-        if (prevUserSelect !== null) {
-            document.body.style.userSelect = prevUserSelect;
-            prevUserSelect = null;
-        }
-        try {
-            handle.releasePointerCapture(event.pointerId);
-        }
-        catch (_a) {
-            // ignore if capture wasn't set
-        }
-    };
-    handle.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
+export function setHistoryHeaderLanguage(language) {
+    const header = document.querySelector(".history-header");
+    if (!header)
+        return;
+    let labelSpan = header.querySelector(".history-header-label");
+    if (!labelSpan) {
+        labelSpan = document.createElement("span");
+        labelSpan.className = "history-header-label";
+        header.prepend(labelSpan);
+    }
+    labelSpan.textContent = language === "Chn" ? "历史记录" : "History";
 }
 //# sourceMappingURL=history.js.map

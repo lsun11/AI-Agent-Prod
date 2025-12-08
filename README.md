@@ -18,8 +18,9 @@
 ### 🌐 Beautiful and comprehensive tool comparisons.
 ![results_tools.png](static/assets/readme_stuff/results_tools.png)
 
-### 🌐 Thorough methodology recommendations and strategies.
-<video src="static/assets/readme_stuff/results_vid.mp4" width="500" height="440" controls></video>
+### 🌐 Thorough methodology recommendations and strategies
+![Methodology demo](static/assets/readme_stuff/results_vid.gif)
+
 
 
 ## Overview

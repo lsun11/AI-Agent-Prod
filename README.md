@@ -5,24 +5,26 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 
 ### 🌐 A Bilingual, Multi-Source AI Research Pipeline • Structured Knowledge Extraction • PDF/PPTX/DOCX Output
-![English_Cover](static/assets/readme_stuff/cover_eng.png)
+<img src="static/assets/readme_stuff/cover_eng.png" alt="English_Cover" style="border-radius: 12px;">
+
 ### 🌐 English and Chinese with an Easy Switch.
-![Chinese_Cover](static/assets/readme_stuff/cover_chn.png)
+<img src="static/assets/readme_stuff/cover_chn.png" alt="Chinese_Cover" style="border-radius: 12px;">
+
 ### 🌐 Various AI models and Humanization Levels Selection.
-<img src="static/assets/readme_stuff/ai_models.png" alt="Alt Text" width="100" height="200">
-<img src="static/assets/readme_stuff/humanization.png" alt="Alt Text" width="200" height="130">
+<img src="static/assets/readme_stuff/ai_models.png" alt="AI_Models" width="100" height="200" border-radius border-radius="12px" style="border-radius: 12px;">
+<img src="static/assets/readme_stuff/humanization.png" alt="Humanization" width="200" height="130" style="border-radius: 12px;">
 
 ### 🌐 Easy-to-use Chatbot Interface and Detailed thinking process.
-![chat_thinking.png](static/assets/readme_stuff/chat_thinking.png)
+<img src="static/assets/readme_stuff/chat_thinking.png" alt="Chat_Thinking" style="border-radius: 12px;">
 
 ### 🌐 Beautiful and comprehensive tool comparisons.
-![results_tools.png](static/assets/readme_stuff/results_tools.png)
+<img src="static/assets/readme_stuff/results_tools.png" alt="Results" style="border-radius: 12px;">
 
 ### 🌐 Thorough methodology recommendations and strategies
-![Methodology demo](static/assets/readme_stuff/results_vid.gif)
+<img src="static/assets/readme_stuff/results_vid.gif" alt="Browsing_GIF" style="border-radius: 12px;">
 
 ### 🌐 Professional output in various format (PDF, txt, docx, pptx)
-![Example_PDF_Generation](static/assets/readme_stuff/system_design_report_2x2_v2.png)
+<img src="static/assets/readme_stuff/system_design_report_2x2_v2.png" alt="PDF_Demos" style="border-radius: 12px;">
 
 ## Overview
 

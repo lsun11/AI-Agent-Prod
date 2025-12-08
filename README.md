@@ -167,6 +167,10 @@ Behavior:
 
 This ensures non-technical users can control reasoning depth intuitively.
 
+Below is a comparison of the screenshot of running the Agent using Fast vs Deep Thinking mode.
+![Deep Thinking Toggle Comparison](static/assets/readme_stuff/deep_thinking_comparison_1.png)
+
+
 ---
 
 ## Performance & Cost Characteristics

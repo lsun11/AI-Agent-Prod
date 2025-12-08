@@ -11,8 +11,8 @@
 <img src="static/assets/readme_stuff/cover_chn.png" alt="Chinese_Cover" style="border-radius: 12px;">
 
 ### 🌐 Various AI models and Humanization Levels Selection.
-<img src="static/assets/readme_stuff/ai_models.png" alt="AI_Models" width="100" height="200" border-radius border-radius="12px" style="border-radius: 12px;">
-<img src="static/assets/readme_stuff/humanization.png" alt="Humanization" width="200" height="130" style="border-radius: 12px;">
+<img src="static/assets/readme_stuff/ai_models.png" alt="AI_Models" width="200" height="400" border-radius border-radius="12px" style="border-radius: 12px;">
+<img src="static/assets/readme_stuff/humanization.png" alt="Humanization" width="240" height="150" style="border-radius: 12px;">
 
 ### 🌐 Easy-to-use Chatbot Interface and Detailed thinking process.
 <img src="static/assets/readme_stuff/chat_thinking.png" alt="Chat_Thinking" style="border-radius: 12px;">

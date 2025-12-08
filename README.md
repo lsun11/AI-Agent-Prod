@@ -49,6 +49,9 @@ The LLM layout engine handles complex formatting requirements:
 * Rendering of complex Markdown (bolding, lists, headers).
 * Brand-aware styling (colors and logos) with CJK-safe fonts.
 
+An example of a pdf generated with question "Good places to learn system design". 
+![Example_PDF_Generation](static/assets/readme_stuff/system_design_report_2x2_v2.png)
+
 ---
 
 ## Supported Topics

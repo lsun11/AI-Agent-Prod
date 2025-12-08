@@ -4,9 +4,24 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-active-success)
 
-### A Bilingual(English/Chinese), Multi-Source AI Research Pipeline • Structured Knowledge Extraction • PDF/PPTX/DOCX Output
+### 🌐 A Bilingual, Multi-Source AI Research Pipeline • Structured Knowledge Extraction • PDF/PPTX/DOCX Output
 ![English_Cover](static/assets/readme_stuff/cover_eng.png)
+### 🌐 English and Chinese with an Easy Switch.
 ![Chinese_Cover](static/assets/readme_stuff/cover_chn.png)
+### 🌐 Various AI models and Humanization Levels Selection.
+<img src="static/assets/readme_stuff/ai_models.png" alt="Alt Text" width="100" height="200">
+<img src="static/assets/readme_stuff/humanization.png" alt="Alt Text" width="200" height="130">
+
+### 🌐 Easy-to-use Chatbot Interface and Detailed thinking process.
+![chat_thinking.png](static/assets/readme_stuff/chat_thinking.png)
+
+### 🌐 Beautiful and comprehensive tool comparisons.
+![results_tools.png](static/assets/readme_stuff/results_tools.png)
+
+### 🌐 Thorough methodology recommendations and strategies.
+
+
+
 
 ## Overview
 

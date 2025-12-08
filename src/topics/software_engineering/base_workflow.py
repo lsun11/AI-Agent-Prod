@@ -17,6 +17,7 @@ from .base_models import (
 
 class BaseSoftwareEngWorkflow(RootWorkflow[BaseSoftwareEngState]):
     topic_label = "SoftwareEngineering"
+    article_query_suffix: str = "Software Engineering methodology"
     topic_tag = "Base"
 
     def __init__(self) -> None:
@@ -37,8 +38,24 @@ class BaseSoftwareEngWorkflow(RootWorkflow[BaseSoftwareEngState]):
     # Step 2: plan search strategy + collect sources
     # -------------------------
     def step_2_collect_sources(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
-        self._log("Collecting multi-pass articles for software engineering topic...")
-        merged_content, meta_items = self._multi_pass_articles(state.query)
+        self._log(f"Collecting multi-pass articles for software engineering topic... {state.query}")
+
+        article_query = f"{state.query} {self.article_query_suffix}"
+        query_variants = [
+            article_query,
+            f"{state.query} interview prep platforms comparison",
+            f"{state.query} career resources overview",
+        ]
+
+        fast = self._is_fast(state)
+
+        merged_content, meta_items = self._multi_pass_articles(
+            state.query,
+            num_results=3,
+            snippet_len=1500,
+            query_variants=query_variants,
+            fast=fast,
+        )
 
         # Populate aggregated_markdown
         new_state = state.model_copy(update={"aggregated_markdown": merged_content})
@@ -64,6 +81,12 @@ class BaseSoftwareEngWorkflow(RootWorkflow[BaseSoftwareEngState]):
     def step_3_summarize(self, state: BaseSoftwareEngState) -> BaseSoftwareEngState:
         if not state.aggregated_markdown:
             self._log("No aggregated markdown available; skipping summarization.")
+            return state
+
+        fast = self._is_fast(state)
+        if fast:
+            # Fast mode keeps behavior closer to the original (no extra LLM summarization).
+            self._log("Fast mode: skipping summarization step.")
             return state
 
         self._log("Summarizing aggregated content into keywords / key points...")
@@ -111,9 +134,16 @@ class BaseSoftwareEngWorkflow(RootWorkflow[BaseSoftwareEngState]):
             self._log("No aggregated markdown; skipping knowledge extraction.")
             return state
 
+        fast = self._is_fast(state)
+        if fast:
+            # Fast mode: preserve old behavior (no global knowledge graph).
+            self._log("Fast mode: skipping knowledge extraction.")
+            return state
+
         result = self._extract_knowledge_from_markdown(
             aggregated_markdown=state.aggregated_markdown,
             prompts=self.prompts,
+            fast=False,  # deep-thinking path
         )
         if result is None:
             return state

@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
 };
 export class ChatUI {
     constructor() {
-        this.suggestionGrid = null;
+        this.deepButton = null; // 👈 NEW
+        this.deepThinkingEnabled = false;
         this.currentSuggestionGrid = null;
         this.currentTopicKey = null;
         this.isThinking = false;
@@ -37,6 +38,26 @@ export class ChatUI {
             throw new Error("Submit button not found");
         }
         this.submitButton = button;
+        const deepBtn = document.createElement("button");
+        deepBtn.type = "button";
+        deepBtn.id = "deep-thinking-btn";
+        deepBtn.className = "deep-thinking-btn";
+        deepBtn.textContent = "Deep Thinking";
+        this.deepButton = deepBtn;
+        // Insert next to the Send button
+        if (this.submitButton.parentElement) {
+            this.submitButton.parentElement.insertBefore(deepBtn, this.submitButton.previousSibling);
+        }
+        // Toggle state + CSS class
+        deepBtn.addEventListener("click", () => {
+            this.deepThinkingEnabled = !this.deepThinkingEnabled;
+            if (this.deepThinkingEnabled) {
+                deepBtn.classList.add("active");
+            }
+            else {
+                deepBtn.classList.remove("active");
+            }
+        });
         this.attachListeners();
         // dropdowns
         const languageSelectEl = this.addDropDown("language-select");
@@ -261,15 +282,18 @@ export class ChatUI {
         this.input.value = "";
         this.input.focus();
         this.submitButton.disabled = true;
+        if (this.deepButton)
+            this.deepButton.disabled = true;
         try {
             const model = this.modelSelect.value || "gpt-4.1-mini";
             const temperature = this.humanizationSelect.value || "0.1";
-            const params = new URLSearchParams({ message: text, model, temperature });
+            const mode = this.deepThinkingEnabled ? "deep" : "fast";
+            const params = new URLSearchParams({ message: text, model, temperature, mode });
             const es = new EventSource(`/chat_stream?${params.toString()}`);
             this.currentEventSource = es;
             const thinkingMsg = this.language === "Chn"
-                ? "🤔 正在思考，请稍候…"
-                : "🤔 Start thinking, please wait...";
+                ? "🤔 正在思考，请稍候…（大约需要0.5-3分钟）"
+                : "🤔 Start thinking, please wait... (it takes approx 0.5-3 min.)";
             this.addMessage(thinkingMsg, "greeting");
             es.onmessage = (event) => {
                 try {
@@ -344,6 +368,8 @@ export class ChatUI {
                         this.addFollowupMsg();
                         this.fetchSuggestions().catch((err) => console.error("Failed to fetch suggestions:", err));
                         this.submitButton.disabled = false;
+                        if (this.deepButton)
+                            this.deepButton.disabled = false;
                     }
                 }
                 catch (e) {
@@ -355,6 +381,8 @@ export class ChatUI {
                 this.addMessage("Error: connection lost.", "bot");
                 es.close();
                 this.submitButton.disabled = false;
+                if (this.deepButton)
+                    this.deepButton.disabled = false;
             };
         }
         catch (error) {
@@ -362,6 +390,8 @@ export class ChatUI {
             const msg = error instanceof Error ? error.message : String(error);
             this.addMessage(`Network error: ${msg}`, "bot");
             this.submitButton.disabled = false;
+            if (this.deepButton)
+                this.deepButton.disabled = false;
         }
     }
 }

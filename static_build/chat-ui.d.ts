@@ -6,7 +6,8 @@ export declare class ChatUI {
     private modelSelect;
     private humanizationSelect;
     private languageSelect;
-    private suggestionGrid;
+    private deepButton;
+    private deepThinkingEnabled;
     private currentSuggestionGrid;
     private currentTopicKey;
     private isThinking;

@@ -32,6 +32,9 @@ class RootWorkflow(Generic[StateT]):
         self._log_callback: Optional[Callable[[str], None]] = None
         self.firecrawl = FirecrawlService()
 
+    @staticmethod
+    def _is_fast(state: Any) -> bool:
+        return bool(getattr(state, "fast_mode", False))
     # ---------------------------
     # LLM switching / configuration
     # ---------------------------
@@ -68,7 +71,12 @@ class RootWorkflow(Generic[StateT]):
         self,
         aggregated_markdown: str,
         prompts: BaseRootPrompts,
+            fast: bool = False,
     ) -> Optional[KnowledgeExtractionResult]:
+        if fast:
+            self._log("Fast mode: skipping global knowledge extraction to save latency.")
+            return None
+
         if not aggregated_markdown or not aggregated_markdown.strip():
             return None
 
@@ -218,7 +226,24 @@ class RootWorkflow(Generic[StateT]):
         num_results: int = 3,
         snippet_len: int = 1500,
         query_variants: Optional[List[str]] = None,
+        fast: bool = False,
     ) -> Tuple[str, List[Dict[str, str]]]:
+        if fast:
+            # FAST PATH: single search
+            effective_query = (
+                query_variants[0] if query_variants else query
+            )
+            self._log(f"Fast mode: single search for articles: {effective_query}")
+            search_results = self.firecrawl.search_companies(
+                effective_query, num_results=num_results
+            )
+            web_results = self._get_web_results(search_results)
+            merged_content, meta_items = self._collect_content_from_web_results(
+                web_results,
+                snippet_len=snippet_len,
+            )
+            return merged_content, meta_items
+
         if query_variants is None:
             query_variants = [
                 "{query} comparison best practices",
@@ -262,7 +287,7 @@ class RootWorkflow(Generic[StateT]):
     # ---------------------------
     # Public entrypoint: run a full workflow
     # ---------------------------
-    def run(self, query: str) -> StateT:
+    def run(self, query: str, fast_mode: bool = True) -> StateT:
         """
         Main entrypoint used by chat.py and other callers.
 
@@ -276,7 +301,7 @@ class RootWorkflow(Generic[StateT]):
             raise RuntimeError("workflow is not built/compiled on this workflow.")
 
         # 1) build initial state
-        initial_state: StateT = self.state_model(query=query)
+        initial_state: StateT = self.state_model(query=query, fast_mode=fast_mode)
 
         # 2) run the graph
         final_state = self.workflow.invoke(initial_state)

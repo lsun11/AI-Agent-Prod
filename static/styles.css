@@ -362,6 +362,22 @@ body {
     cursor: default;
 }
 
+#deep-thinking-btn {
+  margin-right: 8px;
+  border-radius: 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: rgba(46, 236, 255, 0.37);
+  cursor: pointer;
+}
+
+#deep-thinking-btn.active {
+    border: 2px solid #e5e5ea;
+  background: #00c8c8;
+  font-weight: 800;
+}
+
+
 .download-container {
     margin: 4px 0 8px 0;
     display: flex;

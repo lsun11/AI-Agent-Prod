@@ -24,6 +24,7 @@ async def chat_stream(
         message: str,
         model: Optional[str] = Query(None),
         temperature: Optional[str] = Query(None),
+        mode: Optional[str] = Query("fast"),
 ):
     """
     Streaming chat endpoint using Server-Sent Events (SSE).
@@ -41,8 +42,11 @@ async def chat_stream(
     selected_model = model or "gpt-4.1-mini"
     selected_temperature = float(temperature) if temperature is not None else 0.1
 
+    speed_mode = (mode or "fast").lower()
+    fast_mode = speed_mode != "deep"
     print("User selected model:", selected_model)
     print("User selected temperature:", selected_temperature)
+    print("Fast mode:", fast_mode)
 
     # 1) classify topic
     topic_key, topic_label, topic_domain = classify_topic_with_llm(internal_query)
@@ -72,6 +76,14 @@ async def chat_stream(
     # Initial log messages (model + temp)
     q.put(json.dumps({"type": "log", "message": f"📌 Model selected: {selected_model}"}))
     q.put(json.dumps({"type": "log", "message": f"🎛️ Temperature set to: {selected_temperature}"}))
+    # 👇 NEW: log speed mode
+    if fast_mode:
+        speed_msg = "⚡ Fast mode: quicker answer with lighter analysis."
+    else:
+        speed_msg = "🧠 Deep Thinking: multi-pass research and knowledge extraction enabled."
+    if user_is_chinese:
+        speed_msg = translate_text(speed_msg, "Chinese")
+    q.put(json.dumps({"type": "log", "message": speed_msg}))
 
     def format_workflow_result(result):
         reply_text_en = format_result_text(internal_query, result)
@@ -205,12 +217,18 @@ async def chat_stream(
         workflow.set_llm(selected_model, selected_temperature)
         workflow.set_log_callback(log_callback)
         try:
-            result = workflow.run(internal_query)
+            # 👇 TRY to call with fast_mode; fall back to old signature if needed
+            try:
+                result = workflow.run(internal_query, fast_mode=fast_mode)
+            except TypeError:
+                # Old workflows that don't know about fast_mode
+                result = workflow.run(internal_query)
             final_payload = format_workflow_result(result)
             q.put(json.dumps(final_payload))
         finally:
             workflow.set_log_callback(None)
             q.put("__DONE__")
+
 
     # Run workflow in background thread so we can stream logs
     threading.Thread(target=run_workflow, daemon=True).start()

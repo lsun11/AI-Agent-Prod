@@ -110,11 +110,15 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
             f"{state.query} SaaS platform comparison",
         ]
 
+        # Multi-pass
+        fast = self._is_fast(state)
+
         merged_content, meta_items = self._multi_pass_articles(
             state.query,
             num_results=3,
             snippet_len=1500,
             query_variants=query_variants,
+            fast=fast,
         )
 
         # Fallback: single search if multi-pass returned nothing
@@ -378,6 +382,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
     def _extract_knowledge_step(self, state: StateT) -> StateT:
         # Prefer aggregated_markdown from articles; extend with company info where helpful.
         aggregated = (state.aggregated_markdown or "").strip()
+        fast = self._is_fast(state)
 
         if state.companies:
             parts: List[str] = []
@@ -398,6 +403,7 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
         result = self._extract_knowledge_from_markdown(
             aggregated_markdown=aggregated,
             prompts=self.prompts,
+            fast=fast,
         )
         if result is None:
             return state
@@ -439,56 +445,230 @@ class BaseCSWorkflow(RootWorkflow, Generic[StateT, CompanyT, AnalysisT]):
     # ------------------------------------------------------------------ #
     # Step 7: generate_analysis – final human-readable text for UI
     # ------------------------------------------------------------------ #
-    def _generate_analysis_step(self, state: StateT) -> StateT:
+    def _generate_analysis_step(self, state: StateT) -> Dict[str, Any]:
+        """
+        Build the final markdown/string for the tools workflow.
+
+        - In BOTH fast & deep modes:
+            * Overview
+            * Detailed per-tool sections
+            * Comparison table
+            * Recommendations based on ToolComparisonRecommendation
+
+        - In deep mode (fast_mode == False) ONLY:
+            * Extra section summarizing structured knowledge
+              from state.knowledge (entities, pros, cons, risks, timeline)
+        """
         rec = state.recommendation
+        companies = state.companies or []
+        knowledge = getattr(state, "knowledge", None)
+        fast_mode: bool = getattr(state, "fast_mode", True)
+
         parts: List[str] = []
 
-        parts.append(f"Query: {state.query}\n")
-
-        if rec and rec.primary_choice:
-            parts.append(f"**Recommended primary choice:** {rec.primary_choice}")
-        elif rec:
-            parts.append("**Recommended primary choice:** (no clear single winner)")
-        else:
-            parts.append("**Recommended primary choice:** Unable to determine from data.")
-
-        if rec and rec.backup_options:
-            parts.append("\n**Alternative options:**")
-            for alt in rec.backup_options:
-                parts.append(f"- {alt}")
-
+        # ------------------ Overview ------------------ #
+        parts.append("## 📌 Overview")
         if rec and rec.summary:
-            parts.append("\n**Summary:**")
             parts.append(rec.summary)
+        else:
+            parts.append(
+                f"This report evaluates leading tools/services related to: **{state.query}** "
+                "and compares their strengths, limitations, and ideal use cases."
+            )
+        parts.append("")  # blank line
 
-        if rec and rec.selection_criteria:
-            parts.append("\n**Selection criteria to consider:**")
-            for c in rec.selection_criteria:
-                parts.append(f"- {c}")
+        # ------------------ Detailed per-company analysis ------------------ #
+        if companies:
+            parts.append("## 🧩 Detailed Analysis\n")
+            for c in companies:
+                parts.append(f"### {c.name}")
+                if c.website:
+                    parts.append(f"- Website: {c.website}")
+                if getattr(c, "pricing_model", None):
+                    parts.append(f"- Pricing: {c.pricing_model}")
+                if getattr(c, "pricing_details", None):
+                    parts.append(f"- Pricing Details: {c.pricing_details}")
+                if getattr(c, "is_open_source", None) is not None:
+                    parts.append(
+                        f"- Open Source: {'Yes' if c.is_open_source else 'No'}"
+                    )
+                if getattr(c, "category", None):
+                    parts.append(f"- Category: {c.category}")
+                if getattr(c, "primary_use_case", None):
+                    parts.append(f"- Primary Use Case: {c.primary_use_case}")
+                if getattr(c, "target_users", None):
+                    if c.target_users:
+                        parts.append(
+                            f"- Target Users: {', '.join(c.target_users)}"
+                        )
+                if getattr(c, "strengths", None):
+                    if c.strengths:
+                        parts.append(
+                            "- Strengths: "
+                            + "; ".join(c.strengths)
+                        )
+                if getattr(c, "limitations", None):
+                    if c.limitations:
+                        parts.append(
+                            "- Limitations: "
+                            + "; ".join(c.limitations)
+                        )
+                if getattr(c, "ideal_for", None):
+                    if c.ideal_for:
+                        parts.append(
+                            "- Ideal For: "
+                            + "; ".join(c.ideal_for)
+                        )
+                if getattr(c, "not_suited_for", None):
+                    if c.not_suited_for:
+                        parts.append(
+                            "- Not Suitable For: "
+                            + "; ".join(c.not_suited_for)
+                        )
+                parts.append("")  # blank line between companies
 
-        if rec and rec.tradeoffs:
-            parts.append("\n**Key trade-offs:**")
-            for t in rec.tradeoffs:
-                parts.append(f"- {t}")
+        # ------------------ Comparison table ------------------ #
+        if companies:
+            parts.append("### Comparison Table")
+            # Header
+            header_cells = ["Attribute"] + [c.name for c in companies]
+            header = "| " + " | ".join(header_cells) + " |"
+            sep = "|" + " --- |" * len(header_cells)
+            parts.append(header)
+            parts.append(sep)
 
-        if rec and rec.step_by_step_decision_guide:
-            parts.append("\n**Step-by-step decision guide:**")
-            for step in rec.step_by_step_decision_guide:
-                parts.append(f"- {step}")
+            def row(label: str, getter):
+                row_cells = [label]
+                for c in companies:
+                    try:
+                        val = getter(c) or ""
+                    except Exception:
+                        val = ""
+                    # avoid vertical bars breaking the table
+                    val = str(val).replace("|", "\\|")
+                    row_cells.append(val)
+                parts.append("| " + " | ".join(row_cells) + " |")
 
+            row("Website", lambda c: c.website)
+            row("Pricing", lambda c: c.pricing_model or "Unknown")
+            row(
+                "Open Source",
+                lambda c: (
+                    "Yes"
+                    if c.is_open_source
+                    else "No"
+                    if c.is_open_source is False
+                    else ""
+                ),
+            )
+            row("Category", lambda c: c.category or "")
+            row("Primary Use Case", lambda c: c.primary_use_case or "")
+            row(
+                "Target Users",
+                lambda c: ", ".join(c.target_users) if c.target_users else "",
+            )
+
+            parts.append("")  # blank line after table
+
+        # ------------------ Recommendations from ToolComparisonRecommendation ------------------ #
+        if rec:
+            parts.append("## ✅ Recommendations")
+            if rec.primary_choice:
+                parts.append(
+                    f"- **Recommended primary choice:** {rec.primary_choice}"
+                )
+            elif rec.backup_options:
+                parts.append(
+                    "- **Recommended primary choice:** (no clear single winner)"
+                )
+
+            if rec.backup_options:
+                parts.append("\n- **Alternative options:**")
+                for alt in rec.backup_options:
+                    parts.append(f"  - {alt}")
+
+            if rec.summary:
+                parts.append("\n- **Summary:**")
+                parts.append(f"  {rec.summary}")
+
+            if rec.selection_criteria:
+                parts.append("\n- **Selection criteria to consider:**")
+                for c in rec.selection_criteria:
+                    parts.append(f"  - {c}")
+
+            if rec.tradeoffs:
+                parts.append("\n- **Key trade-offs:**")
+                for t in rec.tradeoffs:
+                    parts.append(f"  - {t}")
+
+            if rec.step_by_step_decision_guide:
+                parts.append("\n- **Step-by-step decision guide:**")
+                for step in rec.step_by_step_decision_guide:
+                    parts.append(f"  - {step}")
+
+            parts.append("")
+
+        else:
+            # If we somehow have no rec but do have companies
+            if companies:
+                parts.append(
+                    "## ✅ Recommendations\n"
+                    "Based on the analyzed tools above, choose the option whose strengths "
+                    "best match your requirements (budget, tech stack, team experience)."
+                )
+                parts.append("")
+
+        # ------------------ Deep-only: knowledge graph highlights ------------------ #
+        if not fast_mode and knowledge:
+            parts.append("## 📚 Knowledge Graph Highlights")
+
+            if knowledge.entities:
+                parts.append("### Entities")
+                for e in knowledge.entities:
+                    t = f" ({e.type})" if getattr(e, "type", None) else ""
+                    desc = getattr(e, "description", "") or ""
+                    parts.append(f"- **{e.name}**{t}: {desc}")
+                parts.append("")
+
+            if getattr(knowledge, "pros", None):
+                parts.append("### Pros")
+                for p in knowledge.pros:
+                    parts.append(f"- {p}")
+                parts.append("")
+
+            if getattr(knowledge, "cons", None):
+                parts.append("### Cons")
+                for c in knowledge.cons:
+                    parts.append(f"- {c}")
+                parts.append("")
+
+            if getattr(knowledge, "risks", None):
+                parts.append("### Risks")
+                for r in knowledge.risks:
+                    parts.append(f"- {r.text if hasattr(r, 'text') else r}")
+                parts.append("")
+
+            if getattr(knowledge, "timeline", None):
+                parts.append("### Timeline / Evolution")
+                for t in knowledge.timeline:
+                    parts.append(f"- {t}")
+                parts.append("")
+
+        # Final string
         analysis_text = "\n".join(parts).strip()
-        return state.model_copy(update={"analysis": analysis_text})
+        return {"analysis": analysis_text}
+
 
     # ------------------------------------------------------------------ #
     # Public API (kept for compatibility – used by chat.py)
     # ------------------------------------------------------------------ #
-    def run(self, query: str) -> StateT:
+    def run(self, query: str, fast_mode: bool = True) -> StateT:
         """
         Keeps your existing contract: chat.py calls workflow.run(query).
 
         Returns a StateT (BaseResearchState subclass) – same as before.
         """
-        initial_state = self.state_model(query=query)
+        initial_state = self.state_model(query=query, fast_mode=fast_mode)
         final_state = self.workflow.invoke(initial_state)
 
         # Handle both dict and model returns safely

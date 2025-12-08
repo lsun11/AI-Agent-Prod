@@ -3,13 +3,11 @@ from __future__ import annotations
 
 import json
 from concurrent.futures import as_completed, ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Callable
+from typing import Any, Dict, List, Optional, Type, TypeVar, Generic
 
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
-# NOTE: you don't really need CompanyT here; we'll return TInfo instead
-# from ..tools.base_workflow import CompanyT
 from .base_models import (
     CareerBaseCompanyAnalysis,
     CareerBaseCompanyInfo,
@@ -17,7 +15,7 @@ from .base_models import (
     CareerGoal,
     CareerActionPlan,
 )
-from .base_prompts import CareerBasePrompts, HasToolPrompts
+from .base_prompts import CareerBasePrompts
 from ..root_workflow import RootWorkflow
 
 # ---------------------------
@@ -26,6 +24,7 @@ from ..root_workflow import RootWorkflow
 TState = TypeVar("TState", bound=CareerBaseResearchState)
 TInfo = TypeVar("TInfo", bound=CareerBaseCompanyInfo)
 TAnalysis = TypeVar("TAnalysis", bound=CareerBaseCompanyAnalysis)
+
 
 class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
     """
@@ -48,7 +47,7 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
     prompts_cls: Type[CareerBasePrompts] = CareerBasePrompts           # type: ignore[assignment]
 
     topic_label: str = "Career"
-    article_query_suffix: str = "career tools comparison best alternatives"
+    article_query_suffix: str = "career tools and method comparison best alternatives"
     official_site_suffix: str = "official site"
 
     def __init__(
@@ -61,7 +60,7 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
         self.workflow = self._build_workflow()
 
     # ------------------------------------------------------------------ #
-    # Graph building (7 steps) – unchanged
+    # Graph building (7 steps)
     # ------------------------------------------------------------------ #
     def _build_workflow(self):
         graph = StateGraph(self.state_cls)
@@ -110,12 +109,14 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
             f"{state.query} career resources overview",
         ]
 
-        # Multi-pass (similar to tools workflow)
+        fast = self._is_fast(state)
+
         merged_content, meta_items = self._multi_pass_articles(
             state.query,
             num_results=3,
             snippet_len=1500,
             query_variants=query_variants,
+            fast=fast,
         )
 
         # Fallback single search if multi-pass is empty
@@ -357,8 +358,13 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
     # Step 5: extract_knowledge – global entities/pros/cons/risks/timeline
     # ------------------------------------------------------------------ #
     def _extract_knowledge_step(self, state: TState) -> Dict[str, Any]:
-        self._log("Running knowledge extraction...")
         aggregated = (state.aggregated_markdown or "").strip()
+        fast = self._is_fast(state)
+
+        if fast:
+            # Fast mode: keep behavior close to the original workflow (no knowledge extraction).
+            self._log("Fast mode: skipping knowledge extraction.")
+            return {}
 
         # Enrich with company-level info, including strengths/limitations if present
         if state.companies:
@@ -389,6 +395,7 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
         result = self._extract_knowledge_from_markdown(
             aggregated_markdown=aggregated,
             prompts=self.prompts,
+            fast=False,  # deep-thinking path
         )
         if result is None:
             return {}
@@ -455,15 +462,13 @@ class CareerBaseWorkflow(RootWorkflow, Generic[TState, TInfo, TAnalysis]):
         This step exists to match the 7-step pipeline and can later be extended
         to build a human-readable summary or markdown document if needed.
         """
-        # You can later add something like a markdown summary derived from `state.plan`
-        # and store it in e.g. `final_markdown` without breaking `analysis`.
         return {}
 
     # ------------------------------------------------------------------ #
     # Public entry – used by chat.py (same contract as before)
     # ------------------------------------------------------------------ #
-    def run(self, query: str) -> TState:
-        initial_state = self.state_cls(query=query)
+    def run(self, query: str, fast_mode: bool = True) -> TState:
+        initial_state = self.state_cls(query=query, fast_mode=fast_mode)
         final_state = self.workflow.invoke(initial_state)
         # Keep returning a Pydantic state instance for compatibility with formatters.
         return self.state_cls(**final_state)

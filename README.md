@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-active-success)
 
-**Bilingual, Multi-Source AI Research Pipeline • Structured Knowledge Extraction • PDF/PPTX/DOCX Output**
+### A Bilingual(English/Chinese), Multi-Source AI Research Pipeline • Structured Knowledge Extraction • PDF/PPTX/DOCX Output
 ![English_Cover](static/assets/readme_stuff/cover_eng.png)
 ![Chinese_Cover](static/assets/readme_stuff/cover_chn.png)
 

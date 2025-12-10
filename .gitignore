@@ -9,6 +9,7 @@ __pycache__/
 build/hj
 build/
 dist/
+dist_release/
 wheels/
 *.egg-info
 node_modules/

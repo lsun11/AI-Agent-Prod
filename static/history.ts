@@ -192,7 +192,7 @@ function setupHistoryToggle(
   if (!labelSpan) {
     labelSpan = document.createElement("span");
     labelSpan.className = "history-header-label";
-    labelSpan.textContent = "History";
+    labelSpan.textContent = "历史记录";
     header.prepend(labelSpan);
   }
 
@@ -205,7 +205,7 @@ function setupHistoryToggle(
     clearBtn.title = "Clear history";
 
     // label will be updated by language sync
-    clearBtn.textContent = "Clear";
+    clearBtn.textContent = "清除";
 
     clearBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
     clearBtn.addEventListener("click", async (e) => {
@@ -276,6 +276,10 @@ export function setHistoryHeaderLanguage(language: LanguageCode): void {
     labelSpan.className = "history-header-label";
     header.prepend(labelSpan);
   }
-
   labelSpan.textContent = language === "Chn" ? "历史记录" : "History";
+
+  let clearBtn = header.querySelector(".history-clear") as HTMLButtonElement | null;
+  if (clearBtn) {
+      clearBtn.textContent = language === "Chn"? "清除" : "Clear";
+  }
 }

@@ -41,10 +41,11 @@ export function getFollowupText(language) {
     const followupChn = "🤘如果还有其他问题，欢迎继续提问。";
     return language === "Chn" ? followupChn : followupEng;
 }
-export function applyInterfaceLanguage(language, input, submitButton, titleEl) {
+export function applyInterfaceLanguage(language, input, submitButton, deepThinkingButton, titleEl) {
     if (language === "Chn") {
         input.placeholder = "请输入你的问题…";
         submitButton.textContent = "发送";
+        deepThinkingButton.textContent = "深度思考";
         if (titleEl) {
             titleEl.textContent = "AI 研究助手 — 计算机开发";
         }
@@ -53,6 +54,7 @@ export function applyInterfaceLanguage(language, input, submitButton, titleEl) {
     else {
         input.placeholder = "Ask me anything about dev tools, careers, etc…";
         submitButton.textContent = "Send";
+        deepThinkingButton.textContent = "Deep Thinking";
         if (titleEl) {
             titleEl.textContent = "AI Research Assistant — Developer Topics";
         }

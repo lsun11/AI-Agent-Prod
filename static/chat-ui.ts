@@ -35,6 +35,7 @@ export class ChatUI {
     private input: HTMLInputElement;
     private messagesEl: HTMLDivElement;
     private submitButton: HTMLButtonElement;
+    private deepBtn: HTMLButtonElement;
     private modelSelect: HTMLSelectElement;
     private humanizationSelect: HTMLSelectElement;
     private languageSelect: HTMLSelectElement;
@@ -75,28 +76,28 @@ export class ChatUI {
         }
         this.submitButton = button;
 
-        const deepBtn = document.createElement("button");
-        deepBtn.type = "button";
-        deepBtn.id = "deep-thinking-btn";
-        deepBtn.className = "deep-thinking-btn";
-        deepBtn.textContent = "Deep Thinking";
-        this.deepButton = deepBtn;
+        this.deepBtn = document.createElement("button");
+        this.deepBtn.type = "button";
+        this.deepBtn.id = "deep-thinking-btn";
+        this.deepBtn.className = "deep-thinking-btn";
+        this.deepBtn.textContent = this.language === 'Chn'? "深度思考" : "Deep Thinking";
+        this.deepButton = this.deepBtn;
 
         // Insert next to the Send button
         if (this.submitButton.parentElement) {
             this.submitButton.parentElement.insertBefore(
-                deepBtn,
+                this.deepBtn,
                 this.submitButton.previousSibling
             );
         }
 
         // Toggle state + CSS class
-        deepBtn.addEventListener("click", () => {
+        this.deepBtn.addEventListener("click", () => {
             this.deepThinkingEnabled = !this.deepThinkingEnabled;
             if (this.deepThinkingEnabled) {
-                deepBtn.classList.add("active");
+                this.deepBtn.classList.add("active");
             } else {
-                deepBtn.classList.remove("active");
+                this.deepBtn.classList.remove("active");
             }
         });
 
@@ -276,7 +277,7 @@ export class ChatUI {
 
     private updateInterfaceLanguage(): void {
         const titleEl = document.getElementById("app-title");
-        applyInterfaceLanguage(this.language, this.input, this.submitButton, titleEl);
+        applyInterfaceLanguage(this.language, this.input, this.submitButton, this.deepBtn, titleEl);
     }
 
     private addGreeting(language: LanguageCode): void {

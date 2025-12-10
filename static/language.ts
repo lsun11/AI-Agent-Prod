@@ -57,11 +57,13 @@ export function applyInterfaceLanguage(
     language: LanguageCode,
     input: HTMLInputElement,
     submitButton: HTMLButtonElement,
+    deepThinkingButton: HTMLButtonElement,
     titleEl: HTMLElement | null,
 ): void {
     if (language === "Chn") {
         input.placeholder = "请输入你的问题…";
         submitButton.textContent = "发送";
+        deepThinkingButton.textContent = "深度思考";
 
         if (titleEl) {
             titleEl.textContent = "AI 研究助手 — 计算机开发";
@@ -70,6 +72,7 @@ export function applyInterfaceLanguage(
     } else {
         input.placeholder = "Ask me anything about dev tools, careers, etc…";
         submitButton.textContent = "Send";
+        deepThinkingButton.textContent = "Deep Thinking";
 
         if (titleEl) {
             titleEl.textContent = "AI Research Assistant — Developer Topics";

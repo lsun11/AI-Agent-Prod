@@ -3,6 +3,7 @@ export declare class ChatUI {
     private input;
     private messagesEl;
     private submitButton;
+    private deepBtn;
     private modelSelect;
     private humanizationSelect;
     private languageSelect;

@@ -21,3 +21,5 @@ saved_slides/
 .env
 
 .uv-cache/
+
+*.zip

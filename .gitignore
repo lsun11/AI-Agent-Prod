@@ -3,10 +3,13 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.spec
 */__pycache__/
 **/__pycache__/
 build/hj
+build/
 dist/
+dist_release/
 wheels/
 *.egg-info
 node_modules/
@@ -15,4 +18,9 @@ saved_slides/
 .
 # Virtual environments
 .venv
+.venv-build
 .env
+
+.uv-cache/
+
+*.zip

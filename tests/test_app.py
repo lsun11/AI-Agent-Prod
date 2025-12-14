@@ -20,7 +20,7 @@ def test_root_serves_index(monkeypatch):
         def __init__(self, path: str):
             # create an empty valid HTTP response
             super().__init__(content=b"", media_type="text/html")
-            captured["path"] = path
+            captured["path"] = str(path)
 
     monkeypatch.setattr("src.api.app.FileResponse", FakeFileResponse)
 

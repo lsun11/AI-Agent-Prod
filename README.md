@@ -235,3 +235,190 @@ uv sync
 # Run the backend server
 uv run server.py
 ```
+
+# 🔨 Build & Release Workflow — AI Agent Desktop Bundle
+
+This document explains how to build a fully self-contained desktop release of the AI Agent Researcher so it can be distributed to testers as a zip file and run locally without exposing the source code.
+
+---
+
+## 🚀 Overview
+
+The release pipeline packages:
+
+- The **PyInstaller-compiled backend** (FastAPI + Uvicorn)
+- Static frontend assets (`static/`, `static_build/`)
+- CJK-safe fonts (`src/saving/fonts/`)
+- A user-friendly launcher (`Start_Agent.command`)
+- A `.env` template
+- A clean `README.txt` for testers
+
+This produces:
+
+```
+AI-Agent-macOS-arm64-v0.1.0.zip
+```
+
+which users can unzip and immediately run.
+
+---
+
+## 📁 Release Output Structure
+
+After building, the `dist_release/` folder will look like:
+
+```
+dist_release/
+│
+├── AI-Agent/                       # PyInstaller output
+│   ├── AI-Agent                    # Executable binary
+│   ├── _internal/                  # Python runtime + packages
+│   └── ...
+├── Start_Agent.command             # Launcher script (double-click)
+├── .env                            # API key template
+├── README.txt                      # Instructions for testers
+```
+
+Testers only need to:
+
+1. Fill in `.env`
+2. Double-click `Start_Agent.command`
+3. Browser opens at `http://127.0.0.1:8000`
+
+---
+
+## 🔧 Build Script (`build_release`)
+
+The full automated release process is handled by `build_release`:
+
+- Clean old builds
+- Run PyInstaller
+- Copy required assets
+- Generate `.env` file
+- Generate release README
+- Zip everything
+
+Run it with:
+
+```bash
+./build_release
+```
+
+After completion, you will see:
+
+```
+📦 AI-Agent-macOS-arm64-v0.1.0.zip
+```
+
+This file can be sent to anyone.
+
+---
+
+## 📦 PyInstaller Settings
+
+The project uses `--onedir` mode for macOS reliability:
+
+```bash
+pyinstaller \
+  --name AI-Agent \
+  --onedir \
+  --windowed \
+  --add-data "static:static" \
+  --add-data "static_build:static_build" \
+  --add-data "src/saving/fonts:src/saving/fonts" \
+  run_local_app.py
+```
+
+### Why `--onedir`?
+
+- More stable than `--onefile` on macOS
+- Prevents silent crash issues
+- Easier debugging
+- Faster startup
+
+---
+
+## 🖥️ Launcher Behavior (`Start_Agent.command`)
+
+The launcher:
+
+1. Loads `.env`
+2. Starts `AI-Agent/AI-Agent` (the PyInstaller binary)
+3. Waits for Uvicorn to start
+4. Opens browser automatically:
+   ```
+   http://127.0.0.1:8000
+   ```
+
+Users only see a small Terminal window running the backend.
+
+You may optionally rename:
+
+```
+Start_Agent.command → Start_Agent.app
+```
+
+but `.command` is more reliable because `.app` bundles require signing/notarization on macOS.
+
+---
+
+## 🔐 API Keys & Environment Variables
+
+Testers must update `.env`:
+
+```
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+FIRECRAWL_API_KEY=
+```
+
+The app does not run without these values.
+
+---
+
+## 📦 Distribution Steps
+
+### Build:
+
+```bash
+./build_release
+```
+
+### Send to testers:
+
+Deliver the final zip:
+
+```
+AI-Agent-macOS-arm64-v0.1.0.zip
+```
+
+### Testers run:
+
+1. Unzip
+2. Open `.env`
+3. Enter API keys
+4. **Right-click → Open** `Start_Agent.command` (first run)
+5. Browser launches automatically
+
+---
+
+## 🎯 Future Improvements
+
+- Add macOS `.app` bundle with Info.plist + icon
+- Optional code signing & notarization
+- Windows `.exe` packaging
+- Update checker for offline builds
+
+---
+
+## ✅ Summary
+
+This build system provides:
+
+✔ A reproducible release pipeline  
+✔ Zero terminal usage for testers  
+✔ Secure local execution  
+✔ No source code exposure  
+✔ Fast packaging and updates  
+
+Use this workflow anytime you want to ship a new internal version of the AI Agent.

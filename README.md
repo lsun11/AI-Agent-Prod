@@ -283,7 +283,7 @@ Testers only need to:
 
 1. Fill in `.env`
 2. Double-click `Start_Agent.command`
-3. Browser opens at `http://127.0.0.1:8000`
+3. Browser opens at `http://0.0.0.0:8000`
 
 ---
 
@@ -402,23 +402,189 @@ AI-Agent-macOS-arm64-v0.1.0.zip
 
 ---
 
-## 🎯 Future Improvements
 
-- Add macOS `.app` bundle with Info.plist + icon
-- Optional code signing & notarization
-- Windows `.exe` packaging
-- Update checker for offline builds
+# Deployment & Hosting Guide (Vultr + Nginx + HTTPS)
+
+This document explains how this AI Agent application is deployed to a public website, and how future maintainers can operate, restart, or update the service.
 
 ---
 
-## ✅ Summary
+## Architecture Overview
 
-This build system provides:
+- **Application**: FastAPI (Python) application
+- **Process manager**: systemd
+- **Web server / reverse proxy**: Nginx
+- **Domain & HTTPS**: Cloudflare DNS + Let’s Encrypt
+- **Server**: Vultr Ubuntu VM
 
-✔ A reproducible release pipeline  
-✔ Zero terminal usage for testers  
-✔ Secure local execution  
-✔ No source code exposure  
-✔ Fast packaging and updates  
+Flow:
 
-Use this workflow anytime you want to ship a new internal version of the AI Agent.
+Browser → Cloudflare → Nginx (443/HTTPS) → FastAPI (0.0.0.0:8000)
+
+---
+
+## Server Setup (One-Time)
+
+### 1. Provision VM
+- Create an Ubuntu server on Vultr
+- Open ports: `22`, `80`, `443`
+
+### 2. Install system packages
+```bash
+sudo apt update
+sudo apt install -y nginx python3 python3-venv git certbot python3-certbot-nginx
+```
+
+### 3. Clone repository
+```bash
+git clone https://github.com/lsun11/AI-Agent-Prod.git
+cd AI-Agent-Prod
+```
+
+### 4. Python environment (uv)
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+```
+
+---
+
+## Running the App (systemd)
+
+### systemd service file
+
+`/etc/systemd/system/ai-agent.service`
+
+```ini
+[Unit]
+Description=AI Agent FastAPI
+After=network.target
+
+[Service]
+User=lsun
+WorkingDirectory=/home/lsun/AI-Agent-Prod
+EnvironmentFile=/home/lsun/AI-Agent-Prod/.env
+ExecStart=/home/lsun/AI-Agent-Prod/.venv/bin/python server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable ai-agent
+sudo systemctl start ai-agent
+sudo systemctl status ai-agent
+```
+
+The FastAPI app listens on `0.0.0.0:8000`.
+
+---
+
+## Nginx Reverse Proxy
+
+### Nginx site config
+
+`/etc/nginx/sites-available/fripsun-agent`
+
+```nginx
+server {
+    listen 80;
+    server_name fripsun-agent.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Enable site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/fripsun-agent /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+## HTTPS (Let’s Encrypt)
+
+```bash
+sudo certbot --nginx -d fripsun-agent.com
+```
+
+This automatically:
+- Issues SSL certificate
+- Adds HTTPS server block
+- Enables HTTP → HTTPS redirect
+
+Auto-renewal is handled by certbot timers.
+
+---
+
+## Cloudflare DNS
+
+- DNS record:
+  - Type: `A`
+  - Name: `fripsun-agent.com`
+  - Value: server public IP
+  - Proxy: **ON** (orange cloud)
+
+If Cloudflare shows **521**, ensure:
+- Nginx is running
+- Port 443 is open
+- SSL mode is **Full** (not Flexible)
+
+---
+
+## Common Operations
+
+### Restart app
+```bash
+sudo systemctl restart ai-agent
+```
+
+### Restart nginx
+```bash
+sudo systemctl reload nginx
+```
+
+### View logs
+```bash
+journalctl -u ai-agent -f
+```
+
+---
+
+## Environment Variables
+
+`.env` (not committed):
+
+```env
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+FIRECRAWL_API_KEY=
+```
+
+---
+
+## Summary
+
+- FastAPI runs locally on port 8000
+- systemd keeps it always-on
+- Nginx exposes it on 80/443
+- Cloudflare provides DNS + protection
+- HTTPS is enforced via Let’s Encrypt
+
+This setup is production-ready and low-cost, suitable for private or semi-public access.
+
+

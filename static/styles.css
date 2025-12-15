@@ -1,15 +1,96 @@
+/* -------------------- */
+/* ✅ Responsive base   */
+/* -------------------- */
+
+:root {
+    --page-max: 1200px;
+    --page-pad: clamp(12px, 3vw, 24px);
+    --radius: 12px;
+    --radius-lg: 24px;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    --shadow-strong: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: #85b8b8;
     margin: 0;
     display: flex;
     flex-direction: column;
+
+    /* ✅ Mobile-safe viewport sizing */
+    min-height: 100dvh;
     height: 100vh;
+
+    /* Background */
+    background-color: #85b8b8;
+    background-image: url("../static/assets/backgrounds/computer_science.gif");
+    background-repeat: repeat;
+    background-size: auto; /* important for tiling */
+    background-position: top left;
+
+    /* iOS safe area */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+body.topic-bg-tools,
+body.topic-bg-career,
+body.topic-bg-software_engineering {
+    position: relative;
+    z-index: 0;
+}
+
+body.topic-bg-tools::before,
+body.topic-bg-career::before,
+body.topic-bg-software_engineering::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-repeat: repeat;
+    background-size: auto;
+    opacity: 0.35;
+    z-index: -1;
+    pointer-events: none;
+}
+
+body.topic-bg-tools::before {
+    background-image: url("../static/assets/backgrounds/tools.png");
+}
+
+body.topic-bg-career::before {
+    background-image: url("../static/assets/backgrounds/career.png");
+}
+
+body.topic-bg-software_engineering::before {
+    background-image: url("../static/assets/backgrounds/software_engineering.png");
+}
+
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .chat-container {
     max-width: 1200px;
-    width: 85%;
+    width: 90%;
     margin: 0 auto;
     flex: 1;
     display: flex;
@@ -18,6 +99,8 @@ body {
     box-sizing: border-box;
     opacity: 96%;
     font-size: 15px;
+      /* prevent fixed panels from causing horizontal scroll */
+  overflow: hidden;
 }
 
 .chat-container h2 {
@@ -48,9 +131,13 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* -------------------- */
+/* Messages area        */
+/* -------------------- */
+
 #messages,
 .messages {
-          /*display: flex;*/
+    /*display: flex;*/
     flex: 1;
     overflow-y: auto;
     padding: 8px;
@@ -64,6 +151,10 @@ body {
     padding: 8px 12px;
     border-radius: 8px;
     white-space: pre-wrap;
+
+    /* ✅ Stop huge bubbles on mobile */
+  max-width: 92%;
+  width: fit-content;
 }
 
 .message.user {
@@ -76,10 +167,10 @@ body {
 
 .message.greeting {
     /*background: rgba(29, 120, 120, 0.3);*/
-      background:  linear-gradient(
-      90deg,
-      rgba(29, 120, 120, 0.3),
-      rgba(237, 254, 255, 0)
+    background: linear-gradient(
+            90deg,
+            rgba(29, 120, 120, 0.3),
+            rgba(237, 254, 255, 0)
     );
     color: #000;
     margin-right: auto;
@@ -90,105 +181,114 @@ body {
 
 /* --- Suggestion grid --- */
 .suggestion-grid {
-  display: grid;
-  margin-left: auto;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  margin-top: 2px;
-  height: fit-content;
-  flex: 1 1 95%;
-  max-width: 95%;
+    display: grid;
+    margin-left: auto;
+  /* ✅ responsive columns */
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+    margin-top: 2px;
+    height: fit-content;
+    flex: 1 1 95%;
+    max-width: 95%;
 }
 
 /* --- Idle drifting animation --- */
 @keyframes suggestionDrift {
-  0% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(10px);   /* how far to drift right */
-  }
-  100% {
-    transform: translateX(0);
-  }
+    0% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(10px); /* how far to drift right */
+    }
+    100% {
+        transform: translateX(0);
+    }
 }
 
 .message.suggestion {
-  position: relative;
+    position: relative;
 
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  overflow: hidden;              /* 👈 hide any bleed at the edges */
-  border: 2px solid transparent; /* keeps hover border working */
+  /* ✅ responsive size */
+  width: clamp(96px, 18vw, 160px);
+  height: clamp(96px, 18vw, 160px);
+    border-radius: 50%;
+    overflow: hidden; /* 👈 hide any bleed at the edges */
+    border: 0 solid transparent; /* keeps hover border working */
 
-  /* 2. content centering */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+    /* 2. content centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
-  padding: 8px;                 /* keep, but circle is still ok with overflow hidden */
-  box-sizing: border-box;
+    padding: 10px; /* keep, but circle is still ok with overflow hidden */
+    box-sizing: border-box;
     text-wrap: pretty;
     font-family: "Lucida Grande", serif;
-  font-size: 14px;
-  font-weight: 400;
-  /*font-style: italic;*/
-  color: #032137;
+    font-size: 14px;
+    font-weight: 400;
+    /*font-style: italic;*/
+    color: #032137;
 
-  /* 3. no fully transparent stop → avoid “leak” */
-  background:
-    radial-gradient(circle at 30% 20%,
+    /* 3. no fully transparent stop → avoid “leak” */
+    background: radial-gradient(circle at 30% 20%,
     rgba(255, 255, 255, 0.44),
-      rgba(255,255,255,0) 60%
+    rgba(255, 255, 255, 0) 60%
     ),
     linear-gradient(
-      170deg,
-      rgba(29, 120, 120, 0.58),
-      rgba(165, 243, 255, 0.18)
+            170deg,
+            rgba(29, 120, 120, 0.58),
+            rgba(165, 243, 255, 0.18)
     );
-  background-clip: padding-box;
+    background-clip: padding-box;
 
-  /* 4. idle horizontal drift animation */
-  animation:
-          fadeIn 0.6s ease forwards,
-          suggestionDrift 6s ease-in-out infinite;
-  will-change: transform;
+    /* 4. idle horizontal drift animation */
+    animation: fadeIn 0.6s ease forwards,
+    suggestionDrift 6s ease-in-out infinite;
+    will-change: transform;
 
-  /* 5. hover transition */
-  transition:
-    transform 0.15s ease,
+    /* 5. hover transition */
+    transition: transform 0.15s ease,
     border-width 0.15s ease,
     border-color 0.15s ease;
 }
 
 @keyframes suggestionDrift {
-  0%   { transform: translateX(0); }
-  25%  { transform: translateX(7px); }
-  50%  { transform: translateX(0); }
-  75%  { transform: translateX(-7px); }
-  100% { transform: translateX(0); }
+    0% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(7px);
+    }
+    50% {
+        transform: translateX(0);
+    }
+    75% {
+        transform: translateX(-7px);
+    }
+    100% {
+        transform: translateX(0);
+    }
 }
 
 @keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.85); /* slight pop-in */
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+    0% {
+        opacity: 0;
+        transform: scale(0.85); /* slight pop-in */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 
 /* Hover: pause drift + highlight border */
 .message.suggestion:hover {
-  animation-play-state: paused;   /* optional: stop drifting while hovered */
-  transform: scale(1.04);         /* tiny zoom */
-  border-color: rgba(29, 120, 120, 0.3);
-  border-width: 4px;
+    animation-play-state: paused; /* optional: stop drifting while hovered */
+    transform: scale(1.04); /* tiny zoom */
+    border-color: rgba(29, 120, 120, 0.3);
+    border-width: 4px;
 }
 
 .message.thinking {
@@ -197,8 +297,6 @@ body {
     margin-left: auto;
     text-align: left;
 }
-
-
 
 
 /* PREMIUM BOT BUBBLE -------------------------------------------------- */
@@ -244,49 +342,49 @@ body {
 /* === Compact rich-content styling inside bot bubbles === */
 .message.bot-first,
 .message.bot {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.4;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.4;
 }
 
 /* Headings: smaller, tighter, nicer */
 .message.bot-first h2,
 .message.bot h2 {
-  font-size: 16px;
-  margin: 4px 0 6px;
-  font-weight: 600;
+    font-size: 16px;
+    margin: 4px 0 6px;
+    font-weight: 600;
 }
 
 .message.bot-first h3,
 .message.bot h3 {
-  font-size: 14px;
-  margin: 4px 0 4px;
-  font-weight: 600;
+    font-size: 14px;
+    margin: 4px 0 4px;
+    font-weight: 600;
 }
 
 /* Paragraphs */
 .message.bot-first p,
 .message.bot p {
-  margin: 2px 0 4px;
+    margin: 2px 0 4px;
 }
 
 /* Lists: kill huge gaps between <ul>s */
 .message.bot-first ul,
 .message.bot ul {
-  margin: 0 0 3px 18px;   /* small vertical gap, slight indent */
-  padding-left: 0;
+    margin: 0 0 3px 18px; /* small vertical gap, slight indent */
+    padding-left: 0;
 }
 
 .message.bot-first li,
 .message.bot li {
-  margin: 0;
-  padding: 0;
-  list-style-type: disc;
+    margin: 0;
+    padding: 0;
+    list-style-type: disc;
 }
 
 /* Optional: make bold text pop a bit more */
 .message.bot-first strong,
 .message.bot strong {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 
@@ -340,11 +438,12 @@ body {
 }
 
 .input-row input {
-    flex: 1;
-    padding: 10px 12px;
-    border-radius: 999px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  min-width: 0;
 }
 
 .input-row button {
@@ -363,18 +462,18 @@ body {
 }
 
 #deep-thinking-btn {
-  margin-right: 8px;
-  border-radius: 4px;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  background: rgba(46, 236, 255, 0.37);
-  cursor: pointer;
+    margin-right: 8px;
+    border-radius: 4px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    background: rgba(46, 236, 255, 0.37);
+    cursor: pointer;
 }
 
 #deep-thinking-btn.active {
     border: 2px solid #e5e5ea;
-  background: #00c8c8;
-  font-weight: 800;
+    background: #00c8c8;
+    font-weight: 800;
 }
 
 
@@ -383,7 +482,8 @@ body {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
-  align-items: center;           /* Required for absolute-positioned hover menu */
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .download-button {
@@ -396,8 +496,8 @@ body {
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
-  align-items: center;
-  gap: 4px;
+    align-items: center;
+    gap: 4px;
 }
 
 .download-button:hover {
@@ -405,25 +505,25 @@ body {
 }
 
 .download-option {
-  padding: 4px 8px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  font-size: 12px;
-  cursor: pointer;
-  border-radius: 6px;
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 6px;
 }
 
 .download-option:hover {
-  background: #f2f2f7;
+    background: #f2f2f7;
 }
 
 /* --- Hover Format Menu --- */
 
 .download-format-menu {
     position: absolute;
-    top: 110%;                     /* Right below the main button */
-    right: 0;                      /* Right aligned with your current container */
+    top: 110%; /* Right below the main button */
+    right: 0; /* Right aligned with your current container */
     display: flex;
     gap: 0.4rem;
     padding: 4px 6px;
@@ -441,7 +541,7 @@ body {
     padding: 4px 10px;
     border-radius: 999px;
     border: none;
-    background: #e0e0e0;          /* light grey to contrast with green main button */
+    background: #e0e0e0; /* light grey to contrast with green main button */
     font-size: 12px;
     cursor: pointer;
     white-space: nowrap;
@@ -452,28 +552,30 @@ body {
 }
 
 .preview-button {
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: none;
-  background: #007aff;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: none;
+    background: #007aff;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .preview-button:hover {
-  opacity: 0.9;
+    opacity: 0.9;
 }
 
 .header-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between; /* title stays left, select on the right */
-    margin-bottom: 1rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 10px;
+  flex-wrap: wrap; /* ✅ allow wrap on small screens */
 }
 
 #app-title {
@@ -545,47 +647,6 @@ body.thinking::before {
     }
 }
 
-body {
-    background-color: #00c8c8;
-    background-image: url("../static/assets/backgrounds/computer_science.gif");
-    background-repeat: repeat;
-    background-size: auto; /* important for tiling */
-    background-position: top left;
-}
-
-body.topic-bg-tools,
-body.topic-bg-career,
-body.topic-bg-software_engineering {
-  position: relative;
-  z-index: 0;
-}
-
-body.topic-bg-tools::before,
-body.topic-bg-career::before,
-body.topic-bg-software_engineering::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-repeat: repeat;
-  background-size: auto;
-  opacity: 0.35;
-  z-index: -1;
-  pointer-events: none;
-}
-
-body.topic-bg-tools::before {
-  background-image: url("../static/assets/backgrounds/tools.png");
-}
-
-body.topic-bg-career::before {
-  background-image: url("../static/assets/backgrounds/career.png");
-}
-
-body.topic-bg-software_engineering::before {
-  background-image: url("../static/assets/backgrounds/software_engineering.png");
-}
-
-
 .message.company-bubble {
     position: relative;
     overflow: hidden;
@@ -611,106 +672,106 @@ body.topic-bg-software_engineering::before {
 }
 
 .file-preview-panel {
-  position: fixed;
-  top: 60px;
-  right: 0;
-  bottom: 16px;
-  width: min(560px, 100%);
-  background: #ffffff;
-  border-left: 1px solid #e5e5e5;
-  box-shadow: -4px 0 18px rgba(0, 0, 0, 0.08);
-  display: none;           /* default hidden */
-  flex-direction: column;
-  z-index: 200;
-  max-height: calc(100vh - 76px);
+    position: fixed;
+    top: 60px;
+    right: 0;
+    bottom: 16px;
+    width: min(560px, 100%);
+    background: #ffffff;
+    border-left: 1px solid #e5e5e5;
+    box-shadow: -4px 0 18px rgba(0, 0, 0, 0.08);
+    display: none; /* default hidden */
+    flex-direction: column;
+    z-index: 200;
+    max-height: calc(100vh - 76px);
 }
 
 .file-preview-panel.visible {
-  display: flex;
+    display: flex;
 }
 
 .file-preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
-  background: linear-gradient(90deg, #f7fbff, #eef4ff);
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    background: linear-gradient(90deg, #f7fbff, #eef4ff);
+    gap: 8px;
 }
 
 .file-preview-title {
-  flex: 1 1 auto;
+    flex: 1 1 auto;
     width: 80%;
-  min-width: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #222;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .file-preview-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .file-preview-format {
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 6px;
-  border: 1px solid #d0d7de;
-  background: #fff;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+    background: #fff;
 }
 
 .file-preview-download,
 .file-preview-close {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 6px;
-  border-radius: 999px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 999px;
 }
 
 .file-preview-download:hover {
-  background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.04);
 }
 
 .file-preview-close:hover {
-  background: rgba(255, 0, 0, 0.08);
+    background: rgba(255, 0, 0, 0.08);
 }
 
 .file-preview-body {
-  flex: 1;
-  overflow: hidden;
-  background: #fafafa;
+    flex: 1;
+    overflow: hidden;
+    background: #fafafa;
 }
 
 /* PDF/PPTX: iframe fills the preview body */
 .file-preview-body iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
 /* TXT: scrollable text block */
 .file-preview-body pre {
-  margin: 0;
-  padding: 12px;
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  height: 100%;
-  overflow: auto;
-  background: #ffffff;
-  color: #111111;
+    margin: 0;
+    padding: 12px;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    height: 100%;
+    overflow: auto;
+    background: #ffffff;
+    color: #111111;
 }
 
 #history-panel {
@@ -731,23 +792,35 @@ body.topic-bg-software_engineering::before {
 }
 
 .history-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    cursor: grab;
+      user-select: none;
+  -webkit-user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.history-header:active {
+  cursor: grabbing;
+}
+
+/* if your JS drag listens on the header, this helps touch dragging */
+.history-header {
+  touch-action: none;
 }
 
 .history-toggle {
-  margin-left: 8px;
+    margin-left: 8px;
     color: #f5f5f5;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 0.9rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
 /* Example: shrink panel when collapsed */
 .history-panel.history-panel--collapsed {
-  height: auto;
+    height: auto;
 }
 
 
@@ -810,16 +883,96 @@ body.topic-bg-software_engineering::before {
 }
 
 .history-clear {
-  margin-left: auto;      /* push buttons right */
-  font-size: 12px;
-  padding: 1px 8px;
-  border: 1px solid #ddd;
-  background: rgba(185, 250, 255, 0.63);
-  border-radius: 4px;
-  cursor: pointer;
+    margin-left: auto; /* push buttons right */
+    font-size: 12px;
+    padding: 1px 8px;
+    border: 1px solid #ddd;
+    background: rgba(185, 250, 255, 0.63);
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 
 .history-clear:hover {
-  background: #f0f0f0;
+    background: #f0f0f0;
+}
+
+/* -------------------- */
+/* ✅ Mobile overrides  */
+/* -------------------- */
+
+@media (max-width: 640px) {
+  .chat-container {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .message {
+    max-width: 96%;
+  }
+
+  .message.greeting {
+    width: 96%;
+  }
+
+    .message.suggestion {
+    /* smaller text on phones */
+    font-size: clamp(12px, 1.3vw, 14px);
+    line-height: 1.15;
+    padding: 8px;        /* slightly tighter so text fits */
+  }
+
+  /* stack dropdowns nicely */
+  .header-row {
+    align-items: flex-start;
+  }
+
+  /* make panels behave like overlays instead of squeezing layout */
+  .file-preview-panel {
+    top: env(safe-area-inset-top);
+    right: 0;
+    left: 0;
+    bottom: env(safe-area-inset-bottom);
+    width: 100%;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid #e5e5e5;
+  }
+
+
+  #history-panel {
+    right: 8px;
+    top: auto;
+    /* leave room for input row */
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    width: 28vh;
+      height: auto;
+      max-height: 16vh;
+
+    /* smoother scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #history-panel.history-panel--collapsed {
+    max-height: 38px;       /* collapsed "peek" height */
+    overflow: hidden;
+  }
+
+  /* input row: keep big and tappable */
+  .input-row {
+    gap: 10px;
+  }
+}
+
+/* -------------------- */
+/* ✅ Reduce motion     */
+/* -------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .message.suggestion,
+  .message.bot,
+  .message.bot-first,
+  body.thinking::before {
+    animation: none !important;
+  }
 }

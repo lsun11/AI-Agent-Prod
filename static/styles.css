@@ -77,15 +77,15 @@ body.topic-bg-software_engineering::before {
 
 
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
-  border: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .chat-container {
@@ -99,19 +99,25 @@ body.topic-bg-software_engineering::before {
     box-sizing: border-box;
     opacity: 96%;
     font-size: 15px;
-      /* prevent fixed panels from causing horizontal scroll */
-  overflow: hidden;
+    /* prevent fixed panels from causing horizontal scroll */
+    overflow: hidden;
 }
 
 .chat-container h2 {
     display: inline-block; /* shrink to fit text */
     margin: 0px auto 3px auto;
     margin-bottom: 0px;
-
+    width: 35%;
     padding: 5px 8px 7px; /* the “pad” around text */
     border-radius: 8px; /* pill shape */
-    background: rgba(255, 255, 255, 0.9); /* light background for contrast */
-    color: #004b50; /* slightly darker text */
+    background: /* rgba(188, 248, 248, 0.76); light background for contrast */
+        linear-gradient(
+            90deg,
+            rgba(188, 248, 248, 0.76),
+            rgba(188, 248, 248, 0.61),
+            rgba(57, 117, 108, 0)
+    );
+    color: #003e43; /* slightly darker text */
     font-size: 20px;
     font-weight: 700;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -153,8 +159,8 @@ body.topic-bg-software_engineering::before {
     white-space: pre-wrap;
 
     /* ✅ Stop huge bubbles on mobile */
-  max-width: 92%;
-  width: fit-content;
+    max-width: 92%;
+    width: fit-content;
 }
 
 .message.user {
@@ -183,9 +189,9 @@ body.topic-bg-software_engineering::before {
 .suggestion-grid {
     display: grid;
     margin-left: auto;
-  /* ✅ responsive columns */
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
+    /* ✅ responsive columns */
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
     margin-top: 2px;
     height: fit-content;
     flex: 1 1 95%;
@@ -208,9 +214,9 @@ body.topic-bg-software_engineering::before {
 .message.suggestion {
     position: relative;
 
-  /* ✅ responsive size */
-  width: clamp(96px, 18vw, 160px);
-  height: clamp(96px, 18vw, 160px);
+    /* ✅ responsive size */
+    width: clamp(96px, 18vw, 160px);
+    height: clamp(96px, 18vw, 160px);
     border-radius: 50%;
     overflow: hidden; /* 👈 hide any bleed at the edges */
     border: 0 solid transparent; /* keeps hover border working */
@@ -438,12 +444,12 @@ body.topic-bg-software_engineering::before {
 }
 
 .input-row input {
-  flex: 1;
-  padding: 12px 14px;
-  border-radius: 999px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  min-width: 0;
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 999px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    min-width: 0;
 }
 
 .input-row button {
@@ -466,14 +472,15 @@ body.topic-bg-software_engineering::before {
     border-radius: 4px;
     padding: 6px 10px;
     border: 1px solid #ccc;
-    background: rgba(46, 236, 255, 0.37);
+    background: rgba(33, 148, 161, 0.8);
     cursor: pointer;
+    font-weight: 500;
 }
 
 #deep-thinking-btn.active {
     border: 2px solid #e5e5ea;
     background: #00c8c8;
-    font-weight: 800;
+    font-weight: 900;
 }
 
 
@@ -570,12 +577,12 @@ body.topic-bg-software_engineering::before {
 }
 
 .header-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  gap: 10px;
-  flex-wrap: wrap; /* ✅ allow wrap on small screens */
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 10px;
+    flex-wrap: wrap; /* ✅ allow wrap on small screens */
 }
 
 #app-title {
@@ -793,20 +800,21 @@ body.thinking::before {
 
 .history-header {
     cursor: grab;
-      user-select: none;
-  -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .history-header:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }
 
 /* if your JS drag listens on the header, this helps touch dragging */
 .history-header {
-  touch-action: none;
+    touch-action: none;
 }
 
 .history-toggle {
@@ -902,66 +910,66 @@ body.thinking::before {
 /* -------------------- */
 
 @media (max-width: 640px) {
-  .chat-container {
-    width: 100%;
-    padding: 12px;
-  }
+    .chat-container {
+        width: 100%;
+        padding: 12px;
+    }
 
-  .message {
-    max-width: 96%;
-  }
+    .message {
+        max-width: 96%;
+    }
 
-  .message.greeting {
-    width: 96%;
-  }
+    .message.greeting {
+        width: 96%;
+    }
 
     .message.suggestion {
-    /* smaller text on phones */
-    font-size: clamp(12px, 1.3vw, 14px);
-    line-height: 1.15;
-    padding: 8px;        /* slightly tighter so text fits */
-  }
+        /* smaller text on phones */
+        font-size: clamp(12px, 1.3vw, 14px);
+        line-height: 1.15;
+        padding: 8px; /* slightly tighter so text fits */
+    }
 
-  /* stack dropdowns nicely */
-  .header-row {
-    align-items: flex-start;
-  }
+    /* stack dropdowns nicely */
+    .header-row {
+        align-items: flex-start;
+    }
 
-  /* make panels behave like overlays instead of squeezing layout */
-  .file-preview-panel {
-    top: env(safe-area-inset-top);
-    right: 0;
-    left: 0;
-    bottom: env(safe-area-inset-bottom);
-    width: 100%;
-    max-height: none;
-    border-left: none;
-    border-top: 1px solid #e5e5e5;
-  }
+    /* make panels behave like overlays instead of squeezing layout */
+    .file-preview-panel {
+        top: env(safe-area-inset-top);
+        right: 0;
+        left: 0;
+        bottom: env(safe-area-inset-bottom);
+        width: 100%;
+        max-height: none;
+        border-left: none;
+        border-top: 1px solid #e5e5e5;
+    }
 
 
-  #history-panel {
-    right: 8px;
-    top: auto;
-    /* leave room for input row */
-    bottom: calc(84px + env(safe-area-inset-bottom));
-    width: 28vh;
-      height: auto;
-      max-height: 16vh;
+    #history-panel {
+        right: 8px;
+        top: auto;
+        /* leave room for input row */
+        bottom: calc(84px + env(safe-area-inset-bottom));
+        width: 28vh;
+        height: auto;
+        max-height: 16vh;
 
-    /* smoother scrolling on iOS */
-    -webkit-overflow-scrolling: touch;
-  }
+        /* smoother scrolling on iOS */
+        -webkit-overflow-scrolling: touch;
+    }
 
-  #history-panel.history-panel--collapsed {
-    max-height: 38px;       /* collapsed "peek" height */
-    overflow: hidden;
-  }
+    #history-panel.history-panel--collapsed {
+        max-height: 38px; /* collapsed "peek" height */
+        overflow: hidden;
+    }
 
-  /* input row: keep big and tappable */
-  .input-row {
-    gap: 10px;
-  }
+    /* input row: keep big and tappable */
+    .input-row {
+        gap: 10px;
+    }
 }
 
 /* -------------------- */
@@ -969,10 +977,187 @@ body.thinking::before {
 /* -------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .message.suggestion,
-  .message.bot,
-  .message.bot-first,
-  body.thinking::before {
-    animation: none !important;
-  }
+    .message.suggestion,
+    .message.bot,
+    .message.bot-first,
+    body.thinking::before {
+        animation: none !important;
+    }
+}
+
+/* ========================================================= */
+/* ✅ Desktop "main window" + Gadget container (NEW)         */
+/*    - AI Agent becomes one expandable gadget component     */
+/*    - Does NOT remove/rename any existing selectors        */
+/* ========================================================= */
+
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden;
+    height: 100%;
+}
+
+.desktop {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: var(--page-pad);
+}
+
+/* A simple desktop-like grid layout so you can add more gadgets later */
+.desktop-grid {
+    width: 100%;
+    max-width: var(--page-max);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: clamp(10px, 2vw, 16px);
+    align-content: start;
+}
+
+/* Base gadget card */
+.gadget {
+    position: relative;
+    grid-column: span 6;
+    border-radius: var(--radius-lg);
+    background: rgb(130, 193, 188);
+    border: 1px solid rgb(189, 255, 255);
+    box-shadow: var(--shadow-strong);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+}
+
+/* Header always visible */
+.gadget-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: linear-gradient(90deg, rgba(180, 255, 242, 0.62), rgba(31, 189, 189, 0));
+    cursor: pointer;
+    user-select: none;
+}
+
+.gadget-title {
+    font-weight: 800;
+    color: #0b3c46;
+    letter-spacing: 0.2px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.gadget-meta {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.62);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gadget-toggle {
+    border: 1px solid rgba(58, 75, 106, 0.35);
+    background: rgba(207, 248, 250, 0.76);
+    color: #0d0d10;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.gadget-toggle:active {
+    transform: translateY(1px);
+}
+
+/* Gadget body: where your existing .chat-container lives */
+.gadget-body {
+    display: block;
+}
+
+/* Collapsed: only show header */
+.gadget--collapsed .gadget-body {
+    display: none;
+}
+
+/* Expanded: float over the desktop, show full app */
+.gadget--expanded {
+    max-width: 1300px;
+    position: fixed;
+    inset: clamp(12px, 5vh, 5vh) clamp(10px, 5vw, 5vw);
+    z-index: 4000;
+    grid-column: 1 / -1; /* doesn't matter when fixed, but safe */
+    border-radius: var(--radius-lg);
+    background: rgba(46, 236, 255, 0.22);
+}
+
+/* In expanded state: let the chat fill the gadget */
+.gadget--expanded .gadget-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 52px); /* header height */
+}
+
+.gadget--expanded .chat-container {
+    width: 100%;
+    max-width: none;
+    padding: var(--page-pad);
+    height: 100%;
+}
+
+/* Backdrop behind the expanded gadget */
+.gadget-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 3500;
+}
+
+.gadget-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Placeholder gadget styling */
+.gadget--placeholder {
+    grid-column: span 6;
+    opacity: 0.55;
+}
+
+.gadget--placeholder .gadget-header {
+    cursor: default;
+}
+
+.gadget--placeholder .gadget-toggle {
+    display: none;
+}
+
+/* Responsive desktop grid */
+@media (max-width: 980px) {
+    .gadget, .gadget--placeholder {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .desktop {
+        padding: 10px;
+    }
+
+    .gadget--expanded {
+        inset: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+        border-radius: 0;
+    }
+
+    .gadget--expanded .gadget-body {
+        height: calc(100% - 56px);
+    }
 }

@@ -9,6 +9,8 @@
     --radius-lg: 24px;
     --shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     --shadow-strong: 0 6px 14px rgba(0, 0, 0, 0.15);
+      --gadget-exp-w: min(1200px, 92vw);
+  --gadget-exp-h: min(820px, 86vh);
 }
 
 *,
@@ -905,6 +907,23 @@ body.thinking::before {
     background: #f0f0f0;
 }
 
+/* While dragging: kill transitions/animations that cause jitter */
+.is-dragging,
+.is-dragging * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Optional: make it feel more "grabby" */
+.gadget .gadget-header {
+  cursor: grab;
+}
+.gadget.is-dragging .gadget-header {
+  cursor: grabbing;
+}
+
+
+
 /* -------------------- */
 /* ✅ Mobile overrides  */
 /* -------------------- */
@@ -1008,18 +1027,17 @@ body.no-scroll {
 
 /* A simple desktop-like grid layout so you can add more gadgets later */
 .desktop-grid {
-    width: 100%;
-    max-width: var(--page-max);
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: clamp(10px, 2vw, 16px);
-    align-content: start;
+  width: 100%;
+  max-width: var(--page-max);
+  position: relative;   /* important */
+  height: 100%;
+  min-height: 80vh;      /* or 100% if you prefer */
 }
 
 /* Base gadget card */
 .gadget {
     position: relative;
-    grid-column: span 6;
+    /*grid-column: span 6;*/
     border-radius: var(--radius-lg);
     background: rgb(130, 193, 188);
     border: 1px solid rgb(189, 255, 255);
@@ -1078,6 +1096,17 @@ body.no-scroll {
     display: block;
 }
 
+.gadget.gadget--collapsed {
+  width: 560px;          /* pick your “old” size */
+  height: auto;          /* header only, body hidden */
+  max-width: 92vw;       /* responsive */
+}
+
+/* If you want collapsed card not affected by min-width/min-height */
+.gadget.gadget--collapsed {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
 /* Collapsed: only show header */
 .gadget--collapsed .gadget-body {
     display: none;
@@ -1085,11 +1114,19 @@ body.no-scroll {
 
 /* Expanded: float over the desktop, show full app */
 .gadget--expanded {
-    max-width: 1300px;
+  min-width: min(1200px, 92vw);
+  min-height: min(820px, 86vh);
+  /*    min-width: var(--gadget-exp-w, min(1200px, 92vw));*/
+  /*min-height: var(--gadget-exp-h, min(820px, 86vh));*/
+    max-width: 1800px;
     position: fixed;
-    inset: clamp(12px, 5vh, 5vh) clamp(10px, 5vw, 5vw);
+    /*inset: clamp(12px, 5vh, 5vh) clamp(10px, 5vw, 5vw);*/
     z-index: 4000;
-    grid-column: 1 / -1; /* doesn't matter when fixed, but safe */
+      /* center like a modal */
+  left: 50%;
+  top: 7vh;
+
+    /*grid-column: 1 / -1; !* doesn't matter when fixed, but safe *!*/
     border-radius: var(--radius-lg);
     background: rgba(46, 236, 255, 0.22);
 }
@@ -1128,8 +1165,12 @@ body.no-scroll {
 
 /* Placeholder gadget styling */
 .gadget--placeholder {
-    grid-column: span 6;
-    opacity: 0.55;
+  left: 620px;
+  top: 24px;
+  opacity: 0.55;
+  width: 560px;          /* pick your “old” size */
+  height: auto;          /* header only, body hidden */
+  max-width: 92vw;       /* responsive */
 }
 
 .gadget--placeholder .gadget-header {
@@ -1138,6 +1179,56 @@ body.no-scroll {
 
 .gadget--placeholder .gadget-toggle {
     display: none;
+}
+
+.gadget.is-dragging {
+  transition: none !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* While resizing: kill transitions/animations */
+.gadget.is-resizing,
+.gadget.is-resizing * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* The overlay handles container */
+.gadget .resize-handle {
+  display: none;
+}
+
+.gadget.gadget--expanded .resize-handle {
+    display: block;
+  position: absolute;
+  z-index: 9999;
+  background: transparent;
+  user-select: none;
+  touch-action: none;
+}
+
+/* edges */
+.gadget .resize-handle.e { right: -6px; top: 10px; bottom: 10px; width: 12px; cursor: ew-resize; }
+.gadget .resize-handle.w { left: -6px; top: 10px; bottom: 10px; width: 12px; cursor: ew-resize; }
+.gadget .resize-handle.s { bottom: -6px; left: 10px; right: 10px; height: 12px; cursor: ns-resize; }
+.gadget .resize-handle.n { top: -6px; left: 10px; right: 10px; height: 12px; cursor: ns-resize; }
+
+/* corners */
+.gadget .resize-handle.ne { right: -6px; top: -6px; width: 16px; height: 16px; cursor: nesw-resize; }
+.gadget .resize-handle.nw { left: -6px; top: -6px; width: 16px; height: 16px; cursor: nwse-resize; }
+.gadget .resize-handle.se { right: -6px; bottom: -6px; width: 16px; height: 16px; cursor: nwse-resize; }
+.gadget .resize-handle.sw { left: -6px; bottom: -6px; width: 16px; height: 16px; cursor: nesw-resize; }
+
+
+.gadget-slot {
+  grid-column: span 6;   /* same as your gadget used to be */
+  min-height: 64px;      /* at least header height so slot doesn't collapse */
+}
+
+/* when expanded, keep the slot's height equal to the collapsed gadget height */
+.gadget-slot.is-expanded {
+  min-height: 64px; /* header height; adjust to match your header */
 }
 
 /* Responsive desktop grid */

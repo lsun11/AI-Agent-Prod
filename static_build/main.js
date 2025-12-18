@@ -1,7 +1,5 @@
-import { ChatUI } from "./chat-ui.js";
-import { initHistoryPanel } from "./history.js";
+import { Desktop } from "./desktop.js";
 document.addEventListener("DOMContentLoaded", () => {
-    new ChatUI();
-    void initHistoryPanel();
+    new Desktop(); // <-- gadget wiring
 });
 //# sourceMappingURL=main.js.map

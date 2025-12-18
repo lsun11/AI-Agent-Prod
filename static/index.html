@@ -1,146 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-  <title>AI Research Assistant</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+    <meta charset="UTF-8"/>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>AI Research Assistant</title>
+    <link rel="stylesheet" href="/static/styles.css"/>
 </head>
 
 <body>
-  <div class="desktop">
+<div class="desktop">
     <div class="desktop-grid">
-      <!-- ✅ AI Agent Gadget -->
-      <section class="gadget gadget--collapsed" id="ai-gadget" aria-expanded="false">
-        <div class="gadget-header" id="ai-gadget-header" role="button" tabindex="0">
-          <div class="gadget-title">AI Research Assistant</div>
-          <div class="gadget-meta">Research • Tool comparisons • Plans • Export (PDF/DOCX/PPTX)</div>
-          <button
-            class="gadget-toggle"
-            id="ai-gadget-toggle"
-            type="button"
-            aria-label="Toggle AI Agent"
-          >
-            Open
-          </button>
-        </div>
-
-        <div class="gadget-body" id="ai-gadget-body">
-          <!-- ✅ Your original AI Agent UI (unchanged structure) -->
-          <div class="chat-container">
-            <div class="header-row">
-              <h2 id="app-title">AI Research Assistant</h2>
-              <div id="dropdown-container" class="dropdown-container"></div>
-            </div>
-
-            <div id="messages" class="messages"></div>
-
-            <form id="chat-form" class="input-row">
-              <label class="sr-only" for="chat-input">Chat input</label>
-              <input
-                id="chat-input"
-                type="text"
-                placeholder="Ask about dev tools, pricing, alternatives..."
-                autocomplete="off"
-              />
-              <button type="submit">Send</button>
-            </form>
-
-            <div id="download-container" class="download-container"></div>
-
-            <div id="file-preview-panel" class="file-preview-panel">
-              <div id="file-preview-header" class="file-preview-header">
-                <div class="file-preview-title" id="file-preview-title"></div>
-                <div class="file-preview-controls">
-                  <select id="file-preview-format" class="file-preview-format"></select>
-                  <button id="file-preview-download" class="file-preview-download" type="button">⬇︎</button>
-                  <button id="file-preview-close" class="file-preview-close" type="button">✕</button>
+        <div class="gadget-slot" id="ai-gadget-slot">
+            <!-- ✅ AI Agent Gadget -->
+            <section class="gadget gadget--collapsed" id="ai-gadget" aria-expanded="false">
+                <div class="gadget-header" id="ai-gadget-header" role="button" tabindex="0">
+                    <div class="gadget-title">AI Research Assistant</div>
+                    <div class="gadget-meta">Research • Tool comparisons • Plans • Export (PDF/DOCX/PPTX)</div>
+                    <button
+                            class="gadget-toggle"
+                            id="ai-gadget-toggle"
+                            type="button"
+                            aria-label="Toggle AI Agent"
+                    >
+                        Open
+                    </button>
                 </div>
-              </div>
-              <div class="file-preview-body" id="file-preview-body">
-                <!-- iframe or <pre> will be injected here -->
-              </div>
-            </div>
 
-            <div id="history-panel">
-              <div class="history-header"></div>
-              <div id="history-list"></div>
-            </div>
-          </div>
-        </div>
-      </section>
+                <div class="gadget-body" id="ai-gadget-body">
+                    <!-- ✅ Your original AI Agent UI (unchanged structure) -->
+                    <div class="chat-container">
+                        <div class="header-row">
+                            <h2 id="app-title">AI Research Assistant</h2>
+                            <div id="dropdown-container" class="dropdown-container"></div>
+                        </div>
 
-      <!-- Placeholder for future gadgets -->
-      <section class="gadget gadget--placeholder" aria-hidden="true">
-        <div class="gadget-header">
-          <div class="gadget-title">More gadgets coming soon</div>
-          <div class="gadget-meta">Dashboards • Monitors • Notes • Utilities</div>
+                        <div id="messages" class="messages"></div>
+
+                        <form id="chat-form" class="input-row">
+                            <label class="sr-only" for="chat-input">Chat input</label>
+                            <input
+                                    id="chat-input"
+                                    type="text"
+                                    placeholder="Ask about dev tools, pricing, alternatives..."
+                                    autocomplete="off"
+                            />
+                            <button type="submit">Send</button>
+                        </form>
+
+                        <div id="download-container" class="download-container"></div>
+
+                        <div id="file-preview-panel" class="file-preview-panel">
+                            <div id="file-preview-header" class="file-preview-header">
+                                <div class="file-preview-title" id="file-preview-title"></div>
+                                <div class="file-preview-controls">
+                                    <select id="file-preview-format" class="file-preview-format"></select>
+                                    <button id="file-preview-download" class="file-preview-download" type="button">⬇︎
+                                    </button>
+                                    <button id="file-preview-close" class="file-preview-close" type="button">✕</button>
+                                </div>
+                            </div>
+                            <div class="file-preview-body" id="file-preview-body">
+                                <!-- iframe or <pre> will be injected here -->
+                            </div>
+                        </div>
+
+                        <div id="history-panel">
+                            <div class="history-header"></div>
+                            <div id="history-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-      </section>
+
+        <!-- Placeholder for future gadgets -->
+        <section class="gadget gadget--placeholder" aria-hidden="true">
+            <div class="gadget-header">
+                <div class="gadget-title">More gadgets coming soon</div>
+                <div class="gadget-meta">Dashboards • Monitors • Notes • Utilities</div>
+            </div>
+        </section>
     </div>
 
     <!-- Backdrop for expanded gadget -->
     <div class="gadget-backdrop" id="gadget-backdrop" aria-hidden="true"></div>
-  </div>
+</div>
 
-  <!-- Load your compiled JS -->
-  <script type="module" src="../static_build/main.js"></script>
+<!-- Load your compiled JS -->
+<script type="module" src="../static_build/main.js"></script>
 
-  <!-- Gadget expand/collapse controller -->
-  <script>
+<!-- Gadget expand/collapse controller -->
+<script>
     (function () {
-      const gadget = document.getElementById("ai-gadget");
-      const header = document.getElementById("ai-gadget-header");
-      const toggleBtn = document.getElementById("ai-gadget-toggle");
-      const backdrop = document.getElementById("gadget-backdrop");
+        const gadget = document.getElementById("ai-gadget");
+        const header = document.getElementById("ai-gadget-header");
+        const toggleBtn = document.getElementById("ai-gadget-toggle");
+        const backdrop = document.getElementById("gadget-backdrop");
 
-      if (!gadget || !header || !toggleBtn || !backdrop) return;
+        if (!gadget || !header || !toggleBtn || !backdrop) return;
 
-      function setExpanded(expanded) {
-        gadget.classList.toggle("gadget--expanded", expanded);
-        gadget.classList.toggle("gadget--collapsed", !expanded);
-        backdrop.classList.toggle("visible", expanded);
-        gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-        toggleBtn.textContent = expanded ? "Close" : "Open";
+        function setExpanded(expanded) {
+            gadget.classList.toggle("gadget--expanded", expanded);
+            gadget.classList.toggle("gadget--collapsed", !expanded);
+            backdrop.classList.toggle("visible", expanded);
+            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+            toggleBtn.textContent = expanded ? "Close" : "Open";
 
-        // prevent background scroll when expanded
-        document.documentElement.classList.toggle("no-scroll", expanded);
-        document.body.classList.toggle("no-scroll", expanded);
-      }
-
-      function toggle() {
-        const expanded = gadget.classList.contains("gadget--expanded");
-        setExpanded(!expanded);
-      }
-
-      header.addEventListener("click", (e) => {
-        // don't double-trigger when clicking the button
-        if (e.target === toggleBtn) return;
-        toggle();
-      });
-
-      toggleBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggle();
-      });
-
-      backdrop.addEventListener("click", () => setExpanded(false));
-
-      header.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          toggle();
+            // prevent background scroll when expanded
+            document.documentElement.classList.toggle("no-scroll", expanded);
+            document.body.classList.toggle("no-scroll", expanded);
         }
-      });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") setExpanded(false);
-      });
+        function toggle() {
+            const expanded = gadget.classList.contains("gadget--expanded");
+            setExpanded(!expanded);
+        }
+
+        header.addEventListener("click", (e) => {
+            // don't double-trigger when clicking the button
+            if (e.target === toggleBtn) return;
+            toggle();
+        });
+
+        toggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle();
+        });
+
+        backdrop.addEventListener("click", () => setExpanded(false));
+
+        header.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggle();
+            }
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") setExpanded(false);
+        });
     })();
-  </script>
+</script>
 </body>
 </html>

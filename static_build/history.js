@@ -114,7 +114,9 @@ export async function initHistoryPanel() {
     // 🔽 Add expand/collapse toggle button
     setupHistoryToggle(panel, header, list);
     // Make the panel draggable by its header
-    makePanelDraggable(panel, header);
+    makePanelDraggable(panel, header, {
+        mode: "boundary",
+    });
     try {
         const items = await fetchHistory(30);
         if (list) {

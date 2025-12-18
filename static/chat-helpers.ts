@@ -167,7 +167,11 @@ function getPreviewPanelElements() {
     const formatSelect = document.getElementById("file-preview-format") as HTMLSelectElement | null;
     const downloadBtn = document.getElementById("file-preview-download") as HTMLButtonElement | null;
     const closeBtn = document.getElementById("file-preview-close") as HTMLButtonElement | null;
-    if (panel && titleEl) {makePanelDraggable(panel, titleEl);}
+    if (panel && titleEl) {
+
+        makePanelDraggable(panel, titleEl, {
+  mode: "boundary",
+});}
     return {panel, titleEl, bodyEl, formatSelect, downloadBtn, closeBtn};
 }
 

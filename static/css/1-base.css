@@ -1,0 +1,91 @@
+/* -------------------- */
+/* ✅ Responsive base   */
+/* -------------------- */
+
+:root {
+    --page-max: 1200px;
+    --page-pad: clamp(12px, 3vw, 24px);
+    --radius: 12px;
+    --radius-lg: 24px;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    --shadow-strong: 0 6px 14px rgba(0, 0, 0, 0.15);
+    --gadget-exp-w: min(1200px, 92vw);
+    --gadget-exp-h: min(820px, 86vh);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+
+    /* ✅ Mobile-safe viewport sizing */
+    min-height: 100dvh;
+    height: 100vh;
+
+    /* Background */
+    background-color: #85b8b8;
+    background-image: url("../../static/assets/backgrounds/computer_science.gif");
+    background-repeat: repeat;
+    background-size: auto; /* important for tiling */
+    background-position: top left;
+
+    /* iOS safe area */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+body.topic-bg-tools,
+body.topic-bg-career,
+body.topic-bg-software_engineering {
+    position: relative;
+    z-index: 0;
+}
+
+body.topic-bg-tools::before,
+body.topic-bg-career::before,
+body.topic-bg-software_engineering::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-repeat: repeat;
+    background-size: auto;
+    opacity: 0.35;
+    z-index: -1;
+    pointer-events: none;
+}
+
+body.topic-bg-tools::before {
+    background-image: url("../../static/assets/backgrounds/tools.png");
+}
+
+body.topic-bg-career::before {
+    background-image: url("../../static/assets/backgrounds/career.png");
+}
+
+body.topic-bg-software_engineering::before {
+    background-image: url("../../static/assets/backgrounds/software_engineering.png");
+}
+
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

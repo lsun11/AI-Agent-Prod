@@ -10,7 +10,7 @@ def make_test_app(monkeypatch) -> FastAPI:
     with all heavy dependencies mocked out.
     """
     # Import after fixtures so env vars etc. are already patched
-    import src.api.routes.chat as chat
+    import src.advanced_agent.api.routes.chat as chat
 
     # --- Dummy workflow that produces one log + one final result ---
     class DummyWorkflow:
@@ -141,7 +141,7 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
         assert response.status_code == 200
         assert response.headers["content-type"].startswith("text/event-stream")
         events = _collect_sse_events(response)
-        print("!!!!!!!!!!!!!!!!!!!!!!", events)
+
     # We expect at least:
     #  - first event: topic
     #  - one or more log events
@@ -181,7 +181,7 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
 
 # ---- Integration-style test with the real app factory ----
 
-from src.api.app import create_app
+from src.advanced_agent.api.app import create_app
 
 client = TestClient(create_app())
 
@@ -192,7 +192,7 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
         return True
 
     monkeypatch.setattr(
-        "src.api.routes.chat.is_chinese",
+        "src.advanced_agent.api.routes.chat.is_chinese",
         fake_is_chinese,
         raising=True,
     )
@@ -206,7 +206,7 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
         return f"[{target_lang}] {text}"
 
     monkeypatch.setattr(
-        "src.api.routes.chat.translate_text",
+        "src.advanced_agent.api.routes.chat.translate_text",
         fake_translate,
         raising=True,
     )
@@ -231,7 +231,7 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
 
     # Patch the workflow + classifier used by chat_stream
     monkeypatch.setattr(
-        "src.api.routes.chat.TOPIC_WORKFLOWS",
+        "src.advanced_agent.api.routes.chat.TOPIC_WORKFLOWS",
         {"developer_tools": DummyWorkflow()},
         raising=True,
     )
@@ -240,14 +240,14 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
         return "developer_tools", "Developer Tools", "tools"
 
     monkeypatch.setattr(
-        "src.api.routes.chat.classify_topic_with_llm",
+        "src.advanced_agent.api.routes.chat.classify_topic_with_llm",
         fake_classify,
         raising=True,
     )
 
     # 4) Avoid real formatting / file generation here as well
     monkeypatch.setattr(
-        "src.api.routes.chat.format_result_text",
+        "src.advanced_agent.api.routes.chat.format_result_text",
         lambda q, r: "dummy formatted",
         raising=True,
     )
@@ -276,12 +276,12 @@ def test_chat_stream_handles_chinese_branch(monkeypatch):
         }
 
     monkeypatch.setattr(
-        "src.api.routes.chat.generate_document_and_slides",
+        "src.advanced_agent.api.routes.chat.generate_document_and_slides",
         fake_generate_document_and_slides,
         raising=True,
     )
     monkeypatch.setattr(
-        "src.api.routes.chat.generate_all_files_for_layout",
+        "src.advanced_agent.api.routes.chat.generate_all_files_for_layout",
         fake_generate_all_files_for_layout,
         raising=True,
     )

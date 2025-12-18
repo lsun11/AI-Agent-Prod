@@ -1,6 +1,6 @@
 # tests/test_app.py
 from fastapi.testclient import TestClient
-from src.api.app import create_app
+from src.advanced_agent.api.app import create_app
 
 
 def test_create_app_basic():
@@ -22,9 +22,9 @@ def test_root_serves_index(monkeypatch):
             super().__init__(content=b"", media_type="text/html")
             captured["path"] = str(path)
 
-    monkeypatch.setattr("src.api.app.FileResponse", FakeFileResponse)
+    monkeypatch.setattr("src.advanced_agent.api.app.FileResponse", FakeFileResponse)
 
-    from src.api.app import create_app
+    from src.advanced_agent.api.app import create_app
     from fastapi.testclient import TestClient
 
     app = create_app()

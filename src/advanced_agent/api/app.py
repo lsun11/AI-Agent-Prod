@@ -1,5 +1,4 @@
 # src/api/app.py
-import os
 import sys
 from pathlib import Path
 from fastapi import FastAPI
@@ -13,7 +12,7 @@ def get_base_dir() -> Path:
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return Path(sys._MEIPASS)  # type: ignore[attr-defined]
     # Normal dev mode
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[3]
 
 
 BASE_DIR = get_base_dir()

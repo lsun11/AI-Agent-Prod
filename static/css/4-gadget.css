@@ -1,0 +1,342 @@
+/* ========================================================= */
+/* ✅ Desktop "main window" + Gadget container (NEW)         */
+/* - AI Agent becomes one expandable gadget component     */
+/* - Does NOT remove/rename any existing selectors        */
+/* ========================================================= */
+
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden;
+    height: 100%;
+}
+
+.desktop {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: var(--page-pad);
+}
+
+/* A simple desktop-like grid layout so you can add more gadgets later */
+.desktop-grid {
+    width: 100%;
+    max-width: var(--page-max);
+    position: relative; /* important */
+    height: 100%;
+    min-height: 80vh; /* or 100% if you prefer */
+}
+
+/* ==========================================================================
+   1. BASE GADGET (Default / Expanded)
+   ========================================================================== */
+.gadget {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: rgb(130, 193, 188);
+    border: 1px solid rgb(189, 255, 255);
+    box-shadow: var(--shadow-strong);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+    transition: width 0.3s ease,
+    height 0.3s ease,
+    border-radius 0.3s ease,
+    background 0.3s ease,
+    opacity 0.3s ease;
+}
+
+/* Expanded State */
+.gadget--expanded {
+    position: fixed;
+    z-index: 4000;
+    left: 50%;
+    top: 7vh;
+    min-width: min(1200px, 92vw);
+    min-height: min(820px, 86vh);
+    max-width: 1800px;
+    background: rgba(46, 236, 255, 0.22);
+}
+
+/* Placeholder State */
+.gadget--placeholder {
+    position: absolute;
+    left: 620px;
+    top: 24px;
+    width: 560px;
+    height: auto;
+    opacity: 0.55;
+}
+
+/* ==========================================================================
+   2. COLLAPSED STATE (The Sphere)
+   ========================================================================== */
+.gadget.gadget--collapsed {
+    width: 160px;
+    height: 160px;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    border-radius: 50%;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+
+    /* Consolidated Marble/Sphere Gradients */
+    background: radial-gradient(circle at 48% -14%, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18) 22%, rgba(255, 255, 255, 0.0) 58%),
+    radial-gradient(circle at 20% 64%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.00) 46%),
+    radial-gradient(circle at 74% 42%, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.00) 70%),
+    radial-gradient(circle at 32% 6%, rgba(192, 248, 248, 0.4) 0%, rgba(103, 182, 182, 0.73) 30%, rgba(4, 57, 66, 0.96) 90%);
+}
+
+/* Sphere Texture Overlay */
+.gadget--collapsed .sphere-texture {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    background: url("/static/assets/backgrounds/giphy.gif") center / 180px 180px repeat;
+    opacity: 0.22;
+    mix-blend-mode: soft-light;
+    filter: contrast(0.9) saturate(0.85);
+}
+
+/* Sphere Text Elements (Title & Meta) */
+.gadget--collapsed::before,
+.gadget--collapsed::after {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 6;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    text-align: center;
+}
+
+/* Fixed Center Title */
+.gadget--collapsed::before {
+    content: attr(data-title);
+    top: 40%;
+    width: 86%;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+/* Rotating Meta Belt */
+.gadget--collapsed::after {
+    content: attr(data-meta) "  •  " attr(data-meta) "  •  ";
+    top: 65%;
+    left: 0;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.78;
+    animation: equatorLoop 8s linear infinite;
+}
+
+/* ==========================================================================
+   3. INTERNAL COMPONENTS
+   ========================================================================== */
+.gadget-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: linear-gradient(90deg, rgba(180, 255, 242, 0.62), rgba(31, 189, 189, 0));
+    cursor: pointer;
+    user-select: none;
+}
+
+.gadget--collapsed .gadget-header {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    display: block;
+}
+
+.gadget-title {
+    font-weight: 800;
+    color: #0b3c46;
+    font-size: 14px;
+}
+
+.gadget-meta {
+    flex: 1;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.62);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gadget-toggle {
+    border: 1px solid rgba(58, 75, 106, 0.35);
+    background: rgba(207, 248, 250, 0.76);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Component Visibility Logic */
+.gadget--collapsed .gadget-toggle,
+.gadget--collapsed .gadget-meta,
+.gadget--collapsed .gadget-title,
+.gadget--collapsed #history-panel {
+    display: none !important;
+}
+
+.gadget--expanded .gadget-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 52px);
+}
+
+.gadget--expanded #history-panel {
+    display: block;
+}
+
+/* ==========================================================================
+   4. UTILS & INTERACTION (Resizing, Dragging, Slots)
+   ========================================================================== */
+.gadget.is-dragging {
+    transition: none !important;
+}
+
+.gadget.is-resizing, .gadget.is-resizing * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Resizing Handles */
+.resize-handle {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    background: transparent;
+}
+
+.gadget--expanded .resize-handle {
+    display: block;
+}
+
+.resize-handle.e, .resize-handle.w {
+    top: 10px;
+    bottom: 10px;
+    width: 12px;
+    cursor: ew-resize;
+}
+
+.resize-handle.e {
+    right: -6px;
+}
+
+.resize-handle.w {
+    left: -6px;
+}
+
+.resize-handle.s, .resize-handle.n {
+    left: 10px;
+    right: 10px;
+    height: 12px;
+    cursor: ns-resize;
+}
+
+.resize-handle.s {
+    bottom: -6px;
+}
+
+.resize-handle.n {
+    top: -6px;
+}
+
+.resize-handle.ne, .resize-handle.nw, .resize-handle.se, .resize-handle.sw {
+    width: 16px;
+    height: 16px;
+}
+
+.resize-handle.se {
+    right: -6px;
+    bottom: -6px;
+    cursor: nwse-resize;
+}
+
+.resize-handle.nw {
+    left: -6px;
+    top: -6px;
+    cursor: nwse-resize;
+}
+
+.resize-handle.ne {
+    right: -6px;
+    top: -6px;
+    cursor: nesw-resize;
+}
+
+.resize-handle.sw {
+    left: -6px;
+    bottom: -6px;
+    cursor: nesw-resize;
+}
+
+/* Backdrop */
+.gadget-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 3500;
+}
+
+.gadget-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Grid Slots */
+.gadget-slot {
+    grid-column: span 6;
+    min-height: 64px;
+}
+
+/* ==========================================================================
+   5. ANIMATIONS
+   ========================================================================== */
+@keyframes equatorLoop {
+    0% {
+        transform: translate(0, -50%);
+    }
+    100% {
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Responsive desktop grid */
+@media (max-width: 980px) {
+    .gadget, .gadget--placeholder {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .desktop {
+        padding: 10px;
+    }
+
+    .gadget--expanded {
+        inset: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+        border-radius: 0;
+    }
+
+    .gadget--expanded .gadget-body {
+        height: calc(100% - 56px);
+    }
+}

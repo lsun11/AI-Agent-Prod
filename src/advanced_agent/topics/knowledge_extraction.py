@@ -1,0 +1,113 @@
+# src/models/knowledge_extraction.py
+from __future__ import annotations
+
+from typing import List, Optional, Literal
+from pydantic import BaseModel, Field, field_validator
+
+
+class Entity(BaseModel):
+    name: str = Field(..., description="Canonical name of the entity.")
+    type: Optional[str] = Field(
+        default=None,
+        description="Type of entity, e.g. 'company', 'product', 'tool', 'api', 'concept'.",
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Short human-readable description of this entity.",
+    )
+
+
+class Relationship(BaseModel):
+    source: str = Field(..., description="Name of the source entity.")
+    target: str = Field(..., description="Name of the target entity.")
+    type: str = Field(
+        ...,
+        description="Relationship type, e.g. 'offers', 'competes_with', 'integrates_with', 'depends_on'.",
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Optional explanation or context for the relationship.",
+    )
+
+
+class ProConItem(BaseModel):
+    entity: Optional[str] = Field(
+        default=None,
+        description="Entity this item refers to, e.g. product/tool name.",
+    )
+    aspect: Optional[str] = Field(
+        default=None,
+        description="Feature or aspect (e.g., 'performance', 'pricing', 'DX').",
+    )
+    text: str = Field(..., description="The actual pro or con statement.")
+
+
+ALLOWED_CATEGORIES = {
+    "technical",
+    "integration",
+    "security",
+    "compliance",
+    "maintainability",
+    "business",
+    "reliability",
+    "other",
+}
+
+CATEGORY_SYNONYMS = {
+    "cost": "business",
+    "pricing": "business",
+    "performance": "technical",
+    # add more if needed
+}
+
+class RiskItem(BaseModel):
+    entity: Optional[str] = None
+    category: Literal[
+        "technical",
+        "integration",
+        "security",
+        "compliance",
+        "maintainability",
+        "business",
+        "reliability",
+        "other",
+    ]
+    text: str
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, v: str) -> str:
+        if not isinstance(v, str):
+            return "other"
+        v_lower = v.lower().strip()
+        # map synonyms first
+        if v_lower in CATEGORY_SYNONYMS:
+            return CATEGORY_SYNONYMS[v_lower]
+        # if it's already allowed, keep it
+        if v_lower in ALLOWED_CATEGORIES:
+            return v_lower
+        # fallback: treat unknown labels as "other"
+        return "other"
+
+
+class TimelineItem(BaseModel):
+    date: Optional[str] = Field(
+        default=None,
+        description="ISO date (YYYY-MM-DD) or approximate text (e.g. 'Q1 2024').",
+    )
+    event: str = Field(..., description="Short description of the event.")
+    entity: Optional[str] = Field(
+        default=None, description="Entity associated with this event, if any."
+    )
+    source: Optional[str] = Field(
+        default=None, description="URL or document identifier for this event."
+    )
+
+
+class KnowledgeExtractionResult(BaseModel):
+    entities: List[Entity] = Field(default_factory=list)
+    relationships: List[Relationship] = Field(default_factory=list)
+    pros: List[ProConItem] = Field(default_factory=list)
+    cons: List[ProConItem] = Field(default_factory=list)
+    risks: List[RiskItem] = Field(default_factory=list)
+    timeline: List[TimelineItem] = Field(default_factory=list)

@@ -1,5 +1,5 @@
 # tests/test_translate.py
-from src.api.translate import translate_text, is_chinese
+from src.advanced_agent.api.translate import translate_text, is_chinese
 
 
 class FakeLLM:
@@ -22,7 +22,7 @@ def test_translate_text(monkeypatch):
     """
     Mock the translator LLM so no real API call happens.
     """
-    from src.api import translate as translate_module
+    from src.advanced_agent.api import translate as translate_module
 
     fake = FakeLLM("翻译后的文字")
     monkeypatch.setattr(translate_module, "translator_llm", fake)

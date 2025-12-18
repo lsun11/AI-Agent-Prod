@@ -7,12 +7,12 @@ import time
 import webbrowser
 
 import uvicorn
-from server import app  # FastAPI app created in server.py
+from server import advanced_agent  # FastAPI app created in server.py
 
 
 def start_server():
     uvicorn.run(
-        app,
+        advanced_agent,
         host="127.0.0.1",
         port=8000,
         reload=False,

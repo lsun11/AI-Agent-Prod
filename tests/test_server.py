@@ -26,4 +26,4 @@ def test_create_app_importable():
     Just ensure the FastAPI app can be instantiated from server.py.
     """
     server = importlib.import_module("server")
-    assert hasattr(server, "app")
+    assert hasattr(server, "advanced_agent")

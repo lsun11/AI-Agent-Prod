@@ -1,0 +1,575 @@
+.chat-container {
+    max-width: 1200px;
+    width: 90%;
+    margin: 0 auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px; /* a bit more breathing room */
+    box-sizing: border-box;
+    opacity: 96%;
+    font-size: 15px;
+    /* prevent fixed panels from causing horizontal scroll */
+    overflow: hidden;
+}
+
+.chat-container h2 {
+    display: inline-block; /* shrink to fit text */
+    margin: 0px auto 3px auto;
+    margin-bottom: 0px;
+    width: 35%;
+    padding: 5px 8px 7px; /* the “pad” around text */
+    border-radius: 8px; /* pill shape */
+    background: /* rgba(188, 248, 248, 0.76); light background for contrast */ linear-gradient(
+            90deg,
+            rgba(188, 248, 248, 0.76),
+            rgba(188, 248, 248, 0.61),
+            rgba(57, 117, 108, 0)
+    );
+    color: #003e43; /* slightly darker text */
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.chat-container h3 {
+    display: inline-block; /* shrink to fit text */
+    margin: 10px auto -4px auto;
+    margin-bottom: 16px;
+
+    padding: 2px 8px 4px 8px; /* the “pad” around text */
+    border-radius: 999px; /* pill shape */
+    background: rgba(248, 252, 253, 0.33); /* light background for contrast */
+    color: #004b50; /* slightly darker text */
+    font-size: 16px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* -------------------- */
+/* Messages area        */
+/* -------------------- */
+
+#messages,
+.messages {
+    /*display: flex;*/
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(246, 255, 255, 0.99);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.message {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+
+    /* ✅ Stop huge bubbles on mobile */
+    max-width: 92%;
+    width: fit-content;
+}
+
+.message.user {
+    background: #007aff;
+    color: white;
+    margin-left: auto; /* 💡 This forces right alignment */
+    text-align: left; /* Keep text aligned normally */
+    width: fit-content;
+}
+
+.message.greeting {
+    /*background: rgba(29, 120, 120, 0.3);*/
+    background: linear-gradient(
+            90deg,
+            rgba(29, 120, 120, 0.3),
+            rgba(237, 254, 255, 0)
+    );
+    color: #000;
+    margin-right: auto;
+    text-align: left;
+    width: 70%;
+    align-self: flex-start;
+}
+
+/* --- Suggestion grid --- */
+.suggestion-grid {
+    display: grid;
+    margin-left: auto;
+    /* ✅ responsive columns */
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin-top: 2px;
+    height: fit-content;
+    flex: 1 1 95%;
+    max-width: 95%;
+}
+
+.message.suggestion {
+    position: relative;
+
+    /* ✅ responsive size */
+    width: clamp(96px, 18vw, 160px);
+    height: clamp(96px, 18vw, 160px);
+    border-radius: 50%;
+    overflow: hidden; /* 👈 hide any bleed at the edges */
+    border: 0 solid transparent; /* keeps hover border working */
+
+    /* 2. content centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    padding: 10px; /* keep, but circle is still ok with overflow hidden */
+    box-sizing: border-box;
+    text-wrap: pretty;
+    font-family: "Lucida Grande", serif;
+    font-size: 14px;
+    font-weight: 400;
+    /*font-style: italic;*/
+    color: #032137;
+
+    /* 3. no fully transparent stop → avoid “leak” */
+    background: radial-gradient(circle at 30% 20%,
+    rgba(255, 255, 255, 0.44),
+    rgba(255, 255, 255, 0) 60%
+    ),
+    linear-gradient(
+            170deg,
+            rgba(29, 120, 120, 0.58),
+            rgba(165, 243, 255, 0.18)
+    );
+    background-clip: padding-box;
+
+    /* 4. idle horizontal drift animation */
+    animation: fadeIn 0.6s ease forwards,
+    suggestionDrift 6s ease-in-out infinite;
+    will-change: transform;
+
+    /* 5. hover transition */
+    transition: transform 0.15s ease,
+    border-width 0.15s ease,
+    border-color 0.15s ease;
+}
+
+@keyframes suggestionDrift {
+    0% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(7px);
+    }
+    50% {
+        transform: translateX(0);
+    }
+    75% {
+        transform: translateX(-7px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.85); /* slight pop-in */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* Hover: pause drift + highlight border */
+.message.suggestion:hover {
+    animation-play-state: paused; /* optional: stop drifting while hovered */
+    transform: scale(1.04); /* tiny zoom */
+    border-color: rgba(29, 120, 120, 0.3);
+    border-width: 4px;
+}
+
+.message.thinking {
+    font-size: 12px;
+    color: rgba(96, 97, 99, 0.38);
+    margin-left: auto;
+    text-align: left;
+}
+
+
+/* PREMIUM BOT BUBBLE -------------------------------------------------- */
+.message.bot,
+.message.bot-first {
+    background: linear-gradient(
+            170deg,
+            rgba(93, 181, 213, 0.49),
+            rgba(65, 145, 255, 0.64)
+    );
+    color: #000;
+    border-radius: 24px;
+    align-self: flex-start;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+
+    /* depth + gloss */
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+
+    /* glassy feel */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    position: relative;
+
+    /* gentle drift animation */
+    animation: botFloat 6s ease-in-out infinite;
+}
+
+.message.bot-first {
+    background: linear-gradient(
+            160deg,
+            rgba(93, 181, 213, 0.63),
+            rgba(56, 179, 248, 0.59)
+    );
+    border-radius: 12px;
+    border-color: #131a2a;
+    width: fit-content;
+}
+
+/* === Compact rich-content styling inside bot bubbles === */
+.message.bot-first,
+.message.bot {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.4;
+}
+
+/* Headings: smaller, tighter, nicer */
+.message.bot-first h2,
+.message.bot h2 {
+    font-size: 16px;
+    margin: 4px 0 6px;
+    font-weight: 600;
+}
+
+.message.bot-first h3,
+.message.bot h3 {
+    font-size: 14px;
+    margin: 4px 0 4px;
+    font-weight: 600;
+}
+
+/* Paragraphs */
+.message.bot-first p,
+.message.bot p {
+    margin: 2px 0 4px;
+}
+
+/* Lists: kill huge gaps between <ul>s */
+.message.bot-first ul,
+.message.bot ul {
+    margin: 0 0 3px 18px; /* small vertical gap, slight indent */
+    padding-left: 0;
+}
+
+.message.bot-first li,
+.message.bot li {
+    margin: 0;
+    padding: 0;
+    list-style-type: disc;
+}
+
+/* Optional: make bold text pop a bit more */
+.message.bot-first strong,
+.message.bot strong {
+    font-weight: 600;
+}
+
+
+.message.bot:hover {
+    border-color: rgba(4, 143, 143, 0.66);
+    border-width: 4px;
+}
+
+/* glossy reflection highlight */
+.message.bot::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 45%;
+    bottom: 3px;
+    border-radius: 15px;
+    opacity: 0.4;
+    background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.55),
+            rgba(255, 255, 255, 0.0)
+    );
+    pointer-events: none;
+}
+
+/* smooth floating animation */
+@keyframes botFloat {
+    0% {
+        transform: translateY(0) translateX(0) scale(1);
+    }
+    25% {
+        transform: translateY(-0.5px) translateX(0.3px) scale(1.005);
+    }
+    50% {
+        transform: translateY(0) translateX(0) scale(1);
+    }
+    75% {
+        transform: translateY(0.5px) translateX(-0.3px) scale(0.997);
+    }
+    100% {
+        transform: translateY(0) translateX(0) scale(1);
+    }
+}
+
+
+.input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.input-row input {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 999px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    min-width: 0;
+}
+
+.input-row button {
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: none;
+    background: #007aff;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.input-row button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+#deep-thinking-btn {
+    margin-right: 8px;
+    border-radius: 4px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    background: rgba(33, 148, 161, 0.8);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+#deep-thinking-btn.active {
+    border: 2px solid #e5e5ea;
+    background: #00c8c8;
+    font-weight: 900;
+}
+
+
+.download-container {
+    margin: 4px 0 8px 0;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.download-button {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: none;
+    background: #34c759;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.download-button:hover {
+    opacity: 0.9;
+}
+
+.download-option {
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.download-option:hover {
+    background: #f2f2f7;
+}
+
+/* --- Hover Format Menu --- */
+
+.download-format-menu {
+    position: absolute;
+    top: 110%; /* Right below the main button */
+    right: 0; /* Right aligned with your current container */
+    display: flex;
+    gap: 0.4rem;
+    padding: 4px 6px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 999px;
+    backdrop-filter: blur(4px);
+    z-index: 20;
+}
+
+.download-format-menu.hidden {
+    display: none;
+}
+
+.download-format-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: none;
+    background: #e0e0e0; /* light grey to contrast with green main button */
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.download-format-btn:hover {
+    background: rgba(235, 255, 224, 0.92);
+}
+
+.preview-button {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: none;
+    background: #007aff;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.preview-button:hover {
+    opacity: 0.9;
+}
+
+.header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 10px;
+    flex-wrap: wrap; /* ✅ allow wrap on small screens */
+}
+
+#app-title {
+    margin: 0; /* prevent extra vertical shift */
+    margin-right: 10px;
+}
+
+.dropdown-container {
+    display: flex;
+    gap: 0.5rem; /* space between the two dropdowns */
+    align-items: center;
+}
+
+.language-select {
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #3a4b6a;
+    background: rgba(207, 248, 250, 0.76);
+    color: #0d0d10;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.model-select,
+.humanization {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #3a4b6a;
+    background: #131a2a;
+    color: #f5f7ff;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.model-select:focus {
+    outline: none;
+    border-color: #4f8cff;
+    box-shadow: 0 0 0 2px rgba(79, 140, 255, 0.3);
+}
+
+/* default background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* overlay does not block clicks */
+    background: rgba(29, 120, 120, 0.3);
+    z-index: -1; /* sits behind all content */
+}
+
+/* 🔄 mild pulsing (thinking) */
+body.thinking::before {
+    animation: bg-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes bg-pulse {
+    0% {
+        background-color: rgba(46, 236, 255, 0.16);
+    }
+    50% {
+        background-color: rgba(46, 236, 255, 0.34); /* a bit brighter but not too strong */
+    }
+    100% {
+        background-color: rgba(46, 236, 255, 0.16);
+    }
+}
+
+.message.company-bubble {
+    position: relative;
+    overflow: hidden;
+}
+
+.company-logo-bg {
+    /* styles are mostly set inline in JS; this is just in case */
+    pointer-events: none;
+}
+
+.company-bubble-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.company-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.company-body {
+    /* same font-size / styles as your normal bot message body */
+}

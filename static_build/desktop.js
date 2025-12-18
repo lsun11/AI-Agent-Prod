@@ -19,6 +19,7 @@ export class Desktop {
         void initHistoryPanel();
     }
     initGadgetBehavior() {
+        var _a, _b, _c, _d, _e, _f;
         const gadget = this.gadget;
         const header = this.header;
         const toggleBtn = this.toggleBtn;
@@ -78,7 +79,8 @@ export class Desktop {
                         if (h)
                             gadget.style.setProperty("--gadget-exp-h", h);
                     }
-                    catch (_a) { }
+                    catch (_a) {
+                    }
                 }
                 // keep whatever expanded size was last saved
                 gadget.classList.add("gadget--expanded");
@@ -93,6 +95,16 @@ export class Desktop {
             }
             else {
                 // going to collapsed:
+                // 🔥 Collapse must ignore any old drag/resize inline styles
+                gadget.style.removeProperty("position");
+                gadget.style.removeProperty("left");
+                gadget.style.removeProperty("top");
+                gadget.style.removeProperty("right");
+                gadget.style.removeProperty("bottom");
+                gadget.style.removeProperty("inset");
+                gadget.style.removeProperty("transform");
+                gadget.style.removeProperty("width");
+                gadget.style.removeProperty("height");
                 // save current expanded geometry (so resize persists)
                 if (gadget.classList.contains("gadget--expanded")) {
                     saveExpandedGeometry();
@@ -130,6 +142,12 @@ export class Desktop {
                 toggle();
             }
         });
+        if (gadget) {
+            const title = (_c = (_b = (_a = gadget.querySelector(".gadget-title")) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim()) !== null && _c !== void 0 ? _c : "";
+            const meta = (_f = (_e = (_d = gadget.querySelector(".gadget-meta")) === null || _d === void 0 ? void 0 : _d.textContent) === null || _e === void 0 ? void 0 : _e.trim()) !== null && _f !== void 0 ? _f : "";
+            gadget.setAttribute("data-title", title);
+            gadget.setAttribute("data-meta", meta);
+        }
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape")
                 setExpanded(false);

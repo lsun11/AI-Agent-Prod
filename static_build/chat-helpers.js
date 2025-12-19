@@ -1,7 +1,7 @@
 // static/chat-helpers.ts
-import { markdownToHtml } from "./markdown.js";
-import { RECOMMENDATION_STARTERS } from "./types.js";
-import { makePanelDraggable } from "./drag.js";
+import { markdownToHtml } from "./constants/markdown.js";
+import { RECOMMENDATION_STARTERS } from "./constants/types.js";
+import { makePanelDraggable } from "./helpers/drag.js";
 /**
  * Extracts a website URL from a chunk of markdown/text.
  */

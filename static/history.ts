@@ -1,6 +1,6 @@
 // static/history.ts
-import {makePanelDraggable} from "./drag.js";
-import type {LanguageCode} from "./types.js";
+import {makePanelDraggable} from "./helpers/drag.js";
+import type {LanguageCode} from "./constants/types.js";
 
 type HistoryEntry = {
     id: string;

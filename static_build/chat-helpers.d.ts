@@ -1,4 +1,4 @@
-import { type LanguageCode } from "./types.js";
+import { type LanguageCode } from "./constants/types.js";
 export interface CompanyVisual {
     name: string | null;
     website: string | null;

@@ -1,7 +1,7 @@
 // static/chat-helpers.ts
-import {markdownToHtml} from "./markdown.js";
-import {type LanguageCode, RECOMMENDATION_STARTERS} from "./types.js";
-import { makePanelDraggable } from "./drag.js";
+import {markdownToHtml} from "./constants/markdown.js";
+import {type LanguageCode, RECOMMENDATION_STARTERS} from "./constants/types.js";
+import { makePanelDraggable } from "./helpers/drag.js";
 
 export interface CompanyVisual {
     name: string | null;

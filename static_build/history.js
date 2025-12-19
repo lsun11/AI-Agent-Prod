@@ -1,5 +1,5 @@
 // static/history.ts
-import { makePanelDraggable } from "./drag.js";
+import { makePanelDraggable } from "./helpers/drag.js";
 function formatDateForHistory(iso) {
     if (!iso)
         return "";

@@ -1,8 +1,8 @@
 // static/desktop.ts
 import { ChatUI } from "./chat-ui.js";
 import { initHistoryPanel } from "./history.js";
-import { makePanelDraggable } from "./drag.js";
-import { makePanelResizable } from "./resize.js";
+import { makePanelDraggable } from "./helpers/drag.js";
+import { makePanelResizable } from "./helpers/resize.js";
 export class Desktop {
     constructor() {
         this.gadget = document.getElementById("ai-gadget");

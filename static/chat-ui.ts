@@ -1,14 +1,14 @@
 // static/chat-ui.ts
-import {DROPDOWN_OPTIONS_BY_ID} from "./configs.js";
-import type {SelectOption} from "./configs.js";
-import {markdownToHtml} from "./markdown.js";
+import {DROPDOWN_OPTIONS_BY_ID} from "./constants/configs.js";
+import type {SelectOption} from "./constants/configs.js";
+import {markdownToHtml} from "./constants/markdown.js";
 import {
     mapLanguageValue,
     translateLabel,
     getGreetingText,
     getFollowupText,
     applyInterfaceLanguage, refreshDropdownLabels
-} from "./language.js";
+} from "./constants/language.js";
 import {
     extractWebsiteUrl,
     splitReplyIntoBubbles,
@@ -16,7 +16,7 @@ import {
     createDownloadButtonElement,
     type CompanyVisual,
 } from "./chat-helpers.js";
-import type {Sender, LanguageCode} from "./types.js";
+import type {Sender, LanguageCode} from "./constants/types.js";
 import {setHistoryHeaderLanguage} from "./history.js";
 
 interface SuggestionsApiResponse {

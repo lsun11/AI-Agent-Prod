@@ -149,6 +149,7 @@ body.no-scroll {
     background: linear-gradient(90deg, rgba(180, 255, 242, 0.62), rgba(31, 189, 189, 0));
     cursor: pointer;
     user-select: none;
+    touch-action: none;
 }
 
 .gadget--collapsed .gadget-header {
@@ -215,6 +216,7 @@ body.no-scroll {
 
 /* Resizing Handles */
 .resize-handle {
+    touch-action: none;
     display: none;
     position: absolute;
     z-index: 9999;
@@ -333,7 +335,7 @@ body.no-scroll {
 
     .gadget--expanded {
         inset: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
-        border-radius: 0;
+        /*border-radius: 0;*/
     }
 
     .gadget--expanded .gadget-body {

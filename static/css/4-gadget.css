@@ -309,6 +309,123 @@ body.no-scroll {
     min-height: 64px;
 }
 
+/* ---------- Weather gadget visuals ---------- */
+
+.gadget--weather.gadget--collapsed {
+  width: 280px;
+  height: 72px;         /* collapsed = compact */
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* collapsed: only header visible */
+.gadget--weather.gadget--collapsed .gadget-body {
+  display: none;
+}
+
+/* make header drag-friendly on mobile (prevents background scroll during drag) */
+.gadget--weather .gadget-header {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* small “badge” look */
+.gadget--weather .gadget-meta {
+  opacity: 0.85;
+}
+
+/* expanded: show your panel */
+.gadget--weather.gadget--expanded .gadget-body {
+  display: block;
+  height: calc(100% - 52px);
+  overflow: auto;
+}
+
+/* body layout */
+.weather-panel {
+  padding: 12px 14px 14px;
+}
+
+.weather-top {
+  display: grid;
+  gap: 10px;
+}
+
+.weather-loc {
+  font-weight: 800;
+  color: rgba(0,0,0,0.75);
+}
+
+.weather-now {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.weather-icon {
+  font-size: 22px;
+}
+
+.weather-temp {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.weather-desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.weather-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.weather-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.weather-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weather-refresh {
+  border: 1px solid rgba(58, 75, 106, 0.25);
+  background: rgba(207, 248, 250, 0.76);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.weather-updated {
+  font-size: 11px;
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+.weather-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+
 /* ==========================================================================
    5. ANIMATIONS
    ========================================================================== */

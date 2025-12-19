@@ -7,8 +7,8 @@
             content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>AI Research Assistant</title>
-<!--    <link rel="stylesheet" href="/static/old_styles.css"/>-->
-        <link rel="stylesheet" href="/static/css/main.css"/>
+    <!--    <link rel="stylesheet" href="/static/old_styles.css"/>-->
+    <link rel="stylesheet" href="/static/css/main.css"/>
 </head>
 
 <body>
@@ -73,6 +73,41 @@
                             <div class="history-header"></div>
                             <div id="history-list"></div>
                         </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="gadget-slot" id="weather-gadget-slot">
+            <section class="gadget gadget--collapsed gadget--weather" id="weather-gadget" aria-expanded="false">
+                <div class="gadget-header" id="weather-gadget-header" role="button" tabindex="0">
+                    <div class="gadget-title">Weather</div>
+                    <div class="gadget-meta" id="weather-meta">Detecting location…</div>
+                    <button class="gadget-toggle" id="weather-gadget-toggle" type="button" aria-label="Toggle Weather">
+                        Open
+                    </button>
+                </div>
+
+                <div class="gadget-body" id="weather-gadget-body">
+                    <div class="weather-panel">
+                        <div class="weather-top">
+                            <div class="weather-loc" id="weather-loc">—</div>
+
+                            <div class="weather-now">
+                                <div class="weather-icon" id="weather-icon">⛅</div>
+                                <div class="weather-temp" id="weather-temp">—</div>
+                                <div class="weather-desc" id="weather-desc">—</div>
+                            </div>
+
+                            <div class="weather-stats" id="weather-stats"></div>
+
+                            <div class="weather-actions">
+                                <button class="weather-refresh" id="weather-refresh" type="button">Refresh</button>
+                                <div class="weather-updated" id="weather-updated"></div>
+                            </div>
+                        </div>
+
+                        <div class="weather-details" id="weather-details"></div>
                     </div>
                 </div>
             </section>

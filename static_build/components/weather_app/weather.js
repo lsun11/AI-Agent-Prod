@@ -5,7 +5,6 @@ function clamp(n, min, max) {
 function weatherCodeToTextAndIcon(code) {
     if (code === undefined || code === null)
         return { text: "Unknown", icon: "❓" };
-    // Minimal but useful mapping
     if (code === 0)
         return { text: "Clear", icon: "☀️" };
     if (code >= 1 && code <= 3)
@@ -28,7 +27,7 @@ async function fetchJsonWithTimeout(url, timeoutMs = 12000) {
     const controller = new AbortController();
     const t = window.setTimeout(() => controller.abort(), timeoutMs);
     try {
-        const resp = await fetch(url, { signal: controller.signal });
+        const resp = await fetch(url, { signal: controller.signal, credentials: "same-origin" });
         if (!resp.ok)
             throw new Error(`HTTP ${resp.status}`);
         return (await resp.json());
@@ -37,27 +36,34 @@ async function fetchJsonWithTimeout(url, timeoutMs = 12000) {
         window.clearTimeout(t);
     }
 }
+/**
+ * IMPORTANT: This class MUST receive the weather gadget root element,
+ * and query elements inside it (no document.getElementById) so multiple gadgets work.
+ */
 export class WeatherGadget {
-    constructor(gadget) {
-        var _a;
+    constructor(weatherGadgetRoot) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         this.coords = null;
         this.timer = null;
-        this.gadget = gadget;
-        this.metaEl = document.getElementById("weather-meta");
-        this.locEl = document.getElementById("weather-loc");
-        this.iconEl = document.getElementById("weather-icon");
-        this.tempEl = document.getElementById("weather-temp");
-        this.descEl = document.getElementById("weather-desc");
-        this.statsEl = document.getElementById("weather-stats");
-        this.updatedEl = document.getElementById("weather-updated");
-        this.detailsEl = document.getElementById("weather-details");
-        this.refreshBtn = document.getElementById("weather-refresh");
-        (_a = this.refreshBtn) === null || _a === void 0 ? void 0 : _a.addEventListener("click", (e) => {
+        this.root = weatherGadgetRoot;
+        // Prefer data-weather hooks; fall back to IDs if you used them
+        const q = (sel) => this.root.querySelector(sel);
+        this.metaEl = (_a = q('[data-weather="meta"]')) !== null && _a !== void 0 ? _a : q("#weather-meta");
+        this.locEl = (_b = q('[data-weather="loc"]')) !== null && _b !== void 0 ? _b : q("#weather-loc");
+        this.iconEl = (_c = q('[data-weather="icon"]')) !== null && _c !== void 0 ? _c : q("#weather-icon");
+        this.tempEl = (_d = q('[data-weather="temp"]')) !== null && _d !== void 0 ? _d : q("#weather-temp");
+        this.descEl = (_e = q('[data-weather="desc"]')) !== null && _e !== void 0 ? _e : q("#weather-desc");
+        this.statsEl = (_f = q('[data-weather="stats"]')) !== null && _f !== void 0 ? _f : q("#weather-stats");
+        this.updatedEl = (_g = q('[data-weather="updated"]')) !== null && _g !== void 0 ? _g : q("#weather-updated");
+        this.detailsEl = (_h = q('[data-weather="details"]')) !== null && _h !== void 0 ? _h : q("#weather-details");
+        this.refreshBtn =
+            ((_j = q('[data-weather="refresh"]')) !== null && _j !== void 0 ? _j : q("#weather-refresh"));
+        (_k = this.refreshBtn) === null || _k === void 0 ? void 0 : _k.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
             void this.refresh(true);
         });
-        // start immediately + every 30 minutes
+        // Start immediately + every 30 minutes
         void this.refresh(false);
         this.timer = window.setInterval(() => void this.refresh(false), 30 * 60 * 1000);
     }
@@ -67,9 +73,26 @@ export class WeatherGadget {
             this.timer = null;
         }
     }
+    isExpanded() {
+        return this.root.classList.contains("gadget--expanded") || this.root.getAttribute("aria-expanded") === "true";
+    }
     setMeta(text) {
+        // 1) update header meta element (if visible)
         if (this.metaEl)
             this.metaEl.textContent = text;
+        // 2) update collapsed-sphere belt source
+        // Your sphere belt uses ::after content: attr(data-meta)
+        this.root.setAttribute("data-meta", text);
+    }
+    setTitleOnceIfMissing() {
+        var _a, _b, _c, _d;
+        // Your sphere center title uses ::before attr(data-title)
+        if (this.root.getAttribute("data-title"))
+            return;
+        const title = ((_b = (_a = this.root.querySelector(".gadget-title")) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim()) ||
+            ((_d = (_c = this.root.querySelector('[data-weather="title"]')) === null || _c === void 0 ? void 0 : _c.textContent) === null || _d === void 0 ? void 0 : _d.trim()) ||
+            "Weather";
+        this.root.setAttribute("data-title", title);
     }
     loadCachedCoords() {
         try {
@@ -94,18 +117,9 @@ export class WeatherGadget {
             // ignore
         }
     }
-    async detectCoords(forcePrompt) {
-        // If we already have coords and not forcing, reuse
-        if (this.coords && !forcePrompt)
-            return this.coords;
-        const cached = this.loadCachedCoords();
-        if (cached && !forcePrompt) {
-            this.coords = cached;
-            return cached;
-        }
+    async tryBrowserGeolocation() {
         if (!navigator.geolocation)
             throw new Error("Geolocation not supported");
-        this.setMeta("Detecting location…");
         const pos = await new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
                 enableHighAccuracy: false,
@@ -113,51 +127,80 @@ export class WeatherGadget {
                 maximumAge: 10 * 60 * 1000,
             });
         });
-        const c = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        return { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    }
+    async tryGeoIpFallback() {
+        // hits your FastAPI /api/geoip
+        const geo = await fetchJsonWithTimeout("/api/geoip", 8000);
+        if (typeof geo.lat !== "number" || typeof geo.lon !== "number")
+            throw new Error("GeoIP did not return coords");
+        return { lat: geo.lat, lon: geo.lon };
+    }
+    getHardFallback() {
+        // Last resort: Seoul (since your timezone/data is Asia/Seoul)
+        return { lat: 37.5665, lon: 126.9780 };
+    }
+    async detectCoords(forcePrompt) {
+        // reuse in-memory
+        if (this.coords && !forcePrompt)
+            return this.coords;
+        // local cache
+        const cached = this.loadCachedCoords();
+        if (cached && !forcePrompt) {
+            this.coords = cached;
+            return cached;
+        }
+        this.setMeta("Detecting location…");
+        // 1) Browser geolocation (best)
+        try {
+            const c = await this.tryBrowserGeolocation();
+            this.coords = c;
+            this.cacheCoords(c);
+            return c;
+        }
+        catch (e) {
+            // continue to fallback
+            console.warn("[Weather] browser geolocation failed:", e);
+        }
+        // 2) GeoIP fallback (server-side IP lookup)
+        try {
+            this.setMeta("Using approximate location…");
+            const c = await this.tryGeoIpFallback();
+            this.coords = c;
+            this.cacheCoords(c);
+            return c;
+        }
+        catch (e) {
+            console.warn("[Weather] geoip fallback failed:", e);
+        }
+        // 3) Hard fallback
+        const c = this.getHardFallback();
         this.coords = c;
         this.cacheCoords(c);
+        this.setMeta("Using default location…");
         return c;
     }
-    buildForecastUrl(lat, lon) {
-        var _a;
-        const useF = (_a = navigator.language) === null || _a === void 0 ? void 0 : _a.toLowerCase().startsWith("en-us");
+    buildBackendWeatherUrl(lat, lon) {
+        const lang = (navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en";
         const params = new URLSearchParams({
-            latitude: String(lat),
-            longitude: String(lon),
-            timezone: "auto",
-            // current snapshot
-            current: [
-                "temperature_2m",
-                "apparent_temperature",
-                "relative_humidity_2m",
-                "precipitation",
-                "weather_code",
-                "wind_speed_10m",
-            ].join(","),
-            // daily summary for “details”
-            daily: [
-                "weather_code",
-                "temperature_2m_max",
-                "temperature_2m_min",
-                "precipitation_probability_max",
-            ].join(","),
+            lat: String(lat),
+            lon: String(lon),
+            lang,
         });
-        if (useF) {
-            params.set("temperature_unit", "fahrenheit");
-            params.set("wind_speed_unit", "mph");
-        }
-        return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+        return `/api/weather?${params.toString()}`;
     }
     async refresh(forcePrompt) {
         var _a, _b, _c, _d, _e, _f, _g;
+        this.setTitleOnceIfMissing();
         try {
             const { lat, lon } = await this.detectCoords(forcePrompt);
             this.setMeta("Fetching weather…");
-            const url = this.buildForecastUrl(lat, lon);
-            const data = await fetchJsonWithTimeout(url);
+            // IMPORTANT: call your backend (not Open-Meteo directly)
+            const url = this.buildBackendWeatherUrl(lat, lon);
+            const data = await fetchJsonWithTimeout(url, 12000);
             const cur = (_a = data.current) !== null && _a !== void 0 ? _a : {};
             const { text, icon } = weatherCodeToTextAndIcon(cur.weather_code);
-            // Location label (keep simple + reliable)
+            // Location label (simple; optionally enrich later with reverse geocode)
             const locLabel = `Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}${data.timezone ? ` • ${data.timezone}` : ""}`;
             if (this.locEl)
                 this.locEl.textContent = locLabel;
@@ -168,7 +211,7 @@ export class WeatherGadget {
             const t = cur.temperature_2m;
             if (this.tempEl)
                 this.tempEl.textContent = typeof t === "number" ? `${Math.round(t)}°` : "—";
-            // quick chips
+            // quick “chips”
             const chips = [];
             if (typeof cur.apparent_temperature === "number")
                 chips.push(`Feels ${Math.round(cur.apparent_temperature)}°`);
@@ -181,39 +224,45 @@ export class WeatherGadget {
             if (this.statsEl) {
                 this.statsEl.innerHTML = chips.map((c) => `<span class="weather-chip">${c}</span>`).join("");
             }
-            // details (only really useful when expanded, but safe to compute always)
+            // Only render details if expanded
             if (this.detailsEl) {
-                const daily = (_b = data.daily) !== null && _b !== void 0 ? _b : {};
-                const day0Max = (_c = daily.temperature_2m_max) === null || _c === void 0 ? void 0 : _c[0];
-                const day0Min = (_d = daily.temperature_2m_min) === null || _d === void 0 ? void 0 : _d[0];
-                const day0Pop = (_e = daily.precipitation_probability_max) === null || _e === void 0 ? void 0 : _e[0];
-                const day0Code = (_f = daily.weather_code) === null || _f === void 0 ? void 0 : _f[0];
-                const d0 = weatherCodeToTextAndIcon(day0Code);
-                const parts = [];
-                if (typeof day0Max === "number" && typeof day0Min === "number") {
-                    parts.push(`Today: ${Math.round(day0Min)}° – ${Math.round(day0Max)}°`);
+                if (!this.isExpanded()) {
+                    this.detailsEl.innerHTML = "";
                 }
-                if (typeof day0Pop === "number")
-                    parts.push(`Precip chance max: ${Math.round(clamp(day0Pop, 0, 100))}%`);
-                parts.push(`Outlook: ${d0.text} ${d0.icon}`);
-                this.detailsEl.innerHTML = parts.map((p) => `<div>${p}</div>`).join("");
+                else {
+                    const daily = (_b = data.daily) !== null && _b !== void 0 ? _b : {};
+                    const day0Max = (_c = daily.temperature_2m_max) === null || _c === void 0 ? void 0 : _c[0];
+                    const day0Min = (_d = daily.temperature_2m_min) === null || _d === void 0 ? void 0 : _d[0];
+                    const day0Pop = (_e = daily.precipitation_probability_max) === null || _e === void 0 ? void 0 : _e[0];
+                    const day0Code = (_f = daily.weather_code) === null || _f === void 0 ? void 0 : _f[0];
+                    const d0 = weatherCodeToTextAndIcon(day0Code);
+                    const parts = [];
+                    if (typeof day0Max === "number" && typeof day0Min === "number") {
+                        parts.push(`Today: ${Math.round(day0Min)}° – ${Math.round(day0Max)}°`);
+                    }
+                    if (typeof day0Pop === "number")
+                        parts.push(`Max precip chance: ${Math.round(clamp(day0Pop, 0, 100))}%`);
+                    parts.push(`Outlook: ${d0.text} ${d0.icon}`);
+                    if (data.source)
+                        parts.push(`Source: ${data.source}`);
+                    this.detailsEl.innerHTML = parts.map((p) => `<div>${p}</div>`).join("");
+                }
             }
-            // updated text
             if (this.updatedEl) {
                 const d = new Date();
                 this.updatedEl.textContent = `Updated ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
             }
-            // collapsed meta: show a “notification-like” one-liner
+            // Collapsed meta (belt / header)
             const metaOneLine = typeof t === "number" ? `${icon} ${Math.round(t)}° • ${text}` : `${icon} ${text}`;
             this.setMeta(metaOneLine);
         }
         catch (e) {
             const msg = (e === null || e === void 0 ? void 0 : e.code) === 1
-                ? "Location blocked — click Refresh to retry"
+                ? "Location blocked — click Refresh"
                 : `Weather unavailable — ${String((_g = e === null || e === void 0 ? void 0 : e.message) !== null && _g !== void 0 ? _g : e)}`;
             this.setMeta(msg);
             if (this.detailsEl)
-                this.detailsEl.textContent = "";
+                this.detailsEl.innerHTML = "";
             if (this.statsEl)
                 this.statsEl.innerHTML = "";
             if (this.locEl)
@@ -224,6 +273,8 @@ export class WeatherGadget {
                 this.descEl.textContent = "—";
             if (this.iconEl)
                 this.iconEl.textContent = "❓";
+            if (this.updatedEl)
+                this.updatedEl.textContent = "";
         }
     }
 }

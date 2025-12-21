@@ -1,4 +1,5 @@
 // static/weather.ts
+import { formatUtcOffsetLabel, buildPlaceLabel, weatherCodeToTexture } from "./weather_helpers.js";
 function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
 }
@@ -63,6 +64,7 @@ export class WeatherGadget {
             e.stopPropagation();
             void this.refresh(true);
         });
+        this.tzEl = q('[data-weather="tz"]');
         // Start immediately + every 30 minutes
         void this.refresh(false);
         this.timer = window.setInterval(() => void this.refresh(false), 30 * 60 * 1000);
@@ -117,6 +119,16 @@ export class WeatherGadget {
             // ignore
         }
     }
+    async reverseGeocode(lat, lon) {
+        try {
+            const params = new URLSearchParams({ lat: String(lat), lon: String(lon) });
+            return await fetchJsonWithTimeout(`/api/reverse_geocode?${params.toString()}`, 8000);
+        }
+        catch (e) {
+            console.warn("[Weather] reverse geocode failed:", e);
+            return null;
+        }
+    }
     async tryBrowserGeolocation() {
         if (!navigator.geolocation)
             throw new Error("Geolocation not supported");
@@ -127,6 +139,7 @@ export class WeatherGadget {
                 maximumAge: 10 * 60 * 1000,
             });
         });
+        console.log(pos);
         return { lat: pos.coords.latitude, lon: pos.coords.longitude };
     }
     async tryGeoIpFallback() {
@@ -199,18 +212,42 @@ export class WeatherGadget {
             const url = this.buildBackendWeatherUrl(lat, lon);
             const data = await fetchJsonWithTimeout(url, 12000);
             const cur = (_a = data.current) !== null && _a !== void 0 ? _a : {};
+            console.log(data);
             const { text, icon } = weatherCodeToTextAndIcon(cur.weather_code);
+            const texture = weatherCodeToTexture(cur.weather_code);
             // Location label (simple; optionally enrich later with reverse geocode)
-            const locLabel = `Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}${data.timezone ? ` • ${data.timezone}` : ""}`;
+            // 1) place line
+            const geo = await this.reverseGeocode(lat, lon);
+            const placeLine = buildPlaceLabel(geo, lat, lon);
             if (this.locEl)
-                this.locEl.textContent = locLabel;
+                this.locEl.textContent = placeLine;
+            // 2) timezone line (separate element OR append with newline if your UI supports it)
+            const tz = (geo === null || geo === void 0 ? void 0 : geo.timezone) || data.timezone; // prefer reverse-geocode timezone if present
+            if (this.updatedEl) {
+                // keep updatedEl as updated time; so use detailsEl or a dedicated timezone element if you have one
+                // If you DON'T have a dedicated element, reuse detailsEl's first line.
+            }
+            if (this.tzEl) {
+                const tz = (geo === null || geo === void 0 ? void 0 : geo.timezone) || data.timezone;
+                const utcLabel = tz ? formatUtcOffsetLabel(tz) : "UTC";
+                this.tzEl.textContent = tz ? `${utcLabel} • ${tz}` : utcLabel;
+            }
+            if (this.detailsEl) {
+                const utcLabel = tz ? formatUtcOffsetLabel(tz) : "UTC";
+                const tzLine = tz ? `${utcLabel} • ${tz}` : `${utcLabel}`;
+                // Put timezone line at top when expanded; keep collapsed clean
+                if (this.isExpanded()) {
+                    const existing = this.detailsEl.innerHTML;
+                    this.detailsEl.innerHTML = `<div class="weather-tz">${tzLine}</div>` + existing;
+                }
+            }
             if (this.iconEl)
                 this.iconEl.textContent = icon;
             if (this.descEl)
                 this.descEl.textContent = text;
             const t = cur.temperature_2m;
             if (this.tempEl)
-                this.tempEl.textContent = typeof t === "number" ? `${Math.round(t)}°` : "—";
+                this.tempEl.textContent = typeof t === "number" ? `${t}°` : "—";
             // quick “chips”
             const chips = [];
             if (typeof cur.apparent_temperature === "number")
@@ -238,7 +275,8 @@ export class WeatherGadget {
                     const d0 = weatherCodeToTextAndIcon(day0Code);
                     const parts = [];
                     if (typeof day0Max === "number" && typeof day0Min === "number") {
-                        parts.push(`Today: ${Math.round(day0Min)}° – ${Math.round(day0Max)}°`);
+                        parts.push(`Today:`);
+                        parts.push(`Min ${Math.round(day0Min)}°  Max ${Math.round(day0Max)}°`);
                     }
                     if (typeof day0Pop === "number")
                         parts.push(`Max precip chance: ${Math.round(clamp(day0Pop, 0, 100))}%`);
@@ -250,8 +288,12 @@ export class WeatherGadget {
             }
             if (this.updatedEl) {
                 const d = new Date();
-                this.updatedEl.textContent = `Updated ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+                this.updatedEl.textContent = `Updated ${d.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })}`;
             }
+            this.root.dataset.weather = texture;
             // Collapsed meta (belt / header)
             const metaOneLine = typeof t === "number" ? `${icon} ${Math.round(t)}° • ${text}` : `${icon} ${text}`;
             this.setMeta(metaOneLine);

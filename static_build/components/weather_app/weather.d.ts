@@ -15,6 +15,7 @@ export declare class WeatherGadget {
     private refreshBtn;
     private coords;
     private timer;
+    private tzEl;
     constructor(weatherGadgetRoot: HTMLElement);
     destroy(): void;
     private isExpanded;
@@ -22,6 +23,7 @@ export declare class WeatherGadget {
     private setTitleOnceIfMissing;
     private loadCachedCoords;
     private cacheCoords;
+    private reverseGeocode;
     private tryBrowserGeolocation;
     private tryGeoIpFallback;
     private getHardFallback;

@@ -1,8 +1,7 @@
 from __future__ import annotations
-
 from fastapi import APIRouter, HTTPException, Request
+from typing import Any, Optional, Dict
 import httpx
-from typing import Any, Optional
 
 router = APIRouter()
 
@@ -119,3 +118,55 @@ async def weather(lat: float, lon: float, lang: str = "en"):
             "firecrawl_error": "not wired yet",
         },
     )
+
+@router.get("/api/reverse_geocode")
+async def reverse_geocode(lat: float, lon: float):
+    """
+    Reverse geocode coords -> place label (city/admin/country).
+    Uses OpenStreetMap Nominatim.
+    """
+    lat_f = _safe_float(lat)
+    lon_f = _safe_float(lon)
+    if lat_f is None or lon_f is None:
+        raise HTTPException(status_code=400, detail="Invalid lat/lon")
+
+    # Nominatim requires a User-Agent
+    headers = {"User-Agent": "AI-Research-Assistant/1.0 (local-dev)"}
+
+    params = {
+        "format": "jsonv2",
+        "lat": str(lat_f),
+        "lon": str(lon_f),
+        "zoom": "10",              # city-ish
+        "addressdetails": "1",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0, headers=headers) as client:
+            r = await client.get("https://nominatim.openstreetmap.org/reverse", params=params)
+            r.raise_for_status()
+            data: Dict[str, Any] = r.json()
+
+        address = data.get("address", {}) or {}
+        # Nominatim uses different fields depending on place type
+        name = (
+            address.get("city")
+            or address.get("town")
+            or address.get("village")
+            or address.get("county")
+            or address.get("state_district")
+            or address.get("state")
+        )
+        admin1 = address.get("state") or address.get("region")
+        country = address.get("country")
+        country_code = address.get("country_code")
+
+        return {
+            "name": name,
+            "admin1": admin1,
+            "country": country,
+            "country_code": country_code,
+        }
+
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Reverse geocode failed: {str(e)}") from e

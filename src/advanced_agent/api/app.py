@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from .routes import downloads, suggestions, topics, chat, history
+from src.advanced_agent.api.routes.weather import router as weather_router
 
 def get_base_dir() -> Path:
     # When running as a PyInstaller bundle
@@ -44,5 +45,6 @@ def create_app() -> FastAPI:
     app.include_router(chat.router, prefix="")
     app.include_router(downloads.router, prefix="")
     app.include_router(history.router, prefix="")
+    app.include_router(weather_router, prefix="")
 
     return app

@@ -1,14 +1,20 @@
 // static/desktop.ts
-import {ChatUI} from "./chat-ui.js";
-import {initHistoryPanel} from "./history.js";
+import {ChatUI} from "./components/advanced-agent/chat-ui.js";
+import {initHistoryPanel} from "./components/advanced-agent/history.js";
 import {makePanelDraggable} from "./helpers/drag.js";
 import {makePanelResizable} from "./helpers/resize.js";
+import {WeatherGadget} from "./components/weather_app/weather.js";
+
 
 export class Desktop {
     private gadget: HTMLElement | null;
     private header: HTMLElement | null;
     private toggleBtn: HTMLButtonElement | null;
     private backdrop: HTMLElement | null;
+    private weatherGadgetEl: HTMLElement | null;
+    private weatherHeaderEl: HTMLElement | null;
+    private weatherToggleBtn: HTMLButtonElement | null;
+    private weather?: WeatherGadget;
 
     // Your existing components
     private chatUI?: ChatUI;
@@ -18,6 +24,12 @@ export class Desktop {
         this.header = document.getElementById("ai-gadget-header");
         this.toggleBtn = document.getElementById("ai-gadget-toggle") as HTMLButtonElement | null;
         this.backdrop = document.getElementById("gadget-backdrop");
+        this.weatherGadgetEl = document.getElementById("weather-gadget");
+        this.weatherHeaderEl = document.getElementById("weather-gadget-header");
+        this.weatherToggleBtn = document.getElementById("weather-gadget-toggle") as HTMLButtonElement | null;
+
+        this.initWeatherBehavior();
+        this.initWeatherLogic();
 
         this.initGadgetBehavior();
         this.initComponents();
@@ -106,16 +118,16 @@ export class Desktop {
                 }
             } else {
                 // going to collapsed:
-                  // 🔥 Collapse must ignore any old drag/resize inline styles
-                  gadget.style.removeProperty("position");
-                  gadget.style.removeProperty("left");
-                  gadget.style.removeProperty("top");
-                  gadget.style.removeProperty("right");
-                  gadget.style.removeProperty("bottom");
-                  gadget.style.removeProperty("inset");
-                  gadget.style.removeProperty("transform");
-                  gadget.style.removeProperty("width");
-                  gadget.style.removeProperty("height");
+                // 🔥 Collapse must ignore any old drag/resize inline styles
+                gadget.style.removeProperty("position");
+                gadget.style.removeProperty("left");
+                gadget.style.removeProperty("top");
+                gadget.style.removeProperty("right");
+                gadget.style.removeProperty("bottom");
+                gadget.style.removeProperty("inset");
+                gadget.style.removeProperty("transform");
+                gadget.style.removeProperty("width");
+                gadget.style.removeProperty("height");
 
                 // save current expanded geometry (so resize persists)
                 if (gadget.classList.contains("gadget--expanded")) {
@@ -162,12 +174,12 @@ export class Desktop {
             }
         });
 
-                        if (gadget) {
-  const title = gadget.querySelector(".gadget-title")?.textContent?.trim() ?? "";
-  const meta = gadget.querySelector(".gadget-meta")?.textContent?.trim() ?? "";
-  gadget.setAttribute("data-title", title);
-  gadget.setAttribute("data-meta", meta);
-}
+        if (gadget) {
+            const title = gadget.querySelector(".gadget-title")?.textContent?.trim() ?? "";
+            const meta = gadget.querySelector(".gadget-meta")?.textContent?.trim() ?? "";
+            gadget.setAttribute("data-title", title);
+            gadget.setAttribute("data-meta", meta);
+        }
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") setExpanded(false);
         });
@@ -187,5 +199,104 @@ export class Desktop {
             makePanelResizable(gadget, {minWidth: 360, minHeight: 260});
 
         }
+
+          if (this.weatherGadgetEl && this.weatherHeaderEl) {
+    makePanelDraggable(this.weatherGadgetEl, this.weatherHeaderEl, {
+      mode: "grab-offset",
+      inertia: true,
+      inertiaFriction: 0.92,
+      inertiaStopSpeed: 0.05,
+    });
+    makePanelResizable(this.weatherGadgetEl, { minWidth: 320, minHeight: 220 });
+  }
     }
+
+    private initWeatherLogic(): void {
+        if (this.weatherGadgetEl) {
+            this.weather = new WeatherGadget(this.weatherGadgetEl);
+        }
+    }
+
+    private initWeatherBehavior(): void {
+        const gadget = this.weatherGadgetEl;
+        const header = this.weatherHeaderEl;
+        const toggleBtn = this.weatherToggleBtn;
+        const backdrop = this.backdrop;
+
+        if (!gadget || !header || !toggleBtn || !backdrop) return;
+
+        const setExpanded = (expanded: boolean) => {
+            // Save expanded size on close (so resize persists)
+            if (!expanded && gadget.classList.contains("gadget--expanded")) {
+                const rect = gadget.getBoundingClientRect();
+                const size = {w: `${rect.width}px`, h: `${rect.height}px`};
+                localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
+            }
+
+            if (expanded) {
+                // apply saved size (if any)
+                const raw = localStorage.getItem("weather-gadget-expanded-size");
+                if (raw) {
+                    try {
+                        const {w, h} = JSON.parse(raw);
+                        if (w) gadget.style.width = w;
+                        if (h) gadget.style.height = h;
+                    } catch {
+                    }
+                }
+
+                gadget.classList.add("gadget--expanded");
+                gadget.classList.remove("gadget--collapsed");
+                backdrop.classList.add("visible");
+
+                // IMPORTANT: don’t let CSS inset override your persisted geometry
+                gadget.style.removeProperty("inset");
+                gadget.style.right = "auto";
+                gadget.style.bottom = "auto";
+                gadget.style.position = "fixed";
+
+                // refresh once when opening
+                void this.weather?.refresh(false);
+            } else {
+                // collapse: wipe geometry so collapsed stays compact + universal
+                gadget.style.removeProperty("position");
+                gadget.style.removeProperty("left");
+                gadget.style.removeProperty("top");
+                gadget.style.removeProperty("right");
+                gadget.style.removeProperty("bottom");
+                gadget.style.removeProperty("inset");
+                gadget.style.removeProperty("transform");
+                gadget.style.removeProperty("width");
+                gadget.style.removeProperty("height");
+
+                gadget.classList.remove("gadget--expanded");
+                gadget.classList.add("gadget--collapsed");
+                backdrop.classList.remove("visible");
+            }
+
+            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+            toggleBtn.textContent = expanded ? "Close" : "Open";
+        };
+
+        const toggle = () => {
+            const expanded = gadget.classList.contains("gadget--expanded");
+            setExpanded(!expanded);
+        };
+
+        header.addEventListener("click", (e) => {
+            if (e.target === toggleBtn) return;
+            toggle();
+        });
+
+        toggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle();
+        });
+
+        // optional: clicking backdrop closes whichever is open
+        backdrop.addEventListener("click", () => setExpanded(false));
+    }
+
+
 }

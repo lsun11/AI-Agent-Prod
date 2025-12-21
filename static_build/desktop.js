@@ -1,14 +1,20 @@
 // static/desktop.ts
-import { ChatUI } from "./chat-ui.js";
-import { initHistoryPanel } from "./history.js";
+import { ChatUI } from "./components/advanced-agent/chat-ui.js";
+import { initHistoryPanel } from "./components/advanced-agent/history.js";
 import { makePanelDraggable } from "./helpers/drag.js";
 import { makePanelResizable } from "./helpers/resize.js";
+import { WeatherGadget } from "./components/weather_app/weather.js";
 export class Desktop {
     constructor() {
         this.gadget = document.getElementById("ai-gadget");
         this.header = document.getElementById("ai-gadget-header");
         this.toggleBtn = document.getElementById("ai-gadget-toggle");
         this.backdrop = document.getElementById("gadget-backdrop");
+        this.weatherGadgetEl = document.getElementById("weather-gadget");
+        this.weatherHeaderEl = document.getElementById("weather-gadget-header");
+        this.weatherToggleBtn = document.getElementById("weather-gadget-toggle");
+        this.initWeatherBehavior();
+        this.initWeatherLogic();
         this.initGadgetBehavior();
         this.initComponents();
         this.initDraggables();
@@ -165,6 +171,95 @@ export class Desktop {
             });
             makePanelResizable(gadget, { minWidth: 360, minHeight: 260 });
         }
+        if (this.weatherGadgetEl && this.weatherHeaderEl) {
+            makePanelDraggable(this.weatherGadgetEl, this.weatherHeaderEl, {
+                mode: "grab-offset",
+                inertia: true,
+                inertiaFriction: 0.92,
+                inertiaStopSpeed: 0.05,
+            });
+            makePanelResizable(this.weatherGadgetEl, { minWidth: 320, minHeight: 220 });
+        }
+    }
+    initWeatherLogic() {
+        if (this.weatherGadgetEl) {
+            this.weather = new WeatherGadget(this.weatherGadgetEl);
+        }
+    }
+    initWeatherBehavior() {
+        const gadget = this.weatherGadgetEl;
+        const header = this.weatherHeaderEl;
+        const toggleBtn = this.weatherToggleBtn;
+        const backdrop = this.backdrop;
+        if (!gadget || !header || !toggleBtn || !backdrop)
+            return;
+        const setExpanded = (expanded) => {
+            var _a;
+            // Save expanded size on close (so resize persists)
+            if (!expanded && gadget.classList.contains("gadget--expanded")) {
+                const rect = gadget.getBoundingClientRect();
+                const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+                localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
+            }
+            if (expanded) {
+                // apply saved size (if any)
+                const raw = localStorage.getItem("weather-gadget-expanded-size");
+                if (raw) {
+                    try {
+                        const { w, h } = JSON.parse(raw);
+                        if (w)
+                            gadget.style.width = w;
+                        if (h)
+                            gadget.style.height = h;
+                    }
+                    catch (_b) {
+                    }
+                }
+                gadget.classList.add("gadget--expanded");
+                gadget.classList.remove("gadget--collapsed");
+                backdrop.classList.add("visible");
+                // IMPORTANT: don’t let CSS inset override your persisted geometry
+                gadget.style.removeProperty("inset");
+                gadget.style.right = "auto";
+                gadget.style.bottom = "auto";
+                gadget.style.position = "fixed";
+                // refresh once when opening
+                void ((_a = this.weather) === null || _a === void 0 ? void 0 : _a.refresh(false));
+            }
+            else {
+                // collapse: wipe geometry so collapsed stays compact + universal
+                gadget.style.removeProperty("position");
+                gadget.style.removeProperty("left");
+                gadget.style.removeProperty("top");
+                gadget.style.removeProperty("right");
+                gadget.style.removeProperty("bottom");
+                gadget.style.removeProperty("inset");
+                gadget.style.removeProperty("transform");
+                gadget.style.removeProperty("width");
+                gadget.style.removeProperty("height");
+                gadget.classList.remove("gadget--expanded");
+                gadget.classList.add("gadget--collapsed");
+                backdrop.classList.remove("visible");
+            }
+            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+            toggleBtn.textContent = expanded ? "Close" : "Open";
+        };
+        const toggle = () => {
+            const expanded = gadget.classList.contains("gadget--expanded");
+            setExpanded(!expanded);
+        };
+        header.addEventListener("click", (e) => {
+            if (e.target === toggleBtn)
+                return;
+            toggle();
+        });
+        toggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle();
+        });
+        // optional: clicking backdrop closes whichever is open
+        backdrop.addEventListener("click", () => setExpanded(false));
     }
 }
 //# sourceMappingURL=desktop.js.map

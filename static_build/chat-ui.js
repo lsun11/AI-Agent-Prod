@@ -2,8 +2,8 @@
 import { DROPDOWN_OPTIONS_BY_ID } from "./constants/configs.js";
 import { markdownToHtml } from "./constants/markdown.js";
 import { mapLanguageValue, translateLabel, getGreetingText, getFollowupText, applyInterfaceLanguage, refreshDropdownLabels } from "./constants/language.js";
-import { extractWebsiteUrl, splitReplyIntoBubbles, createCompanyBubbleElement, createDownloadButtonElement, } from "./chat-helpers.js";
-import { setHistoryHeaderLanguage } from "./history.js";
+import { extractWebsiteUrl, splitReplyIntoBubbles, createCompanyBubbleElement, createDownloadButtonElement, } from "./components/advanced-agent/chat-helpers.js";
+import { setHistoryHeaderLanguage } from "./components/advanced-agent/history.js";
 const STORAGE_KEYS = {
     language: "ai_research_language",
     model: "ai_research_model",

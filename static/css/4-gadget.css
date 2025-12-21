@@ -72,7 +72,7 @@ body.no-scroll {
 /* ==========================================================================
    2. COLLAPSED STATE (The Sphere)
    ========================================================================== */
-.gadget.gadget--collapsed {
+.gadget--ai.gadget--collapsed {
     width: 160px;
     height: 160px;
     min-width: 0 !important;
@@ -162,7 +162,7 @@ body.no-scroll {
 
 .gadget-title {
     font-weight: 800;
-    color: #0b3c46;
+    color: #042645;
     font-size: 14px;
 }
 
@@ -308,6 +308,205 @@ body.no-scroll {
     grid-column: span 6;
     min-height: 64px;
 }
+
+/* ---------- Weather gadget (collapsed) ---------- */
+.gadget--weather.gadget--collapsed {
+  width: 180px;
+  height: 132px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative; /* for ::before overlay */
+}
+
+/* texture overlay */
+.gadget--weather.gadget--collapsed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  background-position: center;
+  background-size: 220px 220px;
+  background-repeat: repeat;
+
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+  filter: contrast(0.9) saturate(0.85);
+}
+
+/* keep text above overlay */
+.gadget--weather.gadget--collapsed .gadget-header {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+/* --- Weather collapsed MUST show real header text --- */
+.gadget--weather.gadget--collapsed .gadget-title
+{
+    transform: translateY(-14px);
+    font-size: 16px;
+  display: block !important;
+}
+
+/* collapsed: header only */
+.gadget--weather.gadget--collapsed .gadget-body {
+  display: none;
+}
+
+/* ---------- Weather background mixin ---------- */
+.gadget--weather[data-weather] {
+  /* shared behavior */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  /* actual image comes from --weather-bg */
+  background-image: var(--weather-bg);
+}
+
+.gadget--weather[data-weather="clear"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/clear.gif");
+}
+
+.gadget--weather[data-weather="cloudy"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/cloudy.gif");
+}
+
+.gadget--weather[data-weather="fog"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/fog.gif");
+}
+
+.gadget--weather[data-weather="drizzle"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/drizzle.gif");
+}
+
+.gadget--weather[data-weather="rain"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/rain.gif");
+}
+
+.gadget--weather[data-weather="snow"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/snow.gif");
+}
+
+.gadget--weather[data-weather="thunderstorm"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/thunderstorm.gif");
+}
+
+.gadget--weather[data-weather="mixed"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/mixed.gif");
+}
+
+/* make header drag-friendly on mobile (prevents background scroll during drag) */
+.gadget--weather .gadget-header {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* small “badge” look */
+.gadget--weather .gadget-meta {
+  opacity: 0.85;
+}
+
+/* expanded: show your panel */
+.gadget--weather.gadget--expanded {
+        min-width: min(600px, 46vw);
+    min-height: min(420px, 43vh);
+}
+.gadget--weather.gadget--expanded .gadget-body {
+  display: block;
+  overflow: auto;
+}
+
+/* body layout */
+.weather-panel {
+  padding: 12px 14px 14px;
+}
+
+.weather-top {
+  display: grid;
+  gap: 10px;
+}
+
+.weather-loc {
+  font-weight: 800;
+  color: rgba(0,0,0,0.75);
+}
+
+.weather-now {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.weather-icon {
+  font-size: 22px;
+}
+
+.weather-temp {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.weather-desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.weather-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.weather-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.35);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.weather-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weather-refresh {
+  border: 1px solid rgba(58, 75, 106, 0.25);
+  background: rgba(207, 248, 250, 0.76);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.weather-updated {
+  font-size: 11px;
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+.weather-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 12px;
+  display: grid;
+  gap: 6px;
+}
+
 
 /* ==========================================================================
    5. ANIMATIONS

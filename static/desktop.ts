@@ -1,302 +1,265 @@
 // static/desktop.ts
-import {ChatUI} from "./components/advanced-agent/chat-ui.js";
-import {initHistoryPanel} from "./components/advanced-agent/history.js";
-import {makePanelDraggable} from "./helpers/drag.js";
-import {makePanelResizable} from "./helpers/resize.js";
-import {WeatherGadget} from "./components/weather_app/weather.js";
-
+import { ChatUI } from "./components/advanced-agent/chat-ui.js";
+import { initHistoryPanel } from "./components/advanced-agent/history.js";
+import { makePanelDraggable } from "./helpers/drag.js";
+import { makePanelResizable } from "./helpers/resize.js";
+import { WeatherGadget } from "./components/weather_app/weather.js";
 
 export class Desktop {
-    private gadget: HTMLElement | null;
-    private header: HTMLElement | null;
-    private toggleBtn: HTMLButtonElement | null;
-    private backdrop: HTMLElement | null;
-    private weatherGadgetEl: HTMLElement | null;
-    private weatherHeaderEl: HTMLElement | null;
-    private weatherToggleBtn: HTMLButtonElement | null;
-    private weather?: WeatherGadget;
+  private gadget: HTMLElement | null;
+  private header: HTMLElement | null;
+  private toggleBtn: HTMLButtonElement | null;
+  private backdrop: HTMLElement | null;
+  private weatherGadgetEl: HTMLElement | null;
+  private weatherHeaderEl: HTMLElement | null;
+  private weatherToggleBtn: HTMLButtonElement | null;
+  private weather?: WeatherGadget;
 
-    // Your existing components
-    private chatUI?: ChatUI;
+  private chatUI?: ChatUI;
 
-    constructor() {
-        this.gadget = document.getElementById("ai-gadget");
-        this.header = document.getElementById("ai-gadget-header");
-        this.toggleBtn = document.getElementById("ai-gadget-toggle") as HTMLButtonElement | null;
-        this.backdrop = document.getElementById("gadget-backdrop");
-        this.weatherGadgetEl = document.getElementById("weather-gadget");
-        this.weatherHeaderEl = document.getElementById("weather-gadget-header");
-        this.weatherToggleBtn = document.getElementById("weather-gadget-toggle") as HTMLButtonElement | null;
+  constructor() {
+    this.gadget = document.getElementById("ai-gadget");
+    this.header = document.getElementById("ai-gadget-header");
+    this.toggleBtn = document.getElementById("ai-gadget-toggle") as HTMLButtonElement | null;
+    this.backdrop = document.getElementById("gadget-backdrop");
+    this.weatherGadgetEl = document.getElementById("weather-gadget");
+    this.weatherHeaderEl = document.getElementById("weather-gadget-header");
+    this.weatherToggleBtn = document.getElementById("weather-gadget-toggle") as HTMLButtonElement | null;
 
-        this.initWeatherBehavior();
-        this.initWeatherLogic();
+    this.initWeatherBehavior();
+    this.initWeatherLogic();
 
-        this.initGadgetBehavior();
-        this.initComponents();
-        this.initDraggables();
-    }
+    this.initGadgetBehavior();
+    this.initComponents();
+    this.initDraggables();
+  }
 
-    private initComponents(): void {
-        // Your AI Agent components still mount using the same IDs inside gadget-body
-        this.chatUI = new ChatUI();
-        void initHistoryPanel();
-    }
+  private initComponents(): void {
+    this.chatUI = new ChatUI();
+    void initHistoryPanel();
+  }
 
-    private initGadgetBehavior(): void {
-        const gadget = this.gadget;
-        const header = this.header;
-        const toggleBtn = this.toggleBtn;
-        const backdrop = this.backdrop;
+  private initGadgetBehavior(): void {
+    const gadget = this.gadget;
+    const header = this.header;
+    const toggleBtn = this.toggleBtn;
+    const backdrop = this.backdrop;
 
-        if (!gadget || !header || !toggleBtn || !backdrop) return;
+    if (!gadget || !header || !toggleBtn || !backdrop) return;
 
-        const EXP_KEYS = ["left", "top", "width", "height", "right", "bottom", "inset"] as const;
+    const slot = document.getElementById("ai-gadget-slot");
 
-        const saveExpandedGeometry = () => {
-            const rect = gadget.getBoundingClientRect();
-            // save current inline size/pos (preferred), else rect
-            const data = {
-                left: gadget.style.left || `${rect.left}px`,
-                top: gadget.style.top || `${rect.top}px`,
-                width: gadget.style.width || `${rect.width}px`,
-                height: gadget.style.height || `${rect.height}px`,
-            };
-            gadget.dataset.expLeft = data.left;
-            gadget.dataset.expTop = data.top;
-            gadget.dataset.expWidth = data.width;
-            gadget.dataset.expHeight = data.height;
-        };
+    const setExpanded = (expanded: boolean) => {
+      // 1. POSITION NORMALIZATION (Crucial Fix)
+      // Regardless of open/close, freeze the current visual location into explicit Top/Left.
+      // We MUST remove 'inset' and 'transform' so they don't override our manual coordinates.
+      const rect = gadget.getBoundingClientRect();
 
-        const applyExpandedGeometry = () => {
-            const w = gadget.dataset.expWidth;
-            const h = gadget.dataset.expHeight;
+      gadget.style.removeProperty("inset");        // Remove the conflicting property
+      gadget.style.removeProperty("transform");    // Remove drag transforms
+      gadget.style.removeProperty("right");        // Ensure no edge constraints
+      gadget.style.removeProperty("bottom");
+
+      gadget.style.left = `${rect.left}px`;        // Hard-set current pixels
+      gadget.style.top = `${rect.top}px`;
+      gadget.style.position = "fixed";             // Lock it to viewport
+
+      if (expanded) {
+        // --- OPENING ---
+        // Restore saved size if it exists
+        const raw = localStorage.getItem("ai-gadget-expanded-size");
+        if (raw) {
+          try {
+            const { w, h } = JSON.parse(raw);
             if (w) gadget.style.width = w;
             if (h) gadget.style.height = h;
-
-            // Optional: if you also want expanded position to persist:
-            const l = gadget.dataset.expLeft;
-            const t = gadget.dataset.expTop;
-            if (l) gadget.style.left = l;
-            if (t) gadget.style.top = t;
-
-            // Make expanded state not re-apply inset sizing
-            gadget.style.removeProperty("inset");
-            gadget.style.right = "auto";
-            gadget.style.bottom = "auto";
-            gadget.style.position = "fixed";
-        };
-
-        const clearInlineGeometry = () => {
-            for (const k of EXP_KEYS) gadget.style.removeProperty(k);
-            gadget.style.position = ""; // let CSS drive collapsed layout
-        };
-
-        const slot = document.getElementById("ai-gadget-slot");
-
-        const setExpanded = (expanded: boolean) => {
-            if (expanded) {
-                // going to expanded:
-                const raw = localStorage.getItem("ai-gadget-expanded-size");
-                if (raw) {
-                    try {
-                        const {w, h} = JSON.parse(raw);
-                        if (w) gadget.style.setProperty("--gadget-exp-w", w);
-                        if (h) gadget.style.setProperty("--gadget-exp-h", h);
-                    } catch {
-                    }
-                }
-                // keep whatever expanded size was last saved
-                gadget.classList.add("gadget--expanded");
-                gadget.classList.remove("gadget--collapsed");
-                backdrop.classList.toggle("visible", true);
-
-                if (slot) slot.classList.toggle("is-expanded", expanded);
-
-                // apply saved expanded geometry if it exists
-                if (gadget.dataset.expWidth || gadget.dataset.expHeight) {
-                    applyExpandedGeometry();
-                }
-            } else {
-                // going to collapsed:
-                // 🔥 Collapse must ignore any old drag/resize inline styles
-                gadget.style.removeProperty("position");
-                gadget.style.removeProperty("left");
-                gadget.style.removeProperty("top");
-                gadget.style.removeProperty("right");
-                gadget.style.removeProperty("bottom");
-                gadget.style.removeProperty("inset");
-                gadget.style.removeProperty("transform");
-                gadget.style.removeProperty("width");
-                gadget.style.removeProperty("height");
-
-                // save current expanded geometry (so resize persists)
-                if (gadget.classList.contains("gadget--expanded")) {
-                    saveExpandedGeometry();
-                }
-
-                // collapse to universal small size
-                gadget.classList.remove("gadget--expanded");
-                gadget.classList.add("gadget--collapsed");
-                backdrop.classList.toggle("visible", false);
-
-                // critical: remove inline width/height/left/top so it doesn't stay huge
-                clearInlineGeometry();
-            }
-
-            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-            toggleBtn.textContent = expanded ? "Close" : "Open";
-            document.documentElement.classList.toggle("no-scroll", expanded);
-            document.body.classList.toggle("no-scroll", expanded);
-        };
-
-        const toggle = () => {
-            const expanded = gadget.classList.contains("gadget--expanded");
-            setExpanded(expanded);
-        };
-
-        header.addEventListener("click", (e) => {
-            if (e.target === toggleBtn) return;
-            toggle();
-        });
-
-        toggleBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggle();
-        });
-
-        //backdrop.addEventListener("click", () => setExpanded(false));
-
-        header.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggle();
-            }
-        });
-
-        if (gadget) {
-            const title = gadget.querySelector(".gadget-title")?.textContent?.trim() ?? "";
-            const meta = gadget.querySelector(".gadget-meta")?.textContent?.trim() ?? "";
-            gadget.setAttribute("data-title", title);
-            gadget.setAttribute("data-meta", meta);
-        }
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") setExpanded(false);
-        });
-    }
-
-    private initDraggables(): void {
-        const gadget = this.gadget;
-        const header = this.header;
-
-        if (gadget && header) {
-            makePanelDraggable(gadget, header, {
-                mode: "grab-offset",
-                inertia: true,
-                inertiaFriction: 0.92,
-                inertiaStopSpeed: 0.05,
-            });
-            makePanelResizable(gadget, {minWidth: 360, minHeight: 260});
-
+          } catch {}
         }
 
-          if (this.weatherGadgetEl && this.weatherHeaderEl) {
-    makePanelDraggable(this.weatherGadgetEl, this.weatherHeaderEl, {
-      mode: "grab-offset",
-      inertia: true,
-      inertiaFriction: 0.92,
-      inertiaStopSpeed: 0.05,
+        gadget.classList.add("gadget--expanded");
+        gadget.classList.remove("gadget--collapsed");
+        backdrop.classList.toggle("visible", true);
+
+        if (slot) slot.classList.toggle("is-expanded", expanded);
+
+        // Clear constraints that might limit expansion
+        gadget.style.removeProperty("min-width");
+        gadget.style.removeProperty("min-height");
+
+      } else {
+        // --- CLOSING ---
+        if (gadget.classList.contains("gadget--expanded")) {
+            // Save ONLY the dimensions (width/height)
+            const rect = gadget.getBoundingClientRect();
+            const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+            localStorage.setItem("ai-gadget-expanded-size", JSON.stringify(size));
+        }
+
+        // Wipe dimensions so CSS class can collapse it.
+        // DO NOT wipe left/top/position - we just set them above to keep it in place.
+        gadget.style.removeProperty("width");
+        gadget.style.removeProperty("height");
+        gadget.style.removeProperty("min-width");
+        gadget.style.removeProperty("min-height");
+
+        gadget.classList.remove("gadget--expanded");
+        gadget.classList.add("gadget--collapsed");
+        backdrop.classList.toggle("visible", false);
+      }
+
+      gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+      toggleBtn.textContent = expanded ? "Close" : "Open";
+      document.documentElement.classList.toggle("no-scroll", expanded);
+      document.body.classList.toggle("no-scroll", expanded);
+    };
+
+    const toggle = () => {
+      const expanded = gadget.classList.contains("gadget--expanded");
+      setExpanded(expanded);
+    };
+
+    header.addEventListener("click", (e) => {
+      if (e.target === toggleBtn) return;
+      toggle();
     });
-    makePanelResizable(this.weatherGadgetEl, { minWidth: 320, minHeight: 220 });
+
+    toggleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggle();
+    });
+
+    header.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+
+    if (gadget) {
+      const title = gadget.querySelector(".gadget-title")?.textContent?.trim() ?? "";
+      const meta = gadget.querySelector(".gadget-meta")?.textContent?.trim() ?? "";
+      gadget.setAttribute("data-title", title);
+      gadget.setAttribute("data-meta", meta);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setExpanded(false);
+    });
   }
+
+  private initDraggables(): void {
+    const gadget = this.gadget;
+    const header = this.header;
+
+    if (gadget && header) {
+      makePanelDraggable(gadget, header, {
+        mode: "grab-offset",
+        inertia: true,
+        inertiaFriction: 0.92,
+        inertiaStopSpeed: 0.05,
+      });
+      makePanelResizable(gadget, { minWidth: 360, minHeight: 260 });
     }
 
-    private initWeatherLogic(): void {
-        if (this.weatherGadgetEl) {
-            this.weather = new WeatherGadget(this.weatherGadgetEl);
+    if (this.weatherGadgetEl && this.weatherHeaderEl) {
+      makePanelDraggable(this.weatherGadgetEl, this.weatherHeaderEl, {
+        mode: "grab-offset",
+        inertia: true,
+        inertiaFriction: 0.92,
+        inertiaStopSpeed: 0.05,
+      });
+      makePanelResizable(this.weatherGadgetEl, { minWidth: 160, minHeight: 220 });
+    }
+  }
+
+  private initWeatherLogic(): void {
+    if (this.weatherGadgetEl) {
+      this.weather = new WeatherGadget(this.weatherGadgetEl);
+    }
+  }
+
+  private initWeatherBehavior(): void {
+    const gadget = this.weatherGadgetEl;
+    const header = this.weatherHeaderEl;
+    const toggleBtn = this.weatherToggleBtn;
+    const backdrop = this.backdrop;
+
+    if (!gadget || !header || !toggleBtn || !backdrop) return;
+
+    const setExpanded = (expanded: boolean) => {
+      // 1. POSITION NORMALIZATION (Crucial Fix)
+      // Capture rect, remove conflicting styles (inset/transform), enforce Top/Left
+      const rect = gadget.getBoundingClientRect();
+
+      gadget.style.removeProperty("inset");
+      gadget.style.removeProperty("transform");
+      gadget.style.removeProperty("right");
+      gadget.style.removeProperty("bottom");
+
+      gadget.style.left = `${rect.left}px`;
+      gadget.style.top = `${rect.top}px`;
+      gadget.style.position = "fixed";
+
+      if (expanded) {
+        // --- OPENING ---
+        const raw = localStorage.getItem("weather-gadget-expanded-size");
+        if (raw) {
+          try {
+            const { w, h } = JSON.parse(raw);
+            if (w) gadget.style.width = w;
+            if (h) gadget.style.height = h;
+          } catch {}
         }
-    }
 
-    private initWeatherBehavior(): void {
-        const gadget = this.weatherGadgetEl;
-        const header = this.weatherHeaderEl;
-        const toggleBtn = this.weatherToggleBtn;
-        const backdrop = this.backdrop;
+        gadget.classList.add("gadget--expanded");
+        gadget.classList.remove("gadget--collapsed");
+        backdrop.classList.add("visible");
 
-        if (!gadget || !header || !toggleBtn || !backdrop) return;
+        gadget.style.removeProperty("min-width");
+        gadget.style.removeProperty("min-height");
 
-        const setExpanded = (expanded: boolean) => {
-            // Save expanded size on close (so resize persists)
-            if (!expanded && gadget.classList.contains("gadget--expanded")) {
-                const rect = gadget.getBoundingClientRect();
-                const size = {w: `${rect.width}px`, h: `${rect.height}px`};
-                localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
-            }
+        void this.weather?.refresh(false);
 
-            if (expanded) {
-                // apply saved size (if any)
-                const raw = localStorage.getItem("weather-gadget-expanded-size");
-                if (raw) {
-                    try {
-                        const {w, h} = JSON.parse(raw);
-                        if (w) gadget.style.width = w;
-                        if (h) gadget.style.height = h;
-                    } catch {
-                    }
-                }
+      } else {
+        // --- CLOSING ---
+        if (gadget.classList.contains("gadget--expanded")) {
+            const rect = gadget.getBoundingClientRect();
+            const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+            localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
+        }
 
-                gadget.classList.add("gadget--expanded");
-                gadget.classList.remove("gadget--collapsed");
-                backdrop.classList.add("visible");
+        // Wipe dimensions only. Position stays locked.
+        gadget.style.removeProperty("width");
+        gadget.style.removeProperty("height");
+        gadget.style.removeProperty("min-width");
+        gadget.style.removeProperty("min-height");
 
-                // IMPORTANT: don’t let CSS inset override your persisted geometry
-                gadget.style.removeProperty("inset");
-                gadget.style.right = "auto";
-                gadget.style.bottom = "auto";
-                gadget.style.position = "fixed";
+        gadget.classList.remove("gadget--expanded");
+        gadget.classList.add("gadget--collapsed");
+        backdrop.classList.remove("visible");
+      }
 
-                // refresh once when opening
-                void this.weather?.refresh(false);
-            } else {
-                // collapse: wipe geometry so collapsed stays compact + universal
-                gadget.style.removeProperty("position");
-                gadget.style.removeProperty("left");
-                gadget.style.removeProperty("top");
-                gadget.style.removeProperty("right");
-                gadget.style.removeProperty("bottom");
-                gadget.style.removeProperty("inset");
-                gadget.style.removeProperty("transform");
-                gadget.style.removeProperty("width");
-                gadget.style.removeProperty("height");
+      gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+      toggleBtn.textContent = expanded ? "Close" : "Open";
+    };
 
-                gadget.classList.remove("gadget--expanded");
-                gadget.classList.add("gadget--collapsed");
-                backdrop.classList.remove("visible");
-            }
+    const toggle = () => {
+      const expanded = gadget.classList.contains("gadget--expanded");
+      setExpanded(!expanded);
+    };
 
-            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-            toggleBtn.textContent = expanded ? "Close" : "Open";
-        };
+    header.addEventListener("click", (e) => {
+      if (e.target === toggleBtn) return;
+      toggle();
+    });
 
-        const toggle = () => {
-            const expanded = gadget.classList.contains("gadget--expanded");
-            setExpanded(!expanded);
-        };
+    toggleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggle();
+    });
 
-        header.addEventListener("click", (e) => {
-            if (e.target === toggleBtn) return;
-            toggle();
-        });
-
-        toggleBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggle();
-        });
-
-        // optional: clicking backdrop closes whichever is open
-        backdrop.addEventListener("click", () => setExpanded(false));
-    }
-
-
+    backdrop.addEventListener("click", () => setExpanded(false));
+  }
 }

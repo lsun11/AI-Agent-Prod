@@ -67,6 +67,7 @@ export class WeatherGadget {
             void this.refresh(true);
         });
         this.tzEl = q('[data-weather="tz"]');
+        this.forecastEl = q('[data-weather="forecast"]');
         // Start immediately + every 30 minutes
         void this.refresh(false);
         this.timer = window.setInterval(() => void this.refresh(false), 30 * 60 * 1000);
@@ -212,6 +213,7 @@ export class WeatherGadget {
             // IMPORTANT: call your backend (not Open-Meteo directly)
             const url = this.buildBackendWeatherUrl(lat, lon);
             const data = await fetchJsonWithTimeout(url, 12000);
+            this.render7Day(data.daily);
             const cur = (_a = data.current) !== null && _a !== void 0 ? _a : {};
             console.log(data);
             const { text, icon } = weatherCodeToTextAndIcon(cur.weather_code);
@@ -321,7 +323,82 @@ export class WeatherGadget {
                 this.iconEl.textContent = "❓";
             if (this.updatedEl)
                 this.updatedEl.textContent = "";
+            if (this.forecastEl)
+                this.forecastEl.innerHTML = "";
         }
+    }
+    formatDow(dateStr) {
+        // Open-Meteo daily.time is "YYYY-MM-DD"
+        const d = new Date(`${dateStr}T00:00:00`);
+        return d.toLocaleDateString(undefined, { weekday: "short" });
+    }
+    render7Day(daily) {
+        var _a, _b, _c, _d, _e;
+        if (!this.forecastEl)
+            return;
+        // Only show in expanded state
+        if (!this.isExpanded()) {
+            this.forecastEl.innerHTML = "";
+            return;
+        }
+        const times = (_a = daily === null || daily === void 0 ? void 0 : daily.time) !== null && _a !== void 0 ? _a : [];
+        const codes = (_b = daily === null || daily === void 0 ? void 0 : daily.weather_code) !== null && _b !== void 0 ? _b : [];
+        const tmax = (_c = daily === null || daily === void 0 ? void 0 : daily.temperature_2m_max) !== null && _c !== void 0 ? _c : [];
+        const tmin = (_d = daily === null || daily === void 0 ? void 0 : daily.temperature_2m_min) !== null && _d !== void 0 ? _d : [];
+        const pop = (_e = daily === null || daily === void 0 ? void 0 : daily.precipitation_probability_max) !== null && _e !== void 0 ? _e : [];
+        const n = Math.min(7, times.length, codes.length, tmax.length, tmin.length);
+        if (n <= 0) {
+            this.forecastEl.innerHTML = "";
+            return;
+        }
+        // Week range for relative bars
+        let weekMin = Number.POSITIVE_INFINITY;
+        let weekMax = Number.NEGATIVE_INFINITY;
+        for (let i = 0; i < n; i++) {
+            if (typeof tmin[i] === "number")
+                weekMin = Math.min(weekMin, tmin[i]);
+            if (typeof tmax[i] === "number")
+                weekMax = Math.max(weekMax, tmax[i]);
+        }
+        const span = Math.max(1, weekMax - weekMin);
+        const cards = [];
+        for (let i = 0; i < n; i++) {
+            const code = codes[i];
+            const { text, icon } = weatherCodeToTextAndIcon(code);
+            const minV = typeof tmin[i] === "number" ? Math.round(tmin[i]) : NaN;
+            const maxV = typeof tmax[i] === "number" ? Math.round(tmax[i]) : NaN;
+            const popV = typeof pop[i] === "number" ? Math.round(clamp(pop[i], 0, 100)) : null;
+            // Bar position/width based on min/max within week range
+            const leftPct = typeof tmin[i] === "number" ? ((tmin[i] - weekMin) / span) * 100 : 0;
+            const widthPct = typeof tmin[i] === "number" && typeof tmax[i] === "number"
+                ? ((tmax[i] - tmin[i]) / span) * 100
+                : 0;
+            cards.push(`
+      <div class="weather-day">
+        <div class="weather-day-top">
+          <div class="weather-dow">${this.formatDow(times[i])}</div>
+          <div class="weather-icon" aria-hidden="true">${icon}</div>
+        </div>
+
+        <div class="weather-cond" title="${text}">${text}</div>
+
+        <div class="weather-temps">
+          <div class="weather-min">${Number.isFinite(minV) ? `${minV}°` : "—"}</div>
+          <div class="weather-max">${Number.isFinite(maxV) ? `${maxV}°` : "—"}</div>
+        </div>
+
+        <div class="weather-bar" aria-hidden="true">
+          <span style="margin-left:${leftPct.toFixed(1)}%; width:${Math.max(2, widthPct).toFixed(1)}%"></span>
+        </div>
+
+        <div class="weather-pop">
+          <span aria-hidden="true">💧</span>
+          <span>${popV === null ? "—" : `${popV}%`}</span>
+        </div>
+      </div>
+    `);
+        }
+        this.forecastEl.innerHTML = cards.join("");
     }
 }
 //# sourceMappingURL=weather.js.map

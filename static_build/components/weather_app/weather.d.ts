@@ -16,6 +16,7 @@ export declare class WeatherGadget {
     private coords;
     private timer;
     private tzEl;
+    private forecastEl;
     constructor(weatherGadgetRoot: HTMLElement);
     destroy(): void;
     private isExpanded;
@@ -30,5 +31,7 @@ export declare class WeatherGadget {
     private detectCoords;
     private buildBackendWeatherUrl;
     refresh(forcePrompt: boolean): Promise<void>;
+    private formatDow;
+    private render7Day;
 }
 //# sourceMappingURL=weather.d.ts.map

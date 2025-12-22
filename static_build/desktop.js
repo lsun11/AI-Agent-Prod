@@ -20,7 +20,6 @@ export class Desktop {
         this.initDraggables();
     }
     initComponents() {
-        // Your AI Agent components still mount using the same IDs inside gadget-body
         this.chatUI = new ChatUI();
         void initHistoryPanel();
     }
@@ -32,95 +31,59 @@ export class Desktop {
         const backdrop = this.backdrop;
         if (!gadget || !header || !toggleBtn || !backdrop)
             return;
-        const EXP_KEYS = ["left", "top", "width", "height", "right", "bottom", "inset"];
-        const saveExpandedGeometry = () => {
-            const rect = gadget.getBoundingClientRect();
-            // save current inline size/pos (preferred), else rect
-            const data = {
-                left: gadget.style.left || `${rect.left}px`,
-                top: gadget.style.top || `${rect.top}px`,
-                width: gadget.style.width || `${rect.width}px`,
-                height: gadget.style.height || `${rect.height}px`,
-            };
-            gadget.dataset.expLeft = data.left;
-            gadget.dataset.expTop = data.top;
-            gadget.dataset.expWidth = data.width;
-            gadget.dataset.expHeight = data.height;
-        };
-        const applyExpandedGeometry = () => {
-            const w = gadget.dataset.expWidth;
-            const h = gadget.dataset.expHeight;
-            if (w)
-                gadget.style.width = w;
-            if (h)
-                gadget.style.height = h;
-            // Optional: if you also want expanded position to persist:
-            const l = gadget.dataset.expLeft;
-            const t = gadget.dataset.expTop;
-            if (l)
-                gadget.style.left = l;
-            if (t)
-                gadget.style.top = t;
-            // Make expanded state not re-apply inset sizing
-            gadget.style.removeProperty("inset");
-            gadget.style.right = "auto";
-            gadget.style.bottom = "auto";
-            gadget.style.position = "fixed";
-        };
-        const clearInlineGeometry = () => {
-            for (const k of EXP_KEYS)
-                gadget.style.removeProperty(k);
-            gadget.style.position = ""; // let CSS drive collapsed layout
-        };
         const slot = document.getElementById("ai-gadget-slot");
         const setExpanded = (expanded) => {
+            // 1. POSITION NORMALIZATION (Crucial Fix)
+            // Regardless of open/close, freeze the current visual location into explicit Top/Left.
+            // We MUST remove 'inset' and 'transform' so they don't override our manual coordinates.
+            const rect = gadget.getBoundingClientRect();
+            gadget.style.removeProperty("inset"); // Remove the conflicting property
+            gadget.style.removeProperty("transform"); // Remove drag transforms
+            gadget.style.removeProperty("right"); // Ensure no edge constraints
+            gadget.style.removeProperty("bottom");
+            gadget.style.left = `${rect.left}px`; // Hard-set current pixels
+            gadget.style.top = `${rect.top}px`;
+            gadget.style.position = "fixed"; // Lock it to viewport
             if (expanded) {
-                // going to expanded:
+                // --- OPENING ---
+                // Restore saved size if it exists
                 const raw = localStorage.getItem("ai-gadget-expanded-size");
                 if (raw) {
                     try {
                         const { w, h } = JSON.parse(raw);
                         if (w)
-                            gadget.style.setProperty("--gadget-exp-w", w);
+                            gadget.style.width = w;
                         if (h)
-                            gadget.style.setProperty("--gadget-exp-h", h);
+                            gadget.style.height = h;
                     }
-                    catch (_a) {
-                    }
+                    catch (_a) { }
                 }
-                // keep whatever expanded size was last saved
                 gadget.classList.add("gadget--expanded");
                 gadget.classList.remove("gadget--collapsed");
                 backdrop.classList.toggle("visible", true);
                 if (slot)
                     slot.classList.toggle("is-expanded", expanded);
-                // apply saved expanded geometry if it exists
-                if (gadget.dataset.expWidth || gadget.dataset.expHeight) {
-                    applyExpandedGeometry();
-                }
+                // Clear constraints that might limit expansion
+                gadget.style.removeProperty("min-width");
+                gadget.style.removeProperty("min-height");
             }
             else {
-                // going to collapsed:
-                // 🔥 Collapse must ignore any old drag/resize inline styles
-                gadget.style.removeProperty("position");
-                gadget.style.removeProperty("left");
-                gadget.style.removeProperty("top");
-                gadget.style.removeProperty("right");
-                gadget.style.removeProperty("bottom");
-                gadget.style.removeProperty("inset");
-                gadget.style.removeProperty("transform");
+                // --- CLOSING ---
+                if (gadget.classList.contains("gadget--expanded")) {
+                    // Save ONLY the dimensions (width/height)
+                    const rect = gadget.getBoundingClientRect();
+                    const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+                    localStorage.setItem("ai-gadget-expanded-size", JSON.stringify(size));
+                }
+                // Wipe dimensions so CSS class can collapse it.
+                // DO NOT wipe left/top/position - we just set them above to keep it in place.
                 gadget.style.removeProperty("width");
                 gadget.style.removeProperty("height");
-                // save current expanded geometry (so resize persists)
-                if (gadget.classList.contains("gadget--expanded")) {
-                    saveExpandedGeometry();
-                }
-                // collapse to universal small size
+                gadget.style.removeProperty("min-width");
+                gadget.style.removeProperty("min-height");
                 gadget.classList.remove("gadget--expanded");
                 gadget.classList.add("gadget--collapsed");
                 backdrop.classList.toggle("visible", false);
-                // critical: remove inline width/height/left/top so it doesn't stay huge
-                clearInlineGeometry();
             }
             gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
             toggleBtn.textContent = expanded ? "Close" : "Open";
@@ -141,7 +104,6 @@ export class Desktop {
             e.stopPropagation();
             toggle();
         });
-        //backdrop.addEventListener("click", () => setExpanded(false));
         header.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -178,7 +140,7 @@ export class Desktop {
                 inertiaFriction: 0.92,
                 inertiaStopSpeed: 0.05,
             });
-            makePanelResizable(this.weatherGadgetEl, { minWidth: 320, minHeight: 220 });
+            makePanelResizable(this.weatherGadgetEl, { minWidth: 160, minHeight: 220 });
         }
     }
     initWeatherLogic() {
@@ -195,14 +157,18 @@ export class Desktop {
             return;
         const setExpanded = (expanded) => {
             var _a;
-            // Save expanded size on close (so resize persists)
-            if (!expanded && gadget.classList.contains("gadget--expanded")) {
-                const rect = gadget.getBoundingClientRect();
-                const size = { w: `${rect.width}px`, h: `${rect.height}px` };
-                localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
-            }
+            // 1. POSITION NORMALIZATION (Crucial Fix)
+            // Capture rect, remove conflicting styles (inset/transform), enforce Top/Left
+            const rect = gadget.getBoundingClientRect();
+            gadget.style.removeProperty("inset");
+            gadget.style.removeProperty("transform");
+            gadget.style.removeProperty("right");
+            gadget.style.removeProperty("bottom");
+            gadget.style.left = `${rect.left}px`;
+            gadget.style.top = `${rect.top}px`;
+            gadget.style.position = "fixed";
             if (expanded) {
-                // apply saved size (if any)
+                // --- OPENING ---
                 const raw = localStorage.getItem("weather-gadget-expanded-size");
                 if (raw) {
                     try {
@@ -212,31 +178,27 @@ export class Desktop {
                         if (h)
                             gadget.style.height = h;
                     }
-                    catch (_b) {
-                    }
+                    catch (_b) { }
                 }
                 gadget.classList.add("gadget--expanded");
                 gadget.classList.remove("gadget--collapsed");
                 backdrop.classList.add("visible");
-                // IMPORTANT: don’t let CSS inset override your persisted geometry
-                gadget.style.removeProperty("inset");
-                gadget.style.right = "auto";
-                gadget.style.bottom = "auto";
-                gadget.style.position = "fixed";
-                // refresh once when opening
+                gadget.style.removeProperty("min-width");
+                gadget.style.removeProperty("min-height");
                 void ((_a = this.weather) === null || _a === void 0 ? void 0 : _a.refresh(false));
             }
             else {
-                // collapse: wipe geometry so collapsed stays compact + universal
-                gadget.style.removeProperty("position");
-                gadget.style.removeProperty("left");
-                gadget.style.removeProperty("top");
-                gadget.style.removeProperty("right");
-                gadget.style.removeProperty("bottom");
-                gadget.style.removeProperty("inset");
-                gadget.style.removeProperty("transform");
+                // --- CLOSING ---
+                if (gadget.classList.contains("gadget--expanded")) {
+                    const rect = gadget.getBoundingClientRect();
+                    const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+                    localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
+                }
+                // Wipe dimensions only. Position stays locked.
                 gadget.style.removeProperty("width");
                 gadget.style.removeProperty("height");
+                gadget.style.removeProperty("min-width");
+                gadget.style.removeProperty("min-height");
                 gadget.classList.remove("gadget--expanded");
                 gadget.classList.add("gadget--collapsed");
                 backdrop.classList.remove("visible");
@@ -258,7 +220,6 @@ export class Desktop {
             e.stopPropagation();
             toggle();
         });
-        // optional: clicking backdrop closes whichever is open
         backdrop.addEventListener("click", () => setExpanded(false));
     }
 }

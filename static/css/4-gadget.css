@@ -98,7 +98,7 @@ body.no-scroll {
     pointer-events: none;
     z-index: 3;
     background: url("/static/assets/backgrounds/giphy.gif") center / 180px 180px repeat;
-    opacity: 0.22;
+    opacity: 0.92;
     mix-blend-mode: soft-light;
     filter: contrast(0.9) saturate(0.85);
 }
@@ -335,6 +335,10 @@ body.no-scroll {
   filter: contrast(0.9) saturate(0.85);
 }
 
+.gadget--weather.gadget--collapsed::after {
+    top: 75%;
+}
+
 /* keep text above overlay */
 .gadget--weather.gadget--collapsed .gadget-header {
   position: relative;
@@ -370,6 +374,17 @@ body.no-scroll {
 
   /* actual image comes from --weather-bg */
   background-image: var(--weather-bg);
+}
+
+.weather-meta-line{
+    position: relative;
+    bottom: 17px;
+    color: #001529;
+    font-weight: 600;
+}
+
+.gadget--weather[data-weather="init"] {
+  --weather-bg: url("/static/assets/backgrounds/weather/earth.gif");
 }
 
 .gadget--weather[data-weather="clear"] {
@@ -424,6 +439,10 @@ body.no-scroll {
 .gadget--weather.gadget--expanded .gadget-body {
   display: block;
   overflow: auto;
+}
+
+.gadget--weather.gadget--expanded .weather-meta-line {
+  display: none;
 }
 
 /* body layout */
@@ -540,4 +559,18 @@ body.no-scroll {
     .gadget--expanded .gadget-body {
         height: calc(100% - 56px);
     }
+
+      .desktop {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .desktop-grid {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
 }

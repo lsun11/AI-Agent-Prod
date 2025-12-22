@@ -80,7 +80,9 @@ export class WeatherGadget {
 
     constructor(weatherGadgetRoot: HTMLElement) {
         this.root = weatherGadgetRoot;
+        this.root.setAttribute("data-weather", "init");
 
+        this.setMeta("Loading weather…");
         // Prefer data-weather hooks; fall back to IDs if you used them
         const q = <T extends Element>(sel: string) => this.root.querySelector(sel) as T | null;
 
@@ -124,7 +126,6 @@ export class WeatherGadget {
         if (this.metaEl) this.metaEl.textContent = text;
 
         // 2) update collapsed-sphere belt source
-        // Your sphere belt uses ::after content: attr(data-meta)
         this.root.setAttribute("data-meta", text);
     }
 
@@ -353,6 +354,8 @@ export class WeatherGadget {
             this.root.dataset.weather = texture;
             // Collapsed meta (belt / header)
             const metaOneLine = typeof t === "number" ? `${icon} ${Math.round(t)}° • ${text}` : `${icon} ${text}`;
+                    const el = this.root.querySelector(".weather-meta-line");
+        if (el) el.textContent = placeLine;
             this.setMeta(metaOneLine);
         } catch (e: any) {
             const msg =

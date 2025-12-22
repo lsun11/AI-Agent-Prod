@@ -1,9 +1,3 @@
-/* ========================================================= */
-/* ✅ Desktop "main window" + Gadget container (NEW)         */
-/* - AI Agent becomes one expandable gadget component     */
-/* - Does NOT remove/rename any existing selectors        */
-/* ========================================================= */
-
 html.no-scroll,
 body.no-scroll {
     overflow: hidden;
@@ -596,25 +590,11 @@ body.no-scroll {
 /* ---- 7-day forecast visualization (expanded only) ---- */
 .gadget--weather.gadget--expanded .weather-forecast {
   display: grid;
-  /* ✅ FIX: 'auto-fit' + 'minmax(72px, 1fr)'
-     This tells the browser: "Fit as many columns as you can.
-     If a column gets smaller than 72px, move it to the next row."
-  */
   grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   gap: 10px;
   margin-top: 12px;
 }
 
-/*@media (max-width: 900px) {*/
-/*  .gadget--weather.gadget--expanded .weather-forecast {*/
-/*    grid-template-columns: repeat(4, minmax(0, 1fr));*/
-/*  }*/
-/*}*/
-/*@media (max-width: 520px) {*/
-/*  .gadget--weather.gadget--expanded .weather-forecast {*/
-/*    grid-template-columns: repeat(2, minmax(0, 1fr));*/
-/*  }*/
-/*}*/
 
 .weather-day {
   border-radius: 14px;

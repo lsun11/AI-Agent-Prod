@@ -155,10 +155,14 @@ export class Desktop {
         const backdrop = this.backdrop;
         if (!gadget || !header || !toggleBtn || !backdrop)
             return;
-        const setExpanded = (expanded) => {
+        // ✅ CHANGED: Added state for Hover vs Click
+        let hoverTimeout;
+        let isPinned = false;
+        const setExpanded = (expanded, pinned = false) => {
             var _a;
-            // 1. POSITION NORMALIZATION (Crucial Fix)
-            // Capture rect, remove conflicting styles (inset/transform), enforce Top/Left
+            // ✅ CHANGED: FREEZE POSITION LOGIC
+            // This runs EVERY time you open or close. It captures the current
+            // visual location and hard-codes it to top/left, deleting 'inset'.
             const rect = gadget.getBoundingClientRect();
             gadget.style.removeProperty("inset");
             gadget.style.removeProperty("transform");
@@ -169,6 +173,7 @@ export class Desktop {
             gadget.style.position = "fixed";
             if (expanded) {
                 // --- OPENING ---
+                isPinned = pinned; // Track if this was a click (pin) or hover (peek)
                 const raw = localStorage.getItem("weather-gadget-expanded-size");
                 if (raw) {
                     try {
@@ -182,19 +187,22 @@ export class Desktop {
                 }
                 gadget.classList.add("gadget--expanded");
                 gadget.classList.remove("gadget--collapsed");
-                backdrop.classList.add("visible");
+                // Show backdrop ONLY if pinned
+                if (isPinned)
+                    backdrop.classList.add("visible");
                 gadget.style.removeProperty("min-width");
                 gadget.style.removeProperty("min-height");
                 void ((_a = this.weather) === null || _a === void 0 ? void 0 : _a.refresh(false));
             }
             else {
                 // --- CLOSING ---
+                isPinned = false;
                 if (gadget.classList.contains("gadget--expanded")) {
                     const rect = gadget.getBoundingClientRect();
                     const size = { w: `${rect.width}px`, h: `${rect.height}px` };
                     localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
                 }
-                // Wipe dimensions only. Position stays locked.
+                // Wipe SIZE only. Keep the POSITION (left/top) we set above.
                 gadget.style.removeProperty("width");
                 gadget.style.removeProperty("height");
                 gadget.style.removeProperty("min-width");
@@ -207,8 +215,13 @@ export class Desktop {
             toggleBtn.textContent = expanded ? "Close" : "Open";
         };
         const toggle = () => {
-            const expanded = gadget.classList.contains("gadget--expanded");
-            setExpanded(!expanded);
+            const isCurrentlyExpanded = gadget.classList.contains("gadget--expanded");
+            if (isCurrentlyExpanded) {
+                setExpanded(false);
+            }
+            else {
+                setExpanded(true, true); // true = Pinned
+            }
         };
         header.addEventListener("click", (e) => {
             if (e.target === toggleBtn)
@@ -221,6 +234,25 @@ export class Desktop {
             toggle();
         });
         backdrop.addEventListener("click", () => setExpanded(false));
+        gadget.addEventListener("mouseenter", () => {
+            if (gadget.classList.contains("is-dragging") || gadget.classList.contains("gadget--expanded"))
+                return;
+            // Open after 2 seconds (Pinned = false)
+            hoverTimeout = window.setTimeout(() => {
+                if (!gadget.classList.contains("is-dragging")) {
+                    setExpanded(true, false);
+                }
+            }, 600);
+        });
+        gadget.addEventListener("mouseleave", () => {
+            clearTimeout(hoverTimeout);
+            if (gadget.classList.contains("is-dragging"))
+                return;
+            // Close ONLY if it wasn't pinned (clicked)
+            if (gadget.classList.contains("gadget--expanded") && !isPinned) {
+                setExpanded(false);
+            }
+        });
     }
 }
 //# sourceMappingURL=desktop.js.map

@@ -675,3 +675,212 @@ body.no-scroll {
   align-items: center;
   gap: 6px;
 }
+
+/* ==========================================================================
+   7. FILES GADGET (File Explorer)
+   ========================================================================== */
+
+/* --- Collapsed State --- */
+.gadget--files.gadget--collapsed {
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+    /* Folder Gradient */
+    background: linear-gradient(135deg, rgba(228, 172, 61, 0.52) 0%, rgba(255, 154, 61, 0.55) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 24px rgba(255, 154, 61, 0.3);
+    position: relative;
+}
+
+/* Icon overlay (The Folder Emoji) */
+.gadget--files.gadget--collapsed::before {
+    content: "📁";
+    position: absolute;
+    font-size: 64px;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    pointer-events: none; /* Let clicks pass through to the header/body if needed */
+}
+
+/* Header Container */
+.gadget--files.gadget--collapsed .gadget-header {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%; /* Cover full area so it's clickable */
+    background: transparent;
+    padding: 0 10px 14px 10px; /* Padding pushes text to bottom */
+
+    display: flex !important; /* Force flex to layout title */
+    align-items: flex-end;    /* Align title to bottom */
+    justify-content: center;  /* Center title */
+    z-index: 5;
+}
+
+/* The Title Text */
+.gadget--files.gadget--collapsed .gadget-title {
+    color: #bbfdff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    font-size: 15px;
+    font-weight: 800;
+
+    /* ✅ CRITICAL FIX: Override the global 'display: none' */
+    display: block !important;
+}
+
+/* Hide other elements */
+.gadget--files.gadget--collapsed .gadget-meta,
+.gadget--files.gadget--collapsed .gadget-toggle,
+.gadget--files.gadget--collapsed .sphere-texture,
+.gadget--files.gadget--collapsed .gadget-body {
+    display: none !important;
+}
+
+/* Reset ::after (used by AI agent for rotating text) */
+.gadget--files.gadget--collapsed::after {
+    content: none;
+    display: none;
+}
+
+/* --- Expanded State --- */
+.gadget--files.gadget--expanded {
+    position: absolute; /* Fixed by logic */
+    z-index: 5000;
+    width: 800px !important;
+    height: 500px !important;
+    background: #fff; /* Clean OS look */
+    color: #333;
+}
+
+.gadget--files.gadget--expanded .gadget-header {
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+}
+.gadget--files.gadget--expanded .gadget-title { color: #333; }
+.gadget--files.gadget--expanded .gadget-toggle {
+    background: #fff;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+/* Layout */
+.files-layout {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.files-sidebar {
+    width: 200px;
+    background: #f8f9fa;
+    border-right: 1px solid #eee;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.files-nav-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #999;
+    margin-top: 10px;
+    padding-left: 10px;
+    margin-bottom: 4px;
+}
+.files-nav-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.1s;
+}
+.files-nav-item:hover { background: #eef0f2; }
+.files-nav-item.active { background: #e3f2fd; color: #1976d2; font-weight: 600; }
+.files-nav-item .icon { font-size: 16px; }
+
+/* Main Area */
+.files-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+.files-toolbar {
+    padding: 10px 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    background: #fff;
+}
+.files-path {
+    font-size: 12px;
+    color: #666;
+    background: #f1f3f4;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Grid */
+.files-grid {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 16px;
+    align-content: start;
+}
+
+/* File/Folder Item */
+.file-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.1s;
+}
+/* Delete Button */
+.file-delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.file-delete-btn:hover {
+    background: #ffebec;
+    border-color: #ffcdd2;
+}
+
+/* Show on hover */
+.file-item:hover .file-delete-btn {
+    display: flex;
+}
+
+.file-item:hover { background: #f0f4f8; }
+.file-icon { font-size: 42px; margin-bottom: 8px; }
+.file-name { font-size: 12px; color: #444; word-break: break-word; line-height: 1.3; }
+.file-date { font-size: 10px; color: #999; margin-top: 4px; }

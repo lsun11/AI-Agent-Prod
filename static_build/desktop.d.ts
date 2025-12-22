@@ -7,6 +7,10 @@ export declare class Desktop {
     private weatherHeaderEl;
     private weatherToggleBtn;
     private weather?;
+    private filesGadgetEl;
+    private filesHeaderEl;
+    private filesToggleBtn;
+    private files?;
     private chatUI?;
     constructor();
     private initComponents;
@@ -14,5 +18,7 @@ export declare class Desktop {
     private initDraggables;
     private initWeatherLogic;
     private initWeatherBehavior;
+    private initFilesLogic;
+    private initFilesBehavior;
 }
 //# sourceMappingURL=desktop.d.ts.map

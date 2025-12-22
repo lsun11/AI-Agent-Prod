@@ -4,6 +4,7 @@ import { initHistoryPanel } from "./components/advanced-agent/history.js";
 import { makePanelDraggable } from "./helpers/drag.js";
 import { makePanelResizable } from "./helpers/resize.js";
 import { WeatherGadget } from "./components/weather_app/weather.js";
+import { FilesGadget } from "./components/files_app/files.js";
 
 export class Desktop {
   private gadget: HTMLElement | null;
@@ -14,6 +15,10 @@ export class Desktop {
   private weatherHeaderEl: HTMLElement | null;
   private weatherToggleBtn: HTMLButtonElement | null;
   private weather?: WeatherGadget;
+  private filesGadgetEl: HTMLElement | null;
+  private filesHeaderEl: HTMLElement | null;
+  private filesToggleBtn: HTMLButtonElement | null;
+  private files?: FilesGadget;
 
   private chatUI?: ChatUI;
 
@@ -25,10 +30,15 @@ export class Desktop {
     this.weatherGadgetEl = document.getElementById("weather-gadget");
     this.weatherHeaderEl = document.getElementById("weather-gadget-header");
     this.weatherToggleBtn = document.getElementById("weather-gadget-toggle") as HTMLButtonElement | null;
+    this.filesGadgetEl = document.getElementById("files-gadget");
+    this.filesHeaderEl = document.getElementById("files-gadget-header");
+    this.filesToggleBtn = document.getElementById("files-gadget-toggle") as HTMLButtonElement | null;
 
+    // Init Logic
     this.initWeatherBehavior();
     this.initWeatherLogic();
-
+    this.initFilesBehavior();
+    this.initFilesLogic();
     this.initGadgetBehavior();
     this.initComponents();
     this.initDraggables();
@@ -171,6 +181,16 @@ export class Desktop {
       });
       makePanelResizable(this.weatherGadgetEl, { minWidth: 160, minHeight: 220 });
     }
+
+    if (this.filesGadgetEl && this.filesHeaderEl) {
+      makePanelDraggable(this.filesGadgetEl, this.filesHeaderEl, {
+        mode: "grab-offset",
+        inertia: true,
+        inertiaFriction: 0.92,
+        inertiaStopSpeed: 0.05,
+      });
+      makePanelResizable(this.filesGadgetEl, { minWidth: 300, minHeight: 200 });
+    }
   }
 
   private initWeatherLogic(): void {
@@ -294,6 +314,138 @@ private initWeatherBehavior(): void {
         if (gadget.classList.contains("is-dragging")) return;
 
         // Close ONLY if it wasn't pinned (clicked)
+        if (gadget.classList.contains("gadget--expanded") && !isPinned) {
+            setExpanded(false);
+        }
+    });
+  }
+
+  private initFilesLogic(): void {
+    if (this.filesGadgetEl) {
+        this.files = new FilesGadget(this.filesGadgetEl);
+    }
+  }
+
+  private initFilesBehavior(): void {
+    const gadget = this.filesGadgetEl;
+    const header = this.filesHeaderEl;
+    const toggleBtn = this.filesToggleBtn;
+    const backdrop = this.backdrop;
+
+    if (!gadget || !header || !toggleBtn || !backdrop) return;
+
+    let hoverTimeout: number | undefined;
+    let isPinned = false;
+
+    const setExpanded = (expanded: boolean, pinned: boolean = false) => {
+      // 1. FREEZE POSITION
+      const rect = gadget.getBoundingClientRect();
+
+      gadget.style.removeProperty("inset");
+      gadget.style.removeProperty("transform");
+      gadget.style.removeProperty("right");
+      gadget.style.removeProperty("bottom");
+
+      gadget.style.left = `${rect.left}px`;
+      gadget.style.top = `${rect.top}px`;
+      gadget.style.position = "fixed";
+
+      if (expanded) {
+        // --- OPENING ---
+        isPinned = pinned;
+
+        // Restore Size
+        const raw = localStorage.getItem("files-gadget-expanded-size");
+        if (raw) {
+          try {
+            const { w, h } = JSON.parse(raw);
+            if (w) gadget.style.width = w;
+            if (h) gadget.style.height = h;
+          } catch {}
+        }
+
+        gadget.classList.add("gadget--expanded");
+        gadget.classList.remove("gadget--collapsed");
+
+        // Show backdrop ONLY if pinned
+        if (isPinned) backdrop.classList.add("visible");
+        else backdrop.classList.remove("visible"); // Ensure hidden if just peeking
+
+        gadget.style.removeProperty("min-width");
+        gadget.style.removeProperty("min-height");
+
+        this.files?.refresh();
+
+      } else {
+        // --- CLOSING ---
+        isPinned = false;
+
+        if (gadget.classList.contains("gadget--expanded")) {
+            const rect = gadget.getBoundingClientRect();
+            const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+            localStorage.setItem("files-gadget-expanded-size", JSON.stringify(size));
+        }
+
+        gadget.style.removeProperty("width");
+        gadget.style.removeProperty("height");
+        gadget.style.removeProperty("min-width");
+        gadget.style.removeProperty("min-height");
+
+        gadget.classList.remove("gadget--expanded");
+        gadget.classList.add("gadget--collapsed");
+        backdrop.classList.remove("visible");
+      }
+
+      gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+      toggleBtn.textContent = expanded ? "Close" : "Open";
+    };
+
+    // ✅ FIXED: Toggle Logic to handle "Peek -> Pin" transition
+    const toggle = () => {
+      const isExpanded = gadget.classList.contains("gadget--expanded");
+
+      if (isExpanded && isPinned) {
+         // It was fully open/pinned, so close it.
+         setExpanded(false);
+      } else {
+         // It was closed OR it was just peeking (hovered).
+         // In both cases, we want to force it OPEN and PINNED.
+         setExpanded(true, true);
+      }
+    };
+
+    header.addEventListener("click", (e) => {
+      if (e.target === toggleBtn) return;
+      toggle();
+    });
+
+    toggleBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggle();
+    });
+
+    backdrop.addEventListener("click", () => setExpanded(false));
+
+    // Hover (Peek)
+    gadget.addEventListener("mouseenter", () => {
+        if (gadget.classList.contains("is-dragging")) return;
+
+        // Only peek if not already open
+        if (!gadget.classList.contains("gadget--expanded")) {
+            hoverTimeout = window.setTimeout(() => {
+                if (!gadget.classList.contains("is-dragging")) {
+                    setExpanded(true, false); // Peek (not pinned)
+                }
+            }, 2000);
+        }
+    });
+
+    gadget.addEventListener("mouseleave", () => {
+        clearTimeout(hoverTimeout);
+        if (gadget.classList.contains("is-dragging")) return;
+
+        // Close ONLY if it wasn't pinned
         if (gadget.classList.contains("gadget--expanded") && !isPinned) {
             setExpanded(false);
         }

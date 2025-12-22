@@ -116,13 +116,56 @@
             </section>
         </div>
 
-        <!-- Placeholder for future gadgets -->
-        <section class="gadget gadget--placeholder" aria-hidden="true">
-            <div class="gadget-header">
-                <div class="gadget-title">More gadgets coming soon</div>
-                <div class="gadget-meta">Dashboards • Monitors • Notes • Utilities</div>
+        <div id="files-gadget" class="gadget gadget--files gadget--collapsed">
+            <div class="sphere-texture"></div>
+
+            <div id="files-gadget-header" class="gadget-header">
+                <div class="gadget-title">File Explorer</div>
+                <div class="gadget-meta">Browse saved documents</div>
+                <button id="files-gadget-toggle" class="gadget-toggle">Open</button>
             </div>
-        </section>
+
+            <div class="gadget-body">
+                <div class="files-layout">
+                    <div class="files-sidebar">
+                        <div class="files-nav-item active" data-path="root">
+                            <span class="icon">💻</span> Desktop
+                        </div>
+                        <div class="files-nav-label">GADGETS</div>
+                        <div class="files-nav-item" data-path="ai_agent">
+                            <span class="icon">🤖</span> AI Agent
+                        </div>
+                        <div class="files-nav-item" data-path="weather">
+                            <span class="icon">🌦️</span> Weather
+                        </div>
+                    </div>
+
+                    <div class="files-main">
+                        <div class="files-toolbar">
+                            <div class="files-path" id="files-current-path">My Desktop > AI Agent</div>
+                        </div>
+                        <div class="files-grid" id="files-grid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resize-handle n"></div>
+            <div class="resize-handle e"></div>
+            <div class="resize-handle s"></div>
+            <div class="resize-handle w"></div>
+            <div class="resize-handle ne"></div>
+            <div class="resize-handle se"></div>
+            <div class="resize-handle sw"></div>
+            <div class="resize-handle nw"></div>
+        </div>
+        <!--        &lt;!&ndash; Placeholder for future gadgets &ndash;&gt;-->
+        <!--        <section class="gadget gadget&#45;&#45;placeholder" aria-hidden="true">-->
+        <!--            <div class="gadget-header">-->
+        <!--                <div class="gadget-title">More gadgets coming soon</div>-->
+        <!--                <div class="gadget-meta">Dashboards • Monitors • Notes • Utilities</div>-->
+        <!--            </div>-->
+        <!--        </section>-->
     </div>
 
     <!-- Backdrop for expanded gadget -->

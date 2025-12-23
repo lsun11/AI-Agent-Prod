@@ -1,11 +1,11 @@
 // static/desktop.ts
-import { ChatUI } from "./components/advanced-agent/chat-ui.js";
-import { initHistoryPanel } from "./components/advanced-agent/history.js";
-import { makePanelDraggable } from "./helpers/drag.js";
-import { makePanelResizable } from "./helpers/resize.js";
-import { WeatherGadget } from "./components/weather_app/weather.js";
-import { FilesGadget } from "./components/files_app/files.js";
-import { ClockGadget } from "./components/clock_app/clock.js";
+import {ChatUI} from "./components/advanced-agent/chat-ui.js";
+import {initHistoryPanel} from "./components/advanced-agent/history.js";
+import {makePanelDraggable} from "./helpers/drag.js";
+import {makePanelResizable} from "./helpers/resize.js";
+import {WeatherGadget} from "./components/weather_app/weather.js";
+import {FilesGadget} from "./components/files_app/files.js";
+import {ClockGadget} from "./components/clock_app/clock.js";
 
 export class Desktop {
   private gadget: HTMLElement | null;
@@ -51,6 +51,77 @@ export class Desktop {
     this.initDraggables();
     this.initClockBehavior(); // New Behavior
     this.initClockLogic();
+    this.restorePosition(this.gadget, "ai-gadget");
+      this.restorePosition(this.weatherGadgetEl, "weather-gadget");
+      this.restorePosition(this.filesGadgetEl, "files-gadget");
+      this.restorePosition(this.clockGadgetEl, "clock-gadget");
+
+  }
+
+    // ========================================================================
+    // 💾 POSITION PERSISTENCE HELPERS
+    // ========================================================================
+
+    /**
+     * Saves the current 'left' and 'top' coordinates to localStorage.
+     */
+    private savePosition(el: HTMLElement | null, id: string) {
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+
+    // Ensure we are saving finite numbers
+    if (Number.isFinite(rect.left) && Number.isFinite(rect.top)) {
+        const pos = { left: rect.left, top: rect.top };
+        localStorage.setItem(`pos-${id}`, JSON.stringify(pos));
+        console.log(`💾 Saved ${id}:`, pos); // Uncomment to debug
+    }
+  }
+
+
+    /**
+     * Restores position from localStorage.
+     * STRICTLY overrides CSS defaults (bottom/right/inset) to prevent jumping.
+     */
+private restorePosition(el: HTMLElement | null, id: string) {
+    if (!el) return;
+
+    const raw = localStorage.getItem(`pos-${id}`);
+    if (!raw) return;
+
+    try {
+        const pos = JSON.parse(raw);
+        let left = parseFloat(pos.left) || 0;
+        let top = parseFloat(pos.top) || 0;
+
+        // Safety: Reset to center if coordinates are corrupt/zero
+        if (!Number.isFinite(left) || !Number.isFinite(top) || (left === 0 && top === 0)) {
+            left = window.innerWidth / 2 - 150;
+            top = window.innerHeight / 2 - 150;
+        }
+
+        // ✅ FIX 1: Use setTimeout (100ms)
+        // This ensures we run AFTER the drag library has finished wiping styles.
+        setTimeout(() => {
+            // ✅ FIX 2: Nuke 'inset' and conflicting anchors
+            // If CSS has 'inset: 0', we must forcefully unbind the bottom/right
+            // so our top/left can work without stretching/conflicts.
+            el.style.setProperty("inset", "auto", "important");
+            el.style.setProperty("bottom", "auto", "important");
+            el.style.setProperty("right", "auto", "important");
+
+            // Apply specific coordinates
+            el.style.setProperty("position", "fixed", "important");
+            el.style.setProperty("left", `${left}px`, "important");
+            el.style.setProperty("top", `${top}px`, "important");
+            el.style.setProperty("margin", "0", "important");
+
+            // Clear transform so it doesn't double-apply offsets
+            el.style.transform = "none";
+        }, 100);
+
+    } catch (e) {
+        console.error(`Failed to restore position for ${id}`, e);
+    }
   }
 
   private initComponents(): void {
@@ -82,6 +153,8 @@ export class Desktop {
       gadget.style.left = `${rect.left}px`;        // Hard-set current pixels
       gadget.style.top = `${rect.top}px`;
       gadget.style.position = "fixed";             // Lock it to viewport
+
+        this.savePosition(gadget, "ai-gadget");
 
       if (expanded) {
         // --- OPENING ---
@@ -167,48 +240,55 @@ export class Desktop {
     });
   }
 
-  private initDraggables(): void {
-    const gadget = this.gadget;
-    const header = this.header;
+private initDraggables(): void {
+    // Helper: Detect "Drop" anywhere
+    const attachSaveListener = (gadget: HTMLElement, id: string) => {
+        // We listen for the START of interaction on the gadget...
+        const onInteractStart = () => {
+            // ...and wait for the END (drop) anywhere on the window
+            const onInteractEnd = () => {
+                // Wait 200ms for inertia to settle, then save
+                setTimeout(() => this.savePosition(gadget, id), 200);
 
-    if (gadget && header) {
-      makePanelDraggable(gadget, header, {
-        mode: "grab-offset",
-        inertia: true,
-        inertiaFriction: 0.92,
-        inertiaStopSpeed: 0.05,
-      });
-      makePanelResizable(gadget, { minWidth: 360, minHeight: 260 });
+                // Cleanup one-time listeners
+                window.removeEventListener("mouseup", onInteractEnd);
+                window.removeEventListener("touchend", onInteractEnd);
+            };
+
+            window.addEventListener("mouseup", onInteractEnd);
+            window.addEventListener("touchend", onInteractEnd);
+        };
+
+        gadget.addEventListener("mousedown", onInteractStart);
+        gadget.addEventListener("touchstart", onInteractStart);
+    };
+
+    // 1. AI Gadget
+    if (this.gadget && this.header) {
+      makePanelDraggable(this.gadget, this.header, { mode: "grab-offset", inertia: true });
+      makePanelResizable(this.gadget, { minWidth: 360, minHeight: 260 });
+      attachSaveListener(this.gadget, "ai-gadget");
     }
 
+    // 2. Weather Gadget
     if (this.weatherGadgetEl && this.weatherHeaderEl) {
-      makePanelDraggable(this.weatherGadgetEl, this.weatherHeaderEl, {
-        mode: "grab-offset",
-        inertia: true,
-        inertiaFriction: 0.92,
-        inertiaStopSpeed: 0.05,
-      });
+      makePanelDraggable(this.weatherGadgetEl, this.weatherHeaderEl, { mode: "grab-offset", inertia: true });
       makePanelResizable(this.weatherGadgetEl, { minWidth: 160, minHeight: 220 });
+      attachSaveListener(this.weatherGadgetEl, "weather-gadget");
     }
 
+    // 3. Files Gadget
     if (this.filesGadgetEl && this.filesHeaderEl) {
-      makePanelDraggable(this.filesGadgetEl, this.filesHeaderEl, {
-        mode: "grab-offset",
-        inertia: true,
-        inertiaFriction: 0.92,
-        inertiaStopSpeed: 0.05,
-      });
+      makePanelDraggable(this.filesGadgetEl, this.filesHeaderEl, { mode: "grab-offset", inertia: true });
       makePanelResizable(this.filesGadgetEl, { minWidth: 300, minHeight: 200 });
+      attachSaveListener(this.filesGadgetEl, "files-gadget");
     }
 
+    // 4. Clock Gadget
     if (this.clockGadgetEl && this.clockHeaderEl) {
-      makePanelDraggable(this.clockGadgetEl, this.clockHeaderEl, {
-        mode: "grab-offset",
-        inertia: true,
-        inertiaFriction: 0.92,
-        inertiaStopSpeed: 0.05,
-      });
+      makePanelDraggable(this.clockGadgetEl, this.clockHeaderEl, { mode: "grab-offset", inertia: true });
       makePanelResizable(this.clockGadgetEl, { minWidth: 200, minHeight: 200 });
+      attachSaveListener(this.clockGadgetEl, "clock-gadget");
     }
   }
 
@@ -244,6 +324,8 @@ private initWeatherBehavior(): void {
       gadget.style.left = `${rect.left}px`;
       gadget.style.top = `${rect.top}px`;
       gadget.style.position = "fixed";
+
+      this.savePosition(gadget, "ai-gadget");
 
       if (expanded) {
         // --- OPENING ---
@@ -363,7 +445,9 @@ private initWeatherBehavior(): void {
     let isPinned = false;
 
     const setExpanded = (expanded: boolean, pinned: boolean = false) => {
-      // 1. FREEZE POSITION
+
+        clearTimeout(hoverTimeout);
+        // 1. FREEZE POSITION
       const rect = gadget.getBoundingClientRect();
 
       gadget.style.removeProperty("inset");
@@ -375,6 +459,7 @@ private initWeatherBehavior(): void {
       gadget.style.top = `${rect.top}px`;
       gadget.style.position = "fixed";
 
+      this.savePosition(gadget, "files-gadget");
       if (expanded) {
         // --- OPENING ---
         isPinned = pinned;
@@ -494,7 +579,10 @@ private initWeatherBehavior(): void {
     let isPinned = false;
 
     const setExpanded = (expanded: boolean, pinned: boolean = false) => {
-      // 1. FREEZE POSITION
+
+        clearTimeout(hoverTimeout);
+
+        // 1. FREEZE POSITION
       const rect = gadget.getBoundingClientRect();
       gadget.style.removeProperty("inset");
       gadget.style.removeProperty("transform");
@@ -503,6 +591,8 @@ private initWeatherBehavior(): void {
       gadget.style.left = `${rect.left}px`;
       gadget.style.top = `${rect.top}px`;
       gadget.style.position = "fixed";
+
+      this.savePosition(gadget, "clock-gadget");
 
       if (expanded) {
         // --- OPENING ---

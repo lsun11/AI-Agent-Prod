@@ -393,6 +393,11 @@ body.no-scroll {
   --weather-bg: url("/static/assets/backgrounds/weather/cloudy.gif");
 }
 
+.gadget--weather[data-weather="sandstorm"] {
+    --weather-bg: url("/static/assets/backgrounds/weather/sandstorm.gif");
+}
+
+
 .gadget--weather[data-weather="fog"] {
   --weather-bg: url("/static/assets/backgrounds/weather/fog.gif");
 }
@@ -405,8 +410,16 @@ body.no-scroll {
   --weather-bg: url("/static/assets/backgrounds/weather/rain.gif");
 }
 
+.gadget--weather[data-weather="heavy_rain"] {
+    --weather-bg: url("/static/assets/backgrounds/weather/rain.gif");
+}
+
 .gadget--weather[data-weather="snow"] {
   --weather-bg: url("/static/assets/backgrounds/weather/snow.gif");
+}
+
+.gadget--weather[data-weather="heavy_snow"] {
+    --weather-bg: url("/static/assets/backgrounds/weather/heavy_snow.gif");
 }
 
 .gadget--weather[data-weather="thunderstorm"] {

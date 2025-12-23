@@ -36,10 +36,13 @@ export function buildPlaceLabel(geo: ReverseGeocodeResponse | null, fallbackLat:
 export type WeatherTexture =
   | "clear"
   | "cloudy"
+    | "sandstorm"
   | "fog"
   | "drizzle"
   | "rain"
+    | "heavy_rain"
   | "snow"
+    | "heavy_snow"
   | "thunderstorm"
   | "mixed";
 
@@ -47,12 +50,14 @@ export function weatherCodeToTexture(code: number | undefined | null): WeatherTe
   if (code === undefined || code === null) return "mixed";
   if (code === 0) return "clear";
   if (code >= 1 && code <= 3) return "cloudy";
+    if (code >= 30 && code <= 35) return "sandstorm";
   if (code === 45 || code === 48) return "fog";
-  if (code >= 51 && code <= 57) return "drizzle";
-  if (code >= 61 && code <= 67) return "rain";
-  if (code >= 80 && code <= 82) return "rain";
-  if (code >= 71 && code <= 77) return "snow";
-  if (code >= 95) return "thunderstorm";
+    if (code >= 50 && code <= 59) return "drizzle";
+    if (code >= 60 && code <= 69) return "rain";
+    if (code >= 80 && code <= 84) return "heavy_rain";
+    if (code >= 70 && code <= 79) return "snow";
+    if (code >= 85 && code <= 86) return "heavy_snow";
+    if (code >= 90) return "thunderstorm";
   return "mixed";
 }
 

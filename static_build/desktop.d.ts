@@ -17,6 +17,15 @@ export declare class Desktop {
     private clock?;
     private chatUI?;
     constructor();
+    /**
+     * Saves the current 'left' and 'top' coordinates to localStorage.
+     */
+    private savePosition;
+    /**
+     * Restores position from localStorage.
+     * STRICTLY overrides CSS defaults (bottom/right/inset) to prevent jumping.
+     */
+    private restorePosition;
     private initComponents;
     private initGadgetBehavior;
     private initDraggables;

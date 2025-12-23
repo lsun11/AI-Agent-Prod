@@ -7,15 +7,18 @@ export declare class ClockGadget {
     private heroDateEl;
     private heroLocEl;
     private gridEl;
+    private earthMapContainer;
     private earthCanvas;
     private earthCtx;
     private earthMarker;
+    private citiesLayer;
     private timer;
     private coords;
     constructor(root: HTMLElement);
     private tick;
     private renderWorldGrid;
     private drawEarth;
+    private renderCityMarkers;
     private initLocation;
     private reverseGeocode;
     private updateLocText;

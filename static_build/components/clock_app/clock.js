@@ -1,13 +1,53 @@
 // static/components/clock_app/clock.ts
 const WORLD_CITIES = [
-    { name: "London", tz: "Europe/London" },
-    { name: "New York", tz: "America/New_York" },
-    { name: "Tokyo", tz: "Asia/Tokyo" },
-    { name: "Sydney", tz: "Australia/Sydney" },
-    { name: "Paris", tz: "Europe/Paris" },
-    { name: "Dubai", tz: "Asia/Dubai" },
-    { name: "Shanghai", tz: "Asia/Shanghai" },
-    { name: "Los Angeles", tz: "America/Los_Angeles" },
+    {
+        name: "London",
+        tz: "Europe/London",
+        lat: 51.5074,
+        lon: -0.1278,
+    },
+    {
+        name: "New York",
+        tz: "America/New_York",
+        lat: 40.7128,
+        lon: -74.0060,
+    },
+    {
+        name: "Tokyo",
+        tz: "Asia/Tokyo",
+        lat: 35.6762,
+        lon: 139.6503,
+    },
+    {
+        name: "Sydney",
+        tz: "Australia/Sydney",
+        lat: -33.8688,
+        lon: 151.2093,
+    },
+    {
+        name: "Paris",
+        tz: "Europe/Paris",
+        lat: 48.8566,
+        lon: 2.3522,
+    },
+    {
+        name: "Dubai",
+        tz: "Asia/Dubai",
+        lat: 25.2048,
+        lon: 55.2708,
+    },
+    {
+        name: "Shanghai",
+        tz: "Asia/Shanghai",
+        lat: 31.2304,
+        lon: 121.4737,
+    },
+    {
+        name: "Los Angeles",
+        tz: "America/Los_Angeles",
+        lat: 34.0522,
+        lon: -118.2437,
+    },
 ];
 export class ClockGadget {
     constructor(root) {
@@ -23,10 +63,13 @@ export class ClockGadget {
         this.heroLocEl = root.querySelector("#clock-hero-loc");
         this.gridEl = root.querySelector("#clock-world-grid");
         this.earthCanvas = root.querySelector("#clock-earth-canvas");
+        this.earthMapContainer = root.querySelector("#earth-map-container");
         this.earthMarker = root.querySelector("#clock-earth-marker");
+        this.citiesLayer = root.querySelector("#clock-city-layer");
         this.earthCtx = this.earthCanvas ? this.earthCanvas.getContext("2d") : null;
         this.tick();
         this.timer = window.setInterval(() => this.tick(), 1000);
+        this.renderCityMarkers();
         // 2. Fetch Location
         void this.initLocation();
     }
@@ -153,6 +196,25 @@ export class ClockGadget {
             this.earthMarker.style.left = `${xPct}%`;
             this.earthMarker.style.top = `${yPct}%`;
         }
+    }
+    renderCityMarkers() {
+        if (!this.citiesLayer)
+            return;
+        const dots = WORLD_CITIES.map(city => {
+            // 1. Calculate Positions (0-100%)
+            // Map: -180 (Left) to +180 (Right)
+            const xPct = ((city.lon + 180) / 360) * 100;
+            // Map: +90 (Top) to -90 (Bottom)
+            const yPct = ((90 - city.lat) / 180) * 100;
+            // 2. Return the HTML string with inline styles
+            // Note: We use 'title' so hovering shows the city name
+            return `<div class="city-marker" 
+                         style="left: ${xPct}%; top: ${yPct}%;" 
+                         title="${city.name}">
+                    </div>`;
+        });
+        // 3. Insert safely into the layer (preserving canvas)
+        this.citiesLayer.innerHTML = dots.join("");
     }
     // ... initLocation, reverseGeocode, updateLocText ...
     async initLocation() {

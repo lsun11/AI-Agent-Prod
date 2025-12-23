@@ -72,12 +72,7 @@ export class Desktop {
                 left = window.innerWidth / 2 - 150;
                 top = window.innerHeight / 2 - 150;
             }
-            // ✅ FIX 1: Use setTimeout (100ms)
-            // This ensures we run AFTER the drag library has finished wiping styles.
             setTimeout(() => {
-                // ✅ FIX 2: Nuke 'inset' and conflicting anchors
-                // If CSS has 'inset: 0', we must forcefully unbind the bottom/right
-                // so our top/left can work without stretching/conflicts.
                 el.style.setProperty("inset", "auto", "important");
                 el.style.setProperty("bottom", "auto", "important");
                 el.style.setProperty("right", "auto", "important");
@@ -108,7 +103,7 @@ export class Desktop {
             return;
         const slot = document.getElementById("ai-gadget-slot");
         const setExpanded = (expanded) => {
-            // 1. POSITION NORMALIZATION (Crucial Fix)
+            // 1. POSITION NORMALIZATION
             // Regardless of open/close, freeze the current visual location into explicit Top/Left.
             // We MUST remove 'inset' and 'transform' so they don't override our manual coordinates.
             const rect = gadget.getBoundingClientRect();
@@ -257,7 +252,7 @@ export class Desktop {
         let isPinned = false;
         const setExpanded = (expanded, pinned = false) => {
             var _a;
-            // ✅ CRITICAL FIX: Stop the timer!
+            // Stop the timer!
             // If the user clicks (Pin), we must cancel any pending "Peek" timer
             // so it doesn't overwrite our state 600ms later.
             clearTimeout(hoverTimeout);

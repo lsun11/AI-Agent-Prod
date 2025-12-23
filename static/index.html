@@ -117,8 +117,6 @@
         </div>
 
         <div id="files-gadget" class="gadget gadget--files gadget--collapsed">
-            <div class="sphere-texture"></div>
-
             <div id="files-gadget-header" class="gadget-header">
                 <div class="gadget-title">File Explorer</div>
                 <div class="gadget-meta">Browse saved documents</div>
@@ -159,13 +157,55 @@
             <div class="resize-handle sw"></div>
             <div class="resize-handle nw"></div>
         </div>
-        <!--        &lt;!&ndash; Placeholder for future gadgets &ndash;&gt;-->
-        <!--        <section class="gadget gadget&#45;&#45;placeholder" aria-hidden="true">-->
-        <!--            <div class="gadget-header">-->
-        <!--                <div class="gadget-title">More gadgets coming soon</div>-->
-        <!--                <div class="gadget-meta">Dashboards • Monitors • Notes • Utilities</div>-->
-        <!--            </div>-->
-        <!--        </section>-->
+
+        <div id="clock-gadget" class="gadget gadget--clock gadget--collapsed">
+            <div class="sphere-texture" aria-hidden="true"></div>
+            <div id="clock-gadget-header" class="gadget-header">
+                <div class="gadget-title">World Clock</div>
+                <button id="clock-gadget-toggle" class="gadget-toggle">Open</button>
+            </div>
+
+            <div class="clock-collapsed-content">
+                <div class="clock-big" id="clock-display-main">00:00</div>
+                <div class="clock-loc" id="clock-loc-main">Detecting...</div>
+                <div class="clock-date" id="clock-date-main">...</div>
+            </div>
+
+            <div class="gadget-body">
+                <div class="clock-expanded-layout">
+                    <div class="clock-hero">
+                        <div class="clock-hero-time" id="clock-hero-time">00:00:00</div>
+                        <div class="clock-hero-date" id="clock-hero-date">Monday, Jan 01</div>
+                        <div class="clock-hero-loc" id="clock-hero-loc">Loading location...</div>
+                    </div>
+
+                    <div class="clock-divider"></div>
+                    <div class="clock-grid-label">WORLD TIME</div>
+
+                    <div class="clock-grid" id="clock-world-grid">
+                    </div>
+                    <div class="clock-hero">
+                    </div>
+
+                    <div class="earth-map-container">
+                        <canvas id="clock-earth-canvas" width="540" height="270"></canvas>
+                        <div id="clock-earth-marker" class="earth-marker"></div>
+                    </div>
+
+                    <div class="clock-divider"></div>
+
+                </div>
+            </div>
+
+            <div class="resize-handle n"></div>
+            <div class="resize-handle e"></div>
+            <div class="resize-handle s"></div>
+            <div class="resize-handle w"></div>
+            <div class="resize-handle ne"></div>
+            <div class="resize-handle se"></div>
+            <div class="resize-handle sw"></div>
+            <div class="resize-handle nw"></div>
+        </div>
     </div>
 
     <!-- Backdrop for expanded gadget -->

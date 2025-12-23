@@ -746,7 +746,6 @@ body.no-scroll {
 /* Hide other elements */
 .gadget--files.gadget--collapsed .gadget-meta,
 .gadget--files.gadget--collapsed .gadget-toggle,
-.gadget--files.gadget--collapsed .sphere-texture,
 .gadget--files.gadget--collapsed .gadget-body {
     display: none !important;
 }
@@ -777,6 +776,31 @@ body.no-scroll {
     background: #fff;
     border: 1px solid #ccc;
     color: #333;
+}
+
+.gadget--files.gadget--expanded .gadget-body {
+    display: block;
+    opacity: 0; /* Start invisible */
+    animation: fileContentOpen 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation-delay: 0.1s;
+}
+
+.gadget--files.gadget--expanded.is-dragging .gadget-body {
+    opacity: 1 !important;
+    animation: none !important;
+    display: block !important;
+    pointer-events: none; /* Optional: improves drag performance */
+}
+
+@keyframes fileContentOpen {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Layout */
@@ -897,3 +921,257 @@ body.no-scroll {
 .file-icon { font-size: 42px; margin-bottom: 8px; }
 .file-name { font-size: 12px; color: #444; word-break: break-word; line-height: 1.3; }
 .file-date { font-size: 10px; color: #999; margin-top: 4px; }
+
+
+
+/* ==========================================================================
+   8. CLOCK GADGET
+   ========================================================================== */
+
+/* --- Collapsed State --- */
+.gadget--clock.gadget--collapsed {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%; /* Circle */
+    /* Indigo/Violet Gradient */
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.58) 0%, rgba(118, 75, 162, 0.57) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 24px rgba(118, 75, 162, 0.4);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Hide standard header/body in collapsed mode */
+.gadget--clock.gadget--collapsed .gadget-body{
+    display: none !important;
+}
+
+.gadget--clock.gadget--collapsed .sphere-texture {
+    background: url("/static/assets/backgrounds/earth.gif");
+}
+
+.gadget--clock.gadget--expanded .gadget-body {
+    flex: 1;              /* Fill all remaining vertical space below header */
+    overflow-y: auto;     /* Scroll vertically if content is too tall */
+    overflow-x: hidden;   /* No horizontal scroll */
+    min-height: 0;        /* Vital fix for nested flex scrolling */
+    position: relative;
+}
+
+.gadget--clock.gadget--collapsed .gadget-header {
+    display: block !important;
+    position: absolute;
+    inset: 0;            /* Cover entire sphere */
+    background: transparent;
+    border: none;
+    z-index: 10;         /* Sit on top of the clock text */
+    opacity: 0;          /* Invisible to eye, but visible to mouse */
+    cursor: grab;
+}
+
+.gadget--clock.gadget--collapsed::after {
+    content: ""
+}
+
+
+/* Collapsed Content (The Face) */
+.clock-collapsed-content {
+    display: none;
+    flex-direction: column;
+    color: #fff;
+    pointer-events: none;
+}
+
+.gadget--clock.gadget--collapsed .clock-collapsed-content {
+    display: flex;
+}
+
+.clock-big {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+}
+.clock-loc {
+    font-size: 11px;
+    opacity: 0.9;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 auto;
+}
+.clock-date {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* --- Expanded State --- */
+.gadget--clock.gadget--expanded {
+    width: 600px;
+    height: 500px;
+    min-width: min(300px, 32vw);
+    min-height: min(220px, 26vh);
+    background: #1a1b26; /* Dark Theme */
+    color: #fff;
+        overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.gadget--clock.gadget--expanded .clock-collapsed-content { display: none; }
+
+.gadget--clock.gadget--expanded .gadget-header {
+    background: #1f202e;
+    border-bottom: 1px solid #2f3042;
+    color: #fff;
+}
+.gadget--clock.gadget--expanded .gadget-toggle {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: none;
+}
+
+/* Expanded Layout */
+.clock-expanded-layout {
+    height: auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    /* Animation hook */
+    opacity: 0;
+}
+
+/* Animation trigger */
+.gadget--clock.gadget--expanded .clock-expanded-layout {
+    animation: fileContentOpen 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation-delay: 0.1s;
+}
+/* Prevent blank on drag */
+.gadget--clock.gadget--expanded.is-dragging .clock-expanded-layout {
+    opacity: 1 !important;
+    animation: none !important;
+}
+
+
+.clock-hero {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.clock-hero-time {
+    font-size: 56px;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+}
+.clock-hero-date {
+    font-size: 18px;
+    color: #a9b1d6;
+    margin-bottom: 6px;
+}
+.clock-hero-loc {
+    font-size: 14px;
+    color: #7aa2f7;
+    font-weight: 600;
+}
+
+.clock-divider {
+    height: 1px;
+    background: #2f3042;
+    margin: 10px 0 20px 0;
+}
+
+.clock-grid-label {
+    font-size: 11px;
+    color: #565f89;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.clock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 15px;
+}
+
+.clock-city-card {
+    background: #24283b;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #2f3042;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.clock-city-card:hover {
+    transform: translateY(-2px);
+    border-color: #7aa2f7;
+}
+
+.clock-city-name {
+    font-size: 12px;
+    color: #9aa5ce;
+    margin-bottom: 6px;
+}
+.clock-city-time {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+.clock-city-diff {
+    font-size: 10px;
+    color: #565f89;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   Clock: Earth Map
+   ========================================================================== */
+.earth-map-container {
+    width: 100%;
+    /* 2:1 Aspect Ratio container (standard for world maps) */
+    aspect-ratio: 2 / 1;
+    background-color: #0b1026; /* Deep ocean blue fallback */
+
+    /* 🌍 REPLACE THIS URL with your local 'earth_day.jpg' */
+    background-image: url("/static/assets/backgrounds/earth.png");
+    background-size: 100% 100%;
+    background-position: center 28%;
+    position: relative;
+    margin-bottom: 20px;
+    border: 1px solid #2f3042;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+#clock-earth-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* The canvas draws the SHADOW (Night), letting the BG image show through as Day */
+}
+
+.earth-marker {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #00ffcc;
+    border: 2px solid rgba(0,0,0,0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px #00ffcc;
+    top: 50%; /* JS will move these */
+    left: 50%;
+    transition: top 0.5s, left 0.5s;
+    pointer-events: none;
+    display: none; /* Hidden until coords loaded */
+}

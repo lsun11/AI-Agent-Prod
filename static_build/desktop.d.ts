@@ -11,6 +11,10 @@ export declare class Desktop {
     private filesHeaderEl;
     private filesToggleBtn;
     private files?;
+    private clockGadgetEl;
+    private clockHeaderEl;
+    private clockToggleBtn;
+    private clock?;
     private chatUI?;
     constructor();
     private initComponents;
@@ -20,5 +24,7 @@ export declare class Desktop {
     private initWeatherBehavior;
     private initFilesLogic;
     private initFilesBehavior;
+    private initClockLogic;
+    private initClockBehavior;
 }
 //# sourceMappingURL=desktop.d.ts.map

@@ -7,6 +7,6 @@ export type ReverseGeocodeResponse = {
     timezone?: string;
 };
 export declare function buildPlaceLabel(geo: ReverseGeocodeResponse | null, fallbackLat: number, fallbackLon: number): string;
-export type WeatherTexture = "clear" | "cloudy" | "fog" | "drizzle" | "rain" | "snow" | "thunderstorm" | "mixed";
+export type WeatherTexture = "clear" | "cloudy" | "sandstorm" | "fog" | "drizzle" | "rain" | "heavy_rain" | "snow" | "heavy_snow" | "thunderstorm" | "mixed";
 export declare function weatherCodeToTexture(code: number | undefined | null): WeatherTexture;
 //# sourceMappingURL=weather_helpers.d.ts.map

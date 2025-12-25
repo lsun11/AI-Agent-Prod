@@ -116,6 +116,8 @@
             </section>
         </div>
 
+
+        <!--files-gadget-->
         <div id="files-gadget" class="gadget gadget--files gadget--collapsed">
             <div id="files-gadget-header" class="gadget-header">
                 <div class="gadget-title">File Explorer</div>
@@ -195,6 +197,77 @@
 
                     <div class="clock-divider"></div>
 
+                </div>
+            </div>
+
+            <div class="resize-handle n"></div>
+            <div class="resize-handle e"></div>
+            <div class="resize-handle s"></div>
+            <div class="resize-handle w"></div>
+            <div class="resize-handle ne"></div>
+            <div class="resize-handle se"></div>
+            <div class="resize-handle sw"></div>
+            <div class="resize-handle nw"></div>
+        </div>
+
+        <!--stock-gadget-->
+        <div id="stock-gadget" class="gadget gadget--stock gadget--collapsed">
+            <div class="sphere-texture"></div>
+
+            <div id="stock-gadget-header" class="gadget-header">
+                <div class="gadget-title">Markets</div>
+                <div class="gadget-meta">SPY • QQQ</div>
+                <button id="stock-gadget-toggle" class="gadget-toggle">Open</button>
+            </div>
+
+            <div class="stock-collapsed-content">
+                <div class="stock-mini-ticker">
+                    <div class="stock-mini-symbol">SPY</div>
+                    <div class="stock-mini-price up" id="stock-mini-spy">...</div>
+                </div>
+                <div class="stock-mini-ticker">
+                    <div class="stock-mini-symbol">QQQ</div>
+                    <div class="stock-mini-price down" id="stock-mini-qqq">...</div>
+                </div>
+            </div>
+            <div class="gadget-body">
+                <div class="stock-layout">
+                    <div class="stock-header-row">
+                <div class="stock-tabs">
+                    <button class="stock-tab active" data-symbol="SPY">SPY</button>
+                    <button class="stock-tab" data-symbol="QQQ">QQQ</button>
+                </div>
+
+                <div class="stock-ranges">
+                    <button class="stock-range-btn" data-range="1H">1H</button>
+                    <button class="stock-range-btn" data-range="1D">1D</button>
+                    <button class="stock-range-btn" data-range="1W">1W</button>
+                    <button class="stock-range-btn" data-range="1M">1M</button>
+                    <button class="stock-range-btn active" data-range="6M">6M</button>
+                    <button class="stock-range-btn" data-range="1Y">1Y</button>
+                    <button class="stock-range-btn" data-range="5Y">5Y</button>
+                </div>
+            </div>
+<!--                    <div class="stock-tabs">-->
+<!--                        <button class="stock-tab active" data-symbol="SPY">SPY</button>-->
+<!--                        <button class="stock-tab" data-symbol="QQQ">QQQ</button>-->
+<!--                        <button class="stock-tab-add">+</button>-->
+<!--                    </div>-->
+
+                    <div class="stock-hero-section">
+                        <div class="stock-hero-left">
+                            <div class="stock-hero-price" id="stock-hero-price">0.00</div>
+                            <div class="stock-hero-change" id="stock-hero-change">+0.00 (0.00%)</div>
+                        </div>
+                        <div class="stock-hero-right">
+                            <div class="stock-hero-vol-label">VOL (24H)</div>
+                            <div class="stock-hero-vol-val" id="stock-hero-vol">--</div>
+                        </div>
+                    </div>
+
+                    <div class="stock-chart-container">
+                        <canvas id="stock-canvas"></canvas>
+                    </div>
                 </div>
             </div>
 

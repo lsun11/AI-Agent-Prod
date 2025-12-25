@@ -1,0 +1,41 @@
+export declare class StockGadget {
+    private root;
+    private canvas;
+    private ctx;
+    private heroPrice;
+    private heroChange;
+    private volEl;
+    private miniSpy;
+    private miniQqq;
+    private tickers;
+    private activeSymbol;
+    private activeRange;
+    private timer;
+    private marketOpen;
+    constructor(root: HTMLElement);
+    private checkMarketStatus;
+    private update;
+    private updateUI;
+    private renderMini;
+    private resizeCanvas;
+    private drawChart;
+    private drawXAxis;
+    private drawGrid;
+    private safeMin;
+    private safeMax;
+    private drawPaneBackground;
+    private drawLabel;
+    private drawYAxis;
+    private drawYAxisFixed;
+    private formatBigNumber;
+    private drawVolumePane;
+    private drawPane;
+    private drawPaneFixed;
+    private hexToRgb;
+    private calculateSMA;
+    private calculateEMA;
+    private calculateRSIArray;
+    private calculateMACDArray;
+    private movingAverage;
+}
+//# sourceMappingURL=stock.d.ts.map

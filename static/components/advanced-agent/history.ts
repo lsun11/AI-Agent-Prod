@@ -109,10 +109,7 @@ function renderHistoryItem(entry: HistoryEntry): HTMLDivElement {
 
     // Optional: clicking the whole item re-fills the input with the old query
     wrapper.addEventListener("click", () => {
-        const input = document.getElementById("user-input") as
-            | HTMLTextAreaElement
-            | HTMLInputElement
-            | null;
+        const input = document.getElementById("chat-input") as HTMLInputElement | null;
         if (input && entry.query) {
             input.value = entry.query;
             input.focus();
@@ -144,11 +141,10 @@ export async function initHistoryPanel(): Promise<void> {
     // 🔽 Add expand/collapse toggle button
     setupHistoryToggle(panel, header, list);
 
-    // Make the panel draggable by its header
-    makePanelDraggable(panel, header, {
-  mode: "boundary",
-});
-
+    if (!header.dataset.dragInitialized) {
+        makePanelDraggable(panel, header, {mode: "boundary"});
+        header.dataset.dragInitialized = "true";
+    }
 
     try {
         const items = await fetchHistory(30);
@@ -215,7 +211,7 @@ function setupHistoryToggle(
       e.stopPropagation();
 
       const ok = window.confirm(
-        panel.dataset.lang === "Chn"
+          panel!.dataset.lang === "Chn"
           ? "确定要清空历史记录吗？"
           : "Clear all history?"
       );
@@ -248,7 +244,7 @@ function setupHistoryToggle(
 
     toggleBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      const collapsed = panel.classList.toggle("history-panel--collapsed");
+        const collapsed = panel!.classList.toggle("history-panel--collapsed");
       if (listEl) {
         listEl.style.display = collapsed ? "none" : "";
       }
@@ -272,6 +268,10 @@ function setupHistoryToggle(
 export function setHistoryHeaderLanguage(language: LanguageCode): void {
   const header = document.querySelector(".history-header") as HTMLElement | null;
   if (!header) return;
+
+    // Store lang on panel for confirm dialog usage
+    const panel = document.getElementById("history-panel");
+    if (panel) panel.dataset.lang = language;
 
   let labelSpan = header.querySelector(".history-header-label") as HTMLSpanElement | null;
   if (!labelSpan) {

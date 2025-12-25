@@ -6,7 +6,7 @@ import {makePanelResizable} from "./helpers/resize.js";
 import {WeatherGadget} from "./components/weather_app/weather.js";
 import {FilesGadget} from "./components/files_app/files.js";
 import {ClockGadget} from "./components/clock_app/clock.js";
-import { StockGadget } from "./components/stock_app/stock.js";
+import {StockGadget} from "./components/stock_app/stock.js";
 
 export class Desktop {
   private gadget: HTMLElement | null;
@@ -676,21 +676,27 @@ private initWeatherBehavior(): void {
 
     backdrop.addEventListener("click", () => setExpanded(false));
 
-    // // Hover
-    // gadget.addEventListener("mouseenter", () => {
-    //     if (gadget.classList.contains("is-dragging")) return;
-    //     if (!gadget.classList.contains("gadget--expanded")) {
-    //         hoverTimeout = window.setTimeout(() => {
-    //             if (!gadget.classList.contains("is-dragging")) {
-    //                 setExpanded(true, false);
-    //             }
-    //         }, 2000);
-    //     }
-    // });
+      // HOVER LOGIC
+      gadget.addEventListener("mouseenter", () => {
+          if (gadget.classList.contains("is-dragging")) return;
+
+          // Start timer to Peek
+          if (!gadget.classList.contains("gadget--expanded")) {
+              hoverTimeout = window.setTimeout(() => {
+                  if (!gadget.classList.contains("is-dragging")) {
+                      setExpanded(true, false); // false = Not Pinned (Peek)
+                  }
+              }, 600);
+          }
+      });
 
     gadget.addEventListener("mouseleave", () => {
+        // Cancel timer if we leave before it fires
         clearTimeout(hoverTimeout);
+
         if (gadget.classList.contains("is-dragging")) return;
+
+        // Close ONLY if we are just Peeking (!isPinned)
         if (gadget.classList.contains("gadget--expanded") && !isPinned) {
             setExpanded(false);
         }
@@ -758,16 +764,30 @@ private initWeatherBehavior(): void {
         toggleBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggle(); });
         backdrop.addEventListener("click", () => setExpanded(false));
 
+        // HOVER LOGIC
         gadget.addEventListener("mouseenter", () => {
             if (gadget.classList.contains("is-dragging")) return;
+
+            // Start timer to Peek
             if (!gadget.classList.contains("gadget--expanded")) {
-                hoverTimeout = window.setTimeout(() => { if (!gadget.classList.contains("is-dragging")) setExpanded(true, false); }, 600);
+                hoverTimeout = window.setTimeout(() => {
+                    if (!gadget.classList.contains("is-dragging")) {
+                        setExpanded(true, false); // false = Not Pinned (Peek)
+                    }
+                }, 600);
             }
         });
+
         gadget.addEventListener("mouseleave", () => {
+            // Cancel timer if we leave before it fires
             clearTimeout(hoverTimeout);
+
             if (gadget.classList.contains("is-dragging")) return;
-            if (gadget.classList.contains("gadget--expanded") && !isPinned) setExpanded(false);
+
+            // Close ONLY if we are just Peeking (!isPinned)
+            if (gadget.classList.contains("gadget--expanded") && !isPinned) {
+                setExpanded(false);
+            }
         });
     }
 

@@ -2,14 +2,16 @@
     max-width: 1200px;
     width: 90%;
     margin: 0 auto;
+
     flex: 1;
+    height: 100%;
+
     display: flex;
     flex-direction: column;
-    padding: 24px; /* a bit more breathing room */
+    padding: 24px;
     box-sizing: border-box;
     opacity: 96%;
     font-size: 15px;
-    /* prevent fixed panels from causing horizontal scroll */
     overflow: hidden;
 }
 

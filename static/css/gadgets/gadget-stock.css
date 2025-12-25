@@ -4,9 +4,9 @@
 
 /* --- Collapsed State --- */
 .gadget--stock.gadget--collapsed {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    border-radius: 10%;
     background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     border: 1px solid rgba(100, 255, 218, 0.3);
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
@@ -21,7 +21,7 @@
 .gadget--stock.gadget--collapsed .sphere-texture {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
+    border-radius: 10%;
     pointer-events: none;
     z-index: 3;
     background: url("/static/assets/backgrounds/stocks.gif") center / 180px 180px repeat;

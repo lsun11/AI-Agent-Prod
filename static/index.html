@@ -7,54 +7,38 @@
             content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>AI Research Assistant</title>
-    <!--    <link rel="stylesheet" href="/static/old_styles.css"/>-->
     <link rel="stylesheet" href="/static/css/main.css"/>
-    <script src="components/weather_app/weather.ts"></script>
 </head>
 
 <body>
 <div class="desktop">
     <div class="desktop-grid">
+
         <div class="gadget-slot" id="ai-gadget-slot">
-            <!-- ✅ AI Agent Gadget -->
             <section class="gadget gadget--ai gadget--collapsed" id="ai-gadget" aria-expanded="false">
                 <div class="sphere-texture" aria-hidden="true"></div>
                 <div class="gadget-header" id="ai-gadget-header" role="button" tabindex="0">
                     <div class="gadget-title">AI Research Assistant</div>
                     <div class="gadget-meta">Research • Tool comparisons • Plans • Export (PDF/DOCX/PPTX)</div>
-                    <button
-                            class="gadget-toggle"
-                            id="ai-gadget-toggle"
-                            type="button"
-                            aria-label="Toggle AI Agent"
-                    >
+                    <button class="gadget-toggle" id="ai-gadget-toggle" type="button" aria-label="Toggle AI Agent">
                         Open
                     </button>
                 </div>
 
                 <div class="gadget-body" id="ai-gadget-body">
-                    <!-- ✅ Your original AI Agent UI (unchanged structure) -->
                     <div class="chat-container">
                         <div class="header-row">
                             <h2 id="app-title">AI Research Assistant</h2>
                             <div id="dropdown-container" class="dropdown-container"></div>
                         </div>
-
                         <div id="messages" class="messages"></div>
-
                         <form id="chat-form" class="input-row">
                             <label class="sr-only" for="chat-input">Chat input</label>
-                            <input
-                                    id="chat-input"
-                                    type="text"
-                                    placeholder="Ask about dev tools, pricing, alternatives..."
-                                    autocomplete="off"
-                            />
+                            <input id="chat-input" type="text"
+                                   placeholder="Ask about dev tools, pricing, alternatives..." autocomplete="off"/>
                             <button type="submit">Send</button>
                         </form>
-
                         <div id="download-container" class="download-container"></div>
-
                         <div id="file-preview-panel" class="file-preview-panel">
                             <div id="file-preview-header" class="file-preview-header">
                                 <div class="file-preview-title" id="file-preview-title"></div>
@@ -65,16 +49,13 @@
                                     <button id="file-preview-close" class="file-preview-close" type="button">✕</button>
                                 </div>
                             </div>
-                            <div class="file-preview-body" id="file-preview-body">
-                                <!-- iframe or <pre> will be injected here -->
-                            </div>
-                        </div>
-
-                        <div id="history-panel">
-                            <div class="history-header"></div>
-                            <div id="history-list"></div>
+                            <div class="file-preview-body" id="file-preview-body"></div>
                         </div>
                     </div>
+                </div>
+                <div id="history-panel">
+                    <div class="history-header"></div>
+                    <div id="history-list"></div>
                 </div>
             </section>
         </div>
@@ -100,15 +81,12 @@
                                 <div class="weather-temp" id="weather-temp">—</div>
                                 <div class="weather-desc" id="weather-desc">—</div>
                             </div>
-
                             <div class="weather-stats" id="weather-stats"></div>
-
                             <div class="weather-actions">
                                 <button class="weather-refresh" id="weather-refresh" type="button">Refresh</button>
                                 <div class="weather-updated" id="weather-updated"></div>
                             </div>
                         </div>
-
                         <div class="weather-details" id="weather-details"></div>
                         <div class="weather-forecast" data-weather="forecast"></div>
                     </div>
@@ -116,8 +94,6 @@
             </section>
         </div>
 
-
-        <!--files-gadget-->
         <div id="files-gadget" class="gadget gadget--files gadget--collapsed">
             <div id="files-gadget-header" class="gadget-header">
                 <div class="gadget-title">File Explorer</div>
@@ -128,28 +104,19 @@
             <div class="gadget-body">
                 <div class="files-layout">
                     <div class="files-sidebar">
-                        <div class="files-nav-item active" data-path="root">
-                            <span class="icon">💻</span> Desktop
-                        </div>
+                        <div class="files-nav-item active" data-path="root"><span class="icon">💻</span> Desktop</div>
                         <div class="files-nav-label">GADGETS</div>
-                        <div class="files-nav-item" data-path="ai_agent">
-                            <span class="icon">🤖</span> AI Agent
-                        </div>
-                        <div class="files-nav-item" data-path="weather">
-                            <span class="icon">🌦️</span> Weather
-                        </div>
+                        <div class="files-nav-item" data-path="ai_agent"><span class="icon">🤖</span> AI Agent</div>
+                        <div class="files-nav-item" data-path="weather"><span class="icon">🌦️</span> Weather</div>
                     </div>
-
                     <div class="files-main">
                         <div class="files-toolbar">
                             <div class="files-path" id="files-current-path">My Desktop > AI Agent</div>
                         </div>
-                        <div class="files-grid" id="files-grid">
-                        </div>
+                        <div class="files-grid" id="files-grid"></div>
                     </div>
                 </div>
             </div>
-
             <div class="resize-handle n"></div>
             <div class="resize-handle e"></div>
             <div class="resize-handle s"></div>
@@ -180,26 +147,18 @@
                         <div class="clock-hero-date" id="clock-hero-date">Monday, Jan 01</div>
                         <div class="clock-hero-loc" id="clock-hero-loc">Loading location...</div>
                     </div>
-
                     <div class="clock-divider"></div>
                     <div class="clock-grid-label">WORLD TIME</div>
-
-                    <div class="clock-grid" id="clock-world-grid">
-                    </div>
-                    <div class="clock-hero">
-                    </div>
+                    <div class="clock-grid" id="clock-world-grid"></div>
 
                     <div class="earth-map-container">
                         <canvas id="clock-earth-canvas" width="540" height="270"></canvas>
                         <div id="clock-earth-marker" class="earth-marker"></div>
                         <div id="clock-city-layer" class="city-layer"></div>
                     </div>
-
                     <div class="clock-divider"></div>
-
                 </div>
             </div>
-
             <div class="resize-handle n"></div>
             <div class="resize-handle e"></div>
             <div class="resize-handle s"></div>
@@ -210,13 +169,11 @@
             <div class="resize-handle nw"></div>
         </div>
 
-        <!--stock-gadget-->
         <div id="stock-gadget" class="gadget gadget--stock gadget--collapsed">
             <div class="sphere-texture"></div>
 
             <div id="stock-gadget-header" class="gadget-header">
                 <div class="gadget-title">Markets</div>
-                <div class="gadget-meta">SPY • QQQ</div>
                 <button id="stock-gadget-toggle" class="gadget-toggle">Open</button>
             </div>
 
@@ -229,30 +186,31 @@
                     <div class="stock-mini-symbol">QQQ</div>
                     <div class="stock-mini-price down" id="stock-mini-qqq">...</div>
                 </div>
+                <div class="stock-mini-ticker">
+                    <div class="stock-mini-symbol">NVDA</div>
+                    <div class="stock-mini-price" id="stock-mini-nvda">...</div>
+                </div>
             </div>
+
             <div class="gadget-body">
                 <div class="stock-layout">
                     <div class="stock-header-row">
-                <div class="stock-tabs">
-                    <button class="stock-tab active" data-symbol="SPY">SPY</button>
-                    <button class="stock-tab" data-symbol="QQQ">QQQ</button>
-                </div>
+                        <div class="stock-tabs">
+                            <button class="stock-tab active" data-symbol="SPY">SPY</button>
+                            <button class="stock-tab" data-symbol="QQQ">QQQ</button>
+                            <button class="stock-tab" data-symbol="NVDA">NVDA</button>
+                        </div>
 
-                <div class="stock-ranges">
-                    <button class="stock-range-btn" data-range="1H">1H</button>
-                    <button class="stock-range-btn" data-range="1D">1D</button>
-                    <button class="stock-range-btn" data-range="1W">1W</button>
-                    <button class="stock-range-btn" data-range="1M">1M</button>
-                    <button class="stock-range-btn active" data-range="6M">6M</button>
-                    <button class="stock-range-btn" data-range="1Y">1Y</button>
-                    <button class="stock-range-btn" data-range="5Y">5Y</button>
-                </div>
-            </div>
-<!--                    <div class="stock-tabs">-->
-<!--                        <button class="stock-tab active" data-symbol="SPY">SPY</button>-->
-<!--                        <button class="stock-tab" data-symbol="QQQ">QQQ</button>-->
-<!--                        <button class="stock-tab-add">+</button>-->
-<!--                    </div>-->
+                        <div class="stock-ranges">
+                            <button class="stock-range-btn" data-range="1H">1H</button>
+                            <button class="stock-range-btn" data-range="1D">1D</button>
+                            <button class="stock-range-btn" data-range="1W">1W</button>
+                            <button class="stock-range-btn" data-range="1M">1M</button>
+                            <button class="stock-range-btn active" data-range="6M">6M</button>
+                            <button class="stock-range-btn" data-range="1Y">1Y</button>
+                            <button class="stock-range-btn" data-range="5Y">5Y</button>
+                        </div>
+                    </div>
 
                     <div class="stock-hero-section">
                         <div class="stock-hero-left">
@@ -270,7 +228,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="resize-handle n"></div>
             <div class="resize-handle e"></div>
             <div class="resize-handle s"></div>
@@ -280,67 +237,12 @@
             <div class="resize-handle sw"></div>
             <div class="resize-handle nw"></div>
         </div>
+
     </div>
 
-    <!-- Backdrop for expanded gadget -->
     <div class="gadget-backdrop" id="gadget-backdrop" aria-hidden="true"></div>
 </div>
 
-<!-- Load your compiled JS -->
 <script type="module" src="../static_build/main.js"></script>
-
-<!-- Gadget expand/collapse controller -->
-<script>
-    (function () {
-        const gadget = document.getElementById("ai-gadget");
-        const header = document.getElementById("ai-gadget-header");
-        const toggleBtn = document.getElementById("ai-gadget-toggle");
-        const backdrop = document.getElementById("gadget-backdrop");
-
-        if (!gadget || !header || !toggleBtn || !backdrop) return;
-
-        function setExpanded(expanded) {
-            gadget.classList.toggle("gadget--expanded", expanded);
-            gadget.classList.toggle("gadget--collapsed", !expanded);
-            backdrop.classList.toggle("visible", expanded);
-            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-            toggleBtn.textContent = expanded ? "Close" : "Open";
-
-            // prevent background scroll when expanded
-            document.documentElement.classList.toggle("no-scroll", expanded);
-            document.body.classList.toggle("no-scroll", expanded);
-        }
-
-        function toggle() {
-            const expanded = gadget.classList.contains("gadget--expanded");
-            setExpanded(!expanded);
-        }
-
-        header.addEventListener("click", (e) => {
-            // don't double-trigger when clicking the button
-            if (e.target === toggleBtn) return;
-            toggle();
-        });
-
-        toggleBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggle();
-        });
-
-        backdrop.addEventListener("click", () => setExpanded(false));
-
-        header.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggle();
-            }
-        });
-
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") setExpanded(false);
-        });
-    })();
-</script>
 </body>
 </html>

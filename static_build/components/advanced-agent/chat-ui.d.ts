@@ -14,8 +14,15 @@ export declare class ChatUI {
     private isThinking;
     private language;
     private latestCompaniesVisual;
+    private gadgetEl;
+    private headerEl;
+    private toggleBtnEl;
+    private backdropEl;
     private currentEventSource?;
     constructor();
+    private attachWindowListeners;
+    private toggleExpanded;
+    private setExpanded;
     private restorePersistedSettings;
     private fetchSuggestions;
     private addSuggestionBubble;

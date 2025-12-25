@@ -11,7 +11,7 @@ const STORAGE_KEYS = {
 };
 export class ChatUI {
     constructor() {
-        this.deepButton = null; // 👈 NEW
+        this.deepButton = null;
         this.deepThinkingEnabled = false;
         this.currentSuggestionGrid = null;
         this.currentTopicKey = null;
@@ -38,17 +38,16 @@ export class ChatUI {
             throw new Error("Submit button not found");
         }
         this.submitButton = button;
+        // --- Deep Thinking Button Setup ---
         this.deepBtn = document.createElement("button");
         this.deepBtn.type = "button";
         this.deepBtn.id = "deep-thinking-btn";
         this.deepBtn.className = "deep-thinking-btn";
         this.deepBtn.textContent = this.language === 'Chn' ? "深度思考" : "Deep Thinking";
         this.deepButton = this.deepBtn;
-        // Insert next to the Send button
         if (this.submitButton.parentElement) {
             this.submitButton.parentElement.insertBefore(this.deepBtn, this.submitButton.previousSibling);
         }
-        // Toggle state + CSS class
         this.deepBtn.addEventListener("click", () => {
             this.deepThinkingEnabled = !this.deepThinkingEnabled;
             if (this.deepThinkingEnabled) {
@@ -58,30 +57,38 @@ export class ChatUI {
                 this.deepBtn.classList.remove("active");
             }
         });
+        // --- Select Elements ---
+        // ✅ Capture Window Elements
+        this.gadgetEl = document.getElementById("ai-gadget");
+        this.headerEl = document.getElementById("ai-gadget-header");
+        this.toggleBtnEl = document.getElementById("ai-gadget-toggle");
+        this.backdropEl = document.getElementById("gadget-backdrop");
+        // Initialize Logic
         this.attachListeners();
+        // ✅ Initialize Window Logic (Expand/Collapse)
+        if (this.gadgetEl && this.headerEl && this.toggleBtnEl && this.backdropEl) {
+            this.attachWindowListeners();
+        }
         // dropdowns
         const languageSelectEl = this.addDropDown("language-select");
-        if (!languageSelectEl) {
+        if (!languageSelectEl)
             throw new Error("Failed to create Language Select");
-        }
         const modelSelectEl = this.addDropDown("model-select");
-        if (!modelSelectEl) {
+        if (!modelSelectEl)
             throw new Error("Failed to create model-select dropdown");
-        }
         const humanizationSelectEl = this.addDropDown("humanization");
-        if (!humanizationSelectEl) {
+        if (!humanizationSelectEl)
             throw new Error("Failed to create humanization dropdown");
-        }
         this.languageSelect = languageSelectEl;
         this.modelSelect = modelSelectEl;
         this.humanizationSelect = humanizationSelectEl;
         this.restorePersistedSettings();
-        // language setup
         this.language = mapLanguageValue(this.languageSelect.value);
         this.updateInterfaceLanguage();
         this.addGreeting(this.language);
         this.fetchSuggestions("fast").catch((err) => console.error("Failed to fetch suggestions:", err));
         setHistoryHeaderLanguage(this.language);
+        // --- Settings Listeners ---
         this.languageSelect.addEventListener("change", () => {
             this.language = mapLanguageValue(this.languageSelect.value);
             try {
@@ -92,7 +99,6 @@ export class ChatUI {
             }
             this.updateInterfaceLanguage();
             refreshDropdownLabels(this.language);
-            // ✅ keep history header in sync without wiping the button
             setHistoryHeaderLanguage(this.language);
             const switchedMsg = this.language === "Chn"
                 ? "🌐 已切换到中文界面"
@@ -101,7 +107,6 @@ export class ChatUI {
             this.addGreeting(this.language);
             this.fetchSuggestions().catch((err) => console.error("Failed to fetch suggestions:", err));
         });
-        // 🔹 Persist model selection
         this.modelSelect.addEventListener("change", () => {
             try {
                 window.localStorage.setItem(STORAGE_KEYS.model, this.modelSelect.value);
@@ -110,7 +115,6 @@ export class ChatUI {
                 console.warn("Failed to persist model setting:", err);
             }
         });
-        // 🔹 Persist humanization (temperature) selection
         this.humanizationSelect.addEventListener("change", () => {
             try {
                 window.localStorage.setItem(STORAGE_KEYS.humanization, this.humanizationSelect.value);
@@ -120,6 +124,59 @@ export class ChatUI {
             }
         });
     }
+    // =========================================================================
+    // ✅ NEW: Window Management Logic (Replaces the inline script)
+    // =========================================================================
+    attachWindowListeners() {
+        // Toggle on Header Click
+        this.headerEl.addEventListener("click", (e) => {
+            if (e.target === this.toggleBtnEl)
+                return; // Let button handle its own click
+            this.toggleExpanded();
+        });
+        // Toggle on Button Click
+        this.toggleBtnEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleExpanded();
+        });
+        // Close on Backdrop Click
+        this.backdropEl.addEventListener("click", () => this.setExpanded(false));
+        // Keyboard Accessibility
+        this.headerEl.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                this.toggleExpanded();
+            }
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape")
+                this.setExpanded(false);
+        });
+    }
+    toggleExpanded() {
+        const isExpanded = this.gadgetEl.classList.contains("gadget--expanded");
+        this.setExpanded(!isExpanded);
+    }
+    setExpanded(expanded) {
+        this.gadgetEl.classList.toggle("gadget--expanded", expanded);
+        this.gadgetEl.classList.toggle("gadget--collapsed", !expanded);
+        this.backdropEl.classList.toggle("visible", expanded);
+        this.gadgetEl.setAttribute("aria-expanded", expanded ? "true" : "false");
+        this.toggleBtnEl.textContent = expanded ? "Close" : "Open";
+        // Prevent scrolling on body when expanded
+        document.documentElement.classList.toggle("no-scroll", expanded);
+        document.body.classList.toggle("no-scroll", expanded);
+        // 🐛 BUG FIX: Explicitly remove inline styles (width/height/transform) when collapsing
+        // This prevents the "ellipse" issue where expanded dimensions persist on the collapsed sphere.
+        if (!expanded) {
+            this.gadgetEl.style.removeProperty("width");
+            this.gadgetEl.style.removeProperty("height");
+            this.gadgetEl.style.removeProperty("transform");
+            this.gadgetEl.style.removeProperty("inset");
+        }
+    }
+    // =========================================================================
     restorePersistedSettings() {
         try {
             const savedLanguage = window.localStorage.getItem(STORAGE_KEYS.language);
@@ -127,21 +184,18 @@ export class ChatUI {
             const savedHumanization = window.localStorage.getItem(STORAGE_KEYS.humanization);
             if (savedLanguage && this.languageSelect) {
                 const option = Array.from(this.languageSelect.options).find((opt) => opt.value === savedLanguage);
-                if (option) {
+                if (option)
                     this.languageSelect.value = savedLanguage;
-                }
             }
             if (savedModel && this.modelSelect) {
                 const option = Array.from(this.modelSelect.options).find((opt) => opt.value === savedModel);
-                if (option) {
+                if (option)
                     this.modelSelect.value = savedModel;
-                }
             }
             if (savedHumanization && this.humanizationSelect) {
                 const option = Array.from(this.humanizationSelect.options).find((opt) => opt.value === savedHumanization);
-                if (option) {
+                if (option)
                     this.humanizationSelect.value = savedHumanization;
-                }
             }
         }
         catch (err) {
@@ -156,9 +210,8 @@ export class ChatUI {
             return;
         }
         const data = await res.json();
-        if (!data.suggestions || !Array.isArray(data.suggestions)) {
+        if (!data.suggestions || !Array.isArray(data.suggestions))
             return;
-        }
         if (this.currentSuggestionGrid) {
             this.currentSuggestionGrid.remove();
             this.currentSuggestionGrid = null;
@@ -166,22 +219,18 @@ export class ChatUI {
         const grid = document.createElement("div");
         grid.className = "suggestion-grid";
         this.currentSuggestionGrid = grid;
-        // Append directly under the most recent message (which you just added)
         this.messagesEl.appendChild(grid);
-        // Now add the suggestion bubbles into THIS grid
         data.suggestions.forEach((q) => {
             if (typeof q === "string" && q.trim()) {
                 this.addSuggestionBubble(q.trim(), grid);
             }
         });
-        // Scroll to bottom so the user sees them
         this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
     }
     addSuggestionBubble(text, grid) {
         const div = document.createElement("div");
         div.className = "message suggestion";
         div.textContent = text;
-        // Click to autofill input
         div.addEventListener("click", () => {
             this.input.value = text;
             this.input.focus();
@@ -209,7 +258,6 @@ export class ChatUI {
     addMessage(text, sender, url) {
         const div = document.createElement("div");
         div.className = `message ${sender}`;
-        // render markdown → HTML
         div.innerHTML = markdownToHtml(text);
         if (sender === "bot" && url) {
             div.classList.add("clickable");
@@ -222,15 +270,11 @@ export class ChatUI {
     }
     addDropDown(selectId) {
         const dropdownContainer = document.getElementById("dropdown-container");
-        if (!dropdownContainer) {
-            console.error("dropdown-container not found");
+        if (!dropdownContainer)
             return null;
-        }
         const options = DROPDOWN_OPTIONS_BY_ID[selectId];
-        if (!options) {
-            console.warn(`No dropdown options configured for selectId="${selectId}"`);
+        if (!options)
             return null;
-        }
         const select = document.createElement("select");
         select.id = selectId;
         select.className = selectId;
@@ -299,11 +343,8 @@ export class ChatUI {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === "topic") {
-                        const topicLabel = data.topic_label;
-                        const topicKey = data.topic_key;
-                        const topicDomain = data.topic_domain;
-                        this.updateTitle(topicLabel);
-                        this.updateBackground(topicDomain);
+                        this.updateTitle(data.topic_label);
+                        this.updateBackground(data.topic_domain);
                         this.startThinking();
                         return;
                     }
@@ -313,16 +354,13 @@ export class ChatUI {
                     }
                     if (data.type === "final") {
                         const bubbles = splitReplyIntoBubbles(data.reply);
-                        // read visual info from backend
-                        const companiesVisual = (data.companies_visual || []);
-                        this.latestCompaniesVisual = companiesVisual;
+                        this.latestCompaniesVisual = (data.companies_visual || []);
                         for (let i = 0; i < bubbles.length; i++) {
                             const isFirst = i === 0;
                             const isLast = i === bubbles.length - 1;
-                            // Middle bubbles → company bubbles
                             if (!isFirst && !isLast) {
-                                const companyIndex = i - 1; // bubble 1 ↔ company 0, etc.
-                                const company = companiesVisual[companyIndex];
+                                const companyIndex = i - 1;
+                                const company = this.latestCompaniesVisual[companyIndex];
                                 if (company) {
                                     // @ts-ignore
                                     const bubbleEl = createCompanyBubbleElement(bubbles[i], company);
@@ -337,29 +375,25 @@ export class ChatUI {
                                 }
                                 continue;
                             }
-                            // First and last bubble: normal bot messages
                             const style = "bot-first";
                             // @ts-ignore
                             const url = extractWebsiteUrl(bubbles[i]);
                             // @ts-ignore
                             this.addMessage(bubbles[i], style, url);
                         }
-                        // Download buttons using helper
                         if (data.download_pdf_url || data.download_docx_url || data.download_txt_url) {
                             const object = this.language === "Eng" ? "document" : "文档";
                             const el = createDownloadButtonElement({
                                 pdf: data.download_pdf_url,
                                 docx: data.download_docx_url,
                                 txt: data.download_txt_url
-                            }, object, this.language, true // 👈 enable multi-format menu for the document
-                            );
+                            }, object, this.language, true);
                             this.messagesEl.appendChild(el);
                             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }
                         if (data.slides_download_url) {
                             const object = this.language === "Eng" ? "slides" : "演示文稿";
-                            const el = createDownloadButtonElement(data.slides_download_url, object, this.language // 👈 leave default (single-click)
-                            );
+                            const el = createDownloadButtonElement(data.slides_download_url, object, this.language);
                             this.messagesEl.appendChild(el);
                             this.messagesEl.scrollTop = this.messagesEl.scrollHeight;
                         }

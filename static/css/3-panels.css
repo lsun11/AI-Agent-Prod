@@ -102,7 +102,7 @@
 }
 
 #history-panel {
-    position: fixed;
+    position: absolute;
     right: 8px;
     top: 64px;
     width: 260px;
@@ -116,6 +116,11 @@
     color: #f5f5f5;
     backdrop-filter: blur(6px);
     z-index: 2000;
+}
+
+#history-panel.history-panel--collapsed {
+    max-height: 38px; /* collapsed "peek" height */
+    overflow: hidden;
 }
 
 .history-header {
@@ -282,25 +287,6 @@
         max-height: none;
         border-left: none;
         border-top: 1px solid #e5e5e5;
-    }
-
-
-    #history-panel {
-        right: 8px;
-        top: auto;
-        /* leave room for input row */
-        bottom: calc(84px + env(safe-area-inset-bottom));
-        width: 28vh;
-        height: auto;
-        max-height: 16vh;
-
-        /* smoother scrolling on iOS */
-        -webkit-overflow-scrolling: touch;
-    }
-
-    #history-panel.history-panel--collapsed {
-        max-height: 38px; /* collapsed "peek" height */
-        overflow: hidden;
     }
 
     /* input row: keep big and tappable */

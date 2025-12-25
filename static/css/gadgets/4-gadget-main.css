@@ -65,12 +65,21 @@ body.no-scroll {
     min-height: min(820px, 86vh);
     max-width: 1800px;
     background: rgba(46, 236, 255, 0.22);
+
+    /* ✅ FIX 1: Use Flexbox to manage vertical stacking */
+    display: flex;
+    flex-direction: column;
 }
 
 .gadget--expanded .gadget-body {
+    /* ✅ FIX 2: Stop using calc() height. Use flex-grow instead. */
+    flex: 1;              /* Fill all remaining space below header */
+    height: auto;         /* Allow it to grow/shrink with parent */
+    min-height: 0;        /* Critical for nested scrolling to work */
+
     display: flex;
     flex-direction: column;
-    height: calc(100% - 52px);
+    position: relative;
 }
 
 /* Placeholder State */

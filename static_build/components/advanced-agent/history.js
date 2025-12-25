@@ -87,7 +87,7 @@ function renderHistoryItem(entry) {
     }
     // Optional: clicking the whole item re-fills the input with the old query
     wrapper.addEventListener("click", () => {
-        const input = document.getElementById("user-input");
+        const input = document.getElementById("chat-input");
         if (input && entry.query) {
             input.value = entry.query;
             input.focus();
@@ -113,10 +113,10 @@ export async function initHistoryPanel() {
     }
     // 🔽 Add expand/collapse toggle button
     setupHistoryToggle(panel, header, list);
-    // Make the panel draggable by its header
-    makePanelDraggable(panel, header, {
-        mode: "boundary",
-    });
+    if (!header.dataset.dragInitialized) {
+        makePanelDraggable(panel, header, { mode: "boundary" });
+        header.dataset.dragInitialized = "true";
+    }
     try {
         const items = await fetchHistory(30);
         if (list) {
@@ -222,6 +222,10 @@ export function setHistoryHeaderLanguage(language) {
     const header = document.querySelector(".history-header");
     if (!header)
         return;
+    // Store lang on panel for confirm dialog usage
+    const panel = document.getElementById("history-panel");
+    if (panel)
+        panel.dataset.lang = language;
     let labelSpan = header.querySelector(".history-header-label");
     if (!labelSpan) {
         labelSpan = document.createElement("span");

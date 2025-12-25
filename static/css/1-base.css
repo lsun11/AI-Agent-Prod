@@ -28,8 +28,6 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-
-    /* ✅ Mobile-safe viewport sizing */
     min-height: 100dvh;
     height: 100vh;
 

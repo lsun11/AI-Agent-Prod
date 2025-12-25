@@ -16,6 +16,10 @@ export declare class Desktop {
     private clockToggleBtn;
     private clock?;
     private chatUI?;
+    private stockGadgetEl;
+    private stockHeaderEl;
+    private stockToggleBtn;
+    private stock?;
     constructor();
     /**
      * Saves the current 'left' and 'top' coordinates to localStorage.
@@ -35,5 +39,7 @@ export declare class Desktop {
     private initFilesBehavior;
     private initClockLogic;
     private initClockBehavior;
+    private initStockLogic;
+    private initStockBehavior;
 }
 //# sourceMappingURL=desktop.d.ts.map

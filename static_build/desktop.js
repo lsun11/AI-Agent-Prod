@@ -6,6 +6,7 @@ import { makePanelResizable } from "./helpers/resize.js";
 import { WeatherGadget } from "./components/weather_app/weather.js";
 import { FilesGadget } from "./components/files_app/files.js";
 import { ClockGadget } from "./components/clock_app/clock.js";
+import { StockGadget } from "./components/stock_app/stock.js";
 export class Desktop {
     constructor() {
         this.gadget = document.getElementById("ai-gadget");
@@ -21,6 +22,9 @@ export class Desktop {
         this.clockGadgetEl = document.getElementById("clock-gadget");
         this.clockHeaderEl = document.getElementById("clock-gadget-header");
         this.clockToggleBtn = document.getElementById("clock-gadget-toggle");
+        this.stockGadgetEl = document.getElementById("stock-gadget");
+        this.stockHeaderEl = document.getElementById("stock-gadget-header");
+        this.stockToggleBtn = document.getElementById("stock-gadget-toggle");
         // Init Logic
         this.initWeatherBehavior();
         this.initWeatherLogic();
@@ -31,10 +35,13 @@ export class Desktop {
         this.initDraggables();
         this.initClockBehavior(); // New Behavior
         this.initClockLogic();
+        this.initStockBehavior();
+        this.initStockLogic();
         this.restorePosition(this.gadget, "ai-gadget");
         this.restorePosition(this.weatherGadgetEl, "weather-gadget");
         this.restorePosition(this.filesGadgetEl, "files-gadget");
         this.restorePosition(this.clockGadgetEl, "clock-gadget");
+        this.restorePosition(this.stockGadgetEl, "stock-gadget");
     }
     // ========================================================================
     // 💾 POSITION PERSISTENCE HELPERS
@@ -234,6 +241,13 @@ export class Desktop {
             makePanelDraggable(this.clockGadgetEl, this.clockHeaderEl, { mode: "grab-offset", inertia: true });
             makePanelResizable(this.clockGadgetEl, { minWidth: 200, minHeight: 200 });
             attachSaveListener(this.clockGadgetEl, "clock-gadget");
+        }
+        // 5. Stock Gadget
+        if (this.stockGadgetEl && this.stockHeaderEl) {
+            // Need to import/use your draggable helper here
+            makePanelDraggable(this.stockGadgetEl, this.stockHeaderEl, { mode: "grab-offset", inertia: true });
+            makePanelResizable(this.stockGadgetEl, { minWidth: 400, minHeight: 300 });
+            attachSaveListener(this.stockGadgetEl, "stock-gadget");
         }
     }
     initWeatherLogic() {
@@ -578,6 +592,95 @@ export class Desktop {
             if (gadget.classList.contains("gadget--expanded") && !isPinned) {
                 setExpanded(false);
             }
+        });
+    }
+    initStockLogic() {
+        if (this.stockGadgetEl)
+            this.stock = new StockGadget(this.stockGadgetEl);
+    }
+    initStockBehavior() {
+        const gadget = this.stockGadgetEl;
+        const header = this.stockHeaderEl;
+        const toggleBtn = this.stockToggleBtn;
+        const backdrop = this.backdrop;
+        if (!gadget || !header || !toggleBtn || !backdrop)
+            return;
+        let hoverTimeout;
+        let isPinned = false;
+        const setExpanded = (expanded, pinned = false) => {
+            clearTimeout(hoverTimeout);
+            const rect = gadget.getBoundingClientRect();
+            gadget.style.removeProperty("inset");
+            gadget.style.removeProperty("transform");
+            gadget.style.removeProperty("right");
+            gadget.style.removeProperty("bottom");
+            gadget.style.left = `${rect.left}px`;
+            gadget.style.top = `${rect.top}px`;
+            gadget.style.position = "fixed";
+            this.savePosition(gadget, "stock-gadget");
+            if (expanded) {
+                isPinned = pinned;
+                const raw = localStorage.getItem("stock-gadget-expanded-size");
+                if (raw) {
+                    try {
+                        const { w, h } = JSON.parse(raw);
+                        if (w)
+                            gadget.style.width = w;
+                        if (h)
+                            gadget.style.height = h;
+                    }
+                    catch (_a) { }
+                }
+                gadget.classList.add("gadget--expanded");
+                gadget.classList.remove("gadget--collapsed");
+                if (isPinned)
+                    backdrop.classList.add("visible");
+                gadget.style.removeProperty("min-width");
+                gadget.style.removeProperty("min-height");
+            }
+            else {
+                isPinned = false;
+                if (gadget.classList.contains("gadget--expanded")) {
+                    const rect = gadget.getBoundingClientRect();
+                    const size = { w: `${rect.width}px`, h: `${rect.height}px` };
+                    localStorage.setItem("stock-gadget-expanded-size", JSON.stringify(size));
+                }
+                gadget.style.removeProperty("width");
+                gadget.style.removeProperty("height");
+                gadget.style.removeProperty("min-width");
+                gadget.style.removeProperty("min-height");
+                gadget.classList.remove("gadget--expanded");
+                gadget.classList.add("gadget--collapsed");
+                backdrop.classList.remove("visible");
+            }
+            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
+            toggleBtn.textContent = expanded ? "Close" : "Open";
+        };
+        const toggle = () => {
+            const isExpanded = gadget.classList.contains("gadget--expanded");
+            if (isExpanded && isPinned)
+                setExpanded(false);
+            else
+                setExpanded(true, true);
+        };
+        header.addEventListener("click", (e) => { if (e.target !== toggleBtn)
+            toggle(); });
+        toggleBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggle(); });
+        backdrop.addEventListener("click", () => setExpanded(false));
+        gadget.addEventListener("mouseenter", () => {
+            if (gadget.classList.contains("is-dragging"))
+                return;
+            if (!gadget.classList.contains("gadget--expanded")) {
+                hoverTimeout = window.setTimeout(() => { if (!gadget.classList.contains("is-dragging"))
+                    setExpanded(true, false); }, 600);
+            }
+        });
+        gadget.addEventListener("mouseleave", () => {
+            clearTimeout(hoverTimeout);
+            if (gadget.classList.contains("is-dragging"))
+                return;
+            if (gadget.classList.contains("gadget--expanded") && !isPinned)
+                setExpanded(false);
         });
     }
 }

@@ -1,0 +1,85 @@
+.gadget--ai.gadget--collapsed {
+    width: 160px;
+    height: 160px;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    border-radius: 50%;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    /* Consolidated Marble/Sphere Gradients */
+    background: radial-gradient(circle at 48% -14%, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18) 22%, rgba(255, 255, 255, 0.0) 58%),
+    radial-gradient(circle at 20% 64%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.00) 46%),
+    radial-gradient(circle at 74% 42%, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.00) 70%),
+    radial-gradient(circle at 32% 6%, rgba(192, 248, 248, 0.4) 0%, rgba(103, 182, 182, 0.73) 30%, rgba(4, 57, 66, 0.96) 90%);
+}
+
+.gadget--collapsed .gadget-header {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    display: block;
+}
+
+/* Sphere Texture Overlay */
+.gadget--collapsed .sphere-texture {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    background: url("/static/assets/backgrounds/giphy.gif") center / 180px 180px repeat;
+    opacity: 0.92;
+    mix-blend-mode: soft-light;
+    filter: contrast(0.9) saturate(0.85);
+}
+
+/* Sphere Text Elements (Title & Meta) */
+.gadget--collapsed::before,
+.gadget--collapsed::after {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 6;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    text-align: center;
+}
+
+/* Fixed Center Title */
+.gadget--collapsed::before {
+    content: attr(data-title);
+    top: 40%;
+    width: 86%;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+/* Rotating Meta Belt */
+.gadget--collapsed::after {
+    content: attr(data-meta) "  •  " attr(data-meta) "  •  ";
+    top: 65%;
+    left: 0;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.78;
+    animation: equatorLoop 8s linear infinite;
+}
+
+/* Component Visibility Logic in Collapsed */
+.gadget--collapsed .gadget-toggle,
+.gadget--collapsed .gadget-meta,
+.gadget--collapsed .gadget-title,
+.gadget--collapsed #history-panel {
+    display: none !important;
+}
+
+.gadget--expanded #history-panel {
+    display: block;
+}

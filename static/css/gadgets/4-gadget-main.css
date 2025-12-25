@@ -1,0 +1,231 @@
+@import "gadget-ai.css";
+@import "gadget-weather.css";
+@import "gadget-files.css";
+@import "gadget-clock.css";
+@import "gadget-stock.css";
+
+/* ==========================================================================
+   1. GLOBAL & DESKTOP LAYOUT
+   ========================================================================== */
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden;
+    height: 100%;
+}
+
+.desktop {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: var(--page-pad);
+}
+
+/* A simple desktop-like grid layout so you can add more gadgets later */
+.desktop-grid {
+    width: 100%;
+    max-width: var(--page-max);
+    position: relative; /* important */
+    height: 100%;
+    min-height: 80vh; /* or 100% if you prefer */
+}
+
+/* Grid Slots */
+.gadget-slot {
+    grid-column: span 6;
+    min-height: 64px;
+}
+
+
+/* ==========================================================================
+   2. BASE GADGET ARCHITECTURE
+   ========================================================================== */
+.gadget {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: rgb(130, 193, 188);
+    border: 1px solid rgb(189, 255, 255);
+    box-shadow: var(--shadow-strong);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+    transition: width 0.3s ease,
+    height 0.3s ease,
+    border-radius 0.3s ease,
+    background 0.3s ease,
+    opacity 0.3s ease;
+}
+
+/* Expanded State Base */
+.gadget--expanded {
+    position: relative;
+    z-index: 4000;
+    min-width: min(1200px, 92vw);
+    min-height: min(820px, 86vh);
+    max-width: 1800px;
+    background: rgba(46, 236, 255, 0.22);
+}
+
+.gadget--expanded .gadget-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 52px);
+}
+
+/* Placeholder State */
+.gadget--placeholder {
+    position: absolute;
+    left: 620px;
+    top: 24px;
+    width: 560px;
+    height: auto;
+    opacity: 0.55;
+}
+
+
+/* ==========================================================================
+   3. SHARED COMPONENTS (Headers, Utils, Dragging)
+   ========================================================================== */
+.gadget-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: linear-gradient(90deg, rgba(180, 255, 242, 0.62), rgba(31, 189, 189, 0));
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+}
+
+.gadget-title {
+    font-weight: 800;
+    color: #042645;
+    font-size: 14px;
+}
+
+.gadget-meta {
+    flex: 1;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.62);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gadget-toggle {
+    border: 1px solid rgba(58, 75, 106, 0.35);
+    background: rgba(207, 248, 250, 0.76);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Dragging & Resizing States */
+.gadget.is-dragging {
+    transition: none !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+.gadget.is-resizing, .gadget.is-resizing * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Backdrop */
+.gadget-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 3500;
+}
+
+.gadget-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Resize Handles */
+.resize-handle {
+    touch-action: none;
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    background: transparent;
+}
+
+.gadget--expanded .resize-handle { display: block; }
+.resize-handle.e, .resize-handle.w { top: 10px; bottom: 10px; width: 12px; cursor: ew-resize; }
+.resize-handle.e { right: -6px; }
+.resize-handle.w { left: -6px; }
+.resize-handle.s, .resize-handle.n { left: 10px; right: 10px; height: 12px; cursor: ns-resize; }
+.resize-handle.s { bottom: -6px; }
+.resize-handle.n { top: -6px; }
+.resize-handle.ne, .resize-handle.nw, .resize-handle.se, .resize-handle.sw { width: 16px; height: 16px; }
+.resize-handle.se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+.resize-handle.nw { left: -6px; top: -6px; cursor: nwse-resize; }
+.resize-handle.ne { right: -6px; top: -6px; cursor: nesw-resize; }
+.resize-handle.sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
+
+
+
+
+/* ==========================================================================
+   4. AI GADGET (Default Collapsed Sphere Style)
+   ========================================================================== */
+/* import css */
+
+
+/* ==========================================================================
+   5. WEATHER GADGET
+   ========================================================================== */
+/* import css */
+
+
+
+/* ==========================================================================
+   6. FILES GADGET
+   ========================================================================== */
+/* import css */
+
+
+/*!* ==========================================================================*/
+/*   7. CLOCK GADGET*/
+/*   ========================================================================== *!*/
+/* import css */
+
+
+/*!* ==========================================================================*/
+/*   8. STOCK GADGET*/
+/*   ========================================================================== *!*/
+/* import css */
+
+
+
+
+/* ==========================================================================
+   9. ANIMATIONS & RESPONSIVE
+   ========================================================================== */
+@keyframes equatorLoop {
+    0% { transform: translate(0, -50%); }
+    100% { transform: translate(-50%, -50%); }
+}
+
+@media (max-width: 980px) {
+    .gadget, .gadget--placeholder {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .desktop { padding: 10px; width: 100vw; height: 100vh; overflow: hidden; position: relative; }
+    .desktop-grid { width: 100%; max-width: 100%; height: 100%; overflow: hidden; }
+    .gadget--expanded { inset: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0; }
+    .gadget--expanded .gadget-body { height: calc(100% - 56px); }
+}

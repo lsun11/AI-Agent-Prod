@@ -32,7 +32,7 @@ def test_root_serves_index(monkeypatch):
 
     resp = client.get("/")
     assert resp.status_code == 200
-    assert captured["path"].endswith("index_old.html")
+    assert captured["path"].endswith("index.html")
 
 
 

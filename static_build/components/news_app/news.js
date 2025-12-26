@@ -1,18 +1,18 @@
 // static/components/news_app/news.ts
-// ✅ 4 Hours in milliseconds
 const REFRESH_MS = 4 * 60 * 60 * 1000;
 export class NewsGadget {
     constructor(root) {
         this.activeCategory = "tech";
-        this.cache = {};
+        // In-memory cache for switching tabs quickly without disk reads
+        this.memCache = {};
         this.currentArticles = [];
         this.currentHeadlineIdx = 0;
         this.tickerInterval = null;
-        // ✅ Timer reference
         this.refreshTimer = null;
         this.root = root;
         this.listEl = root.querySelector("#news-list");
         this.tickerEl = root.querySelector("#news-ticker-text");
+        this.footerEl = root.querySelector(".news-footer"); // Ensure you have this class in HTML
         const tabs = root.querySelectorAll(".news-tab");
         tabs.forEach(btn => {
             btn.addEventListener("click", () => {
@@ -25,7 +25,6 @@ export class NewsGadget {
         });
         // Initial Load
         this.loadCategory("tech");
-        // ✅ Start Auto-Refresh Timer
         this.startAutoRefresh();
     }
     startAutoRefresh() {
@@ -33,39 +32,89 @@ export class NewsGadget {
             clearInterval(this.refreshTimer);
         this.refreshTimer = window.setInterval(() => {
             console.log(`[NewsGadget] Auto-refreshing ${this.activeCategory} news...`);
-            // Pass true to ignore cache and fetch fresh data
             this.loadCategory(this.activeCategory, true);
         }, REFRESH_MS);
     }
-    // ✅ UPDATED: Added forceRefresh parameter
     async loadCategory(category, forceRefresh = false) {
         this.activeCategory = category;
         if (!this.listEl)
             return;
-        // Show loading state
-        this.listEl.innerHTML = `<div class="news-loading">Searching web for ${category} news...</div>`;
-        // Check Cache (Skip if forcing refresh)
-        if (!forceRefresh && this.cache[category]) {
-            this.renderList(this.cache[category]);
-            // Ensure ticker is updated even on cache hit
-            this.updateTicker(this.cache[category]);
-            return;
+        // 1. Try to load from LocalStorage / Memory FIRST
+        // This ensures the UI is never blank on reload
+        const cachedArticles = this.getLocalData(category);
+        if (cachedArticles.length > 0) {
+            // Render cached data immediately
+            this.renderList(cachedArticles);
+            this.updateTicker(cachedArticles);
+            // If we have valid data and NOT forcing refresh, stop here.
+            // (Unless you want to always background-refresh on load, remove the second condition)
+            if (!forceRefresh && this.memCache[category]) {
+                return;
+            }
         }
+        else {
+            // Only show full loading spinner if we have NOTHING to show
+            this.listEl.innerHTML = `<div class="news-loading">Searching web for ${category} news...</div>`;
+        }
+        // 2. Show "Updating" status if we are keeping old data visible
+        this.updateStatus("Updating...", true);
         try {
+            // 3. Fetch Fresh Data
             const res = await fetch(`/news?category=${category}`);
             if (!res.ok)
                 throw new Error("Failed to fetch news");
             const data = await res.json();
-            // Update Cache
-            this.cache[category] = data.articles;
+            // 4. Update UI & Caches with Fresh Data
+            this.memCache[category] = data.articles;
+            this.saveLocalData(category, data.articles);
             this.renderList(data.articles);
             this.updateTicker(data.articles);
+            this.updateStatus("Updated just now", false);
         }
         catch (err) {
             console.error(err);
-            this.listEl.innerHTML = `<div class="news-loading" style="color:red">Failed to load news.</div>`;
-            this.updateTicker([], true);
+            // If we have no data at all, show error.
+            // If we have stale data, keep showing it but warn in footer.
+            if (this.listEl.childElementCount === 0 || this.listEl.querySelector(".news-loading")) {
+                this.listEl.innerHTML = `<div class="news-loading" style="color:red">Failed to load news.</div>`;
+                this.updateTicker([], true);
+            }
+            this.updateStatus("Update failed (Offline)", false);
         }
+    }
+    // ✅ HELPER: Save to Browser LocalStorage
+    saveLocalData(category, articles) {
+        try {
+            localStorage.setItem(`news-cache-${category}`, JSON.stringify(articles));
+        }
+        catch (e) {
+            console.warn("Quota exceeded", e);
+        }
+    }
+    // ✅ HELPER: Load from Browser LocalStorage
+    getLocalData(category) {
+        // Try memory first
+        if (this.memCache[category])
+            return this.memCache[category];
+        // Try disk
+        try {
+            const raw = localStorage.getItem(`news-cache-${category}`);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    this.memCache[category] = parsed; // Sync memory
+                    return parsed;
+                }
+            }
+        }
+        catch (e) { }
+        return [];
+    }
+    updateStatus(msg, isLoading) {
+        if (!this.footerEl)
+            return;
+        this.footerEl.textContent = msg;
+        this.footerEl.style.opacity = isLoading ? "0.7" : "0.4";
     }
     renderList(articles) {
         if (!this.listEl)
@@ -92,6 +141,10 @@ export class NewsGadget {
     updateTicker(articles, error = false) {
         if (!this.tickerEl)
             return;
+        // Don't reset if the content is exactly the same (prevents jitter)
+        if (JSON.stringify(this.currentArticles) === JSON.stringify(articles) && this.tickerInterval) {
+            return;
+        }
         if (this.tickerInterval) {
             window.clearInterval(this.tickerInterval);
             this.tickerInterval = null;
@@ -119,7 +172,7 @@ export class NewsGadget {
                 }
                 this.tickerEl.classList.add("visible");
                 this.currentHeadlineIdx = (this.currentHeadlineIdx + 1) % this.currentArticles.length;
-            }, 1000);
+            }, 500);
         };
         showCurrent();
         this.tickerInterval = window.setInterval(showCurrent, 6000);

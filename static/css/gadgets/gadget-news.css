@@ -238,10 +238,16 @@
 .news-footer {
     padding: 8px;
     text-align: center;
-    font-size: 10px;
+    font-size: 11px; /* Slightly larger */
+    font-weight: 500;
     color: #adb5bd;
     background: #f8f9fa;
     border-top: 1px solid #e9ecef;
+    transition: color 0.3s ease;
+}
+
+.gadget--news .news-footer {
+    color: #666; /* Darker gray by default */
 }
 
 @keyframes pulse {

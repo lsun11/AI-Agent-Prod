@@ -2,8 +2,9 @@ export declare class NewsGadget {
     private root;
     private listEl;
     private tickerEl;
+    private footerEl;
     private activeCategory;
-    private cache;
+    private memCache;
     private currentArticles;
     private currentHeadlineIdx;
     private tickerInterval;
@@ -11,6 +12,9 @@ export declare class NewsGadget {
     constructor(root: HTMLElement);
     private startAutoRefresh;
     private loadCategory;
+    private saveLocalData;
+    private getLocalData;
+    private updateStatus;
     private renderList;
     private updateTicker;
 }

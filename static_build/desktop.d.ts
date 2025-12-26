@@ -20,6 +20,10 @@ export declare class Desktop {
     private stockHeaderEl;
     private stockToggleBtn;
     private stock?;
+    private newsGadgetEl;
+    private newsHeaderEl;
+    private newsToggleBtn;
+    private news?;
     constructor();
     private initComponents;
     private initGadgetBehavior;
@@ -28,9 +32,11 @@ export declare class Desktop {
     private initFilesLogic;
     private initClockLogic;
     private initStockLogic;
+    private initNewsLogic;
     private initWeatherBehavior;
     private initFilesBehavior;
     private initClockBehavior;
     private initStockBehavior;
+    private initNewsBehavior;
 }
 //# sourceMappingURL=desktop.d.ts.map

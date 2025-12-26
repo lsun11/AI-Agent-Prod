@@ -122,7 +122,6 @@ class NewsService:
 
         for title, url in urls:
             try:
-                print(f"[NewsService] Scraping: {url}...")
                 doc = self.firecrawl.scrape(url)
 
                 markdown = ""

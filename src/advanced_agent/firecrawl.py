@@ -27,9 +27,6 @@ class FirecrawlService:
     def scrape_company_pages(self, url: str):
         if url in self._scrape_cache:
             return self._scrape_cache[url]
-
-        print("Scraping", url)
-
         def _do_scrape():
             return self.app.scrape(
                 url=url,
@@ -69,11 +66,8 @@ class FirecrawlService:
         if key in self._search_cache:
             return self._search_cache[key]
 
-        print(f"[Firecrawl] 📰 Searching NEWS for: {query}")
-
         def _do_search():
             # Pure search. Lightweight.
-            print("_do_search", query)
             return self.app.search(
                 query=query,
                 limit=num_results
@@ -82,7 +76,6 @@ class FirecrawlService:
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_do_search)
-                print("future", future)
                 # Shorter timeout (30s) because we aren't scraping yet
                 result = future.result(timeout=30.0)
         except concurrent.futures.TimeoutError:
@@ -114,9 +107,6 @@ class FirecrawlService:
         # Check cache if you implemented one, otherwise direct call
         if hasattr(self, "_scrape_cache") and url in self._scrape_cache:
             return self._scrape_cache[url]
-
-        print(f"[Firecrawl] Scraping URL: {url}")
-
         try:
             # Call the underlying SDK
             result = self.app.scrape_url(url, params={"formats": ["markdown"]})

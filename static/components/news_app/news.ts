@@ -13,6 +13,9 @@ interface NewsResponse {
     articles: Article[];
 }
 
+// ✅ 4 Hours in milliseconds
+const REFRESH_MS = 4 * 60 * 60 * 1000;
+
 export class NewsGadget {
     private root: HTMLElement;
     private listEl: HTMLElement | null;
@@ -20,10 +23,12 @@ export class NewsGadget {
     private activeCategory: string = "tech";
     private cache: Record<string, Article[]> = {};
 
-    // ✅ NEW: properties for cycling headlines
-    private headlines: string[] = [];
+    private currentArticles: Article[] = [];
     private currentHeadlineIdx = 0;
     private tickerInterval: number | null = null;
+
+    // ✅ Timer reference
+    private refreshTimer: number | null = null;
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -40,17 +45,36 @@ export class NewsGadget {
             });
         });
 
+        // Initial Load
         this.loadCategory("tech");
+
+        // ✅ Start Auto-Refresh Timer
+        this.startAutoRefresh();
     }
 
-    private async loadCategory(category: string) {
+    private startAutoRefresh() {
+        if (this.refreshTimer) clearInterval(this.refreshTimer);
+
+        this.refreshTimer = window.setInterval(() => {
+            console.log(`[NewsGadget] Auto-refreshing ${this.activeCategory} news...`);
+            // Pass true to ignore cache and fetch fresh data
+            this.loadCategory(this.activeCategory, true);
+        }, REFRESH_MS);
+    }
+
+    // ✅ UPDATED: Added forceRefresh parameter
+    private async loadCategory(category: string, forceRefresh = false) {
         this.activeCategory = category;
         if (!this.listEl) return;
 
+        // Show loading state
         this.listEl.innerHTML = `<div class="news-loading">Searching web for ${category} news...</div>`;
 
-        if (this.cache[category]) {
+        // Check Cache (Skip if forcing refresh)
+        if (!forceRefresh && this.cache[category]) {
             this.renderList(this.cache[category]);
+            // Ensure ticker is updated even on cache hit
+            this.updateTicker(this.cache[category]);
             return;
         }
 
@@ -59,24 +83,23 @@ export class NewsGadget {
             if (!res.ok) throw new Error("Failed to fetch news");
 
             const data: NewsResponse = await res.json();
+
+            // Update Cache
             this.cache[category] = data.articles;
 
             this.renderList(data.articles);
+            this.updateTicker(data.articles);
 
         } catch (err) {
             console.error(err);
             this.listEl.innerHTML = `<div class="news-loading" style="color:red">Failed to load news.</div>`;
-            this.updateTicker([], true); // Clear ticker on error
+            this.updateTicker([], true);
         }
     }
 
     private renderList(articles: Article[]) {
         if (!this.listEl) return;
         this.listEl.innerHTML = "";
-
-        // 1. Collect Headlines for the Ticker
-        const headlines = articles.map(a => a.headline);
-        this.updateTicker(headlines);
 
         if (articles.length === 0) {
             this.listEl.innerHTML = `<div class="news-loading">No news found.</div>`;
@@ -98,48 +121,46 @@ export class NewsGadget {
         });
     }
 
-    // ✅ NEW: Cycle headlines with Fade Effect
-    private updateTicker(headlines: string[], error = false) {
+    private updateTicker(articles: Article[], error = false) {
         if (!this.tickerEl) return;
 
-        // Clear previous interval
         if (this.tickerInterval) {
             window.clearInterval(this.tickerInterval);
             this.tickerInterval = null;
         }
 
-        if (error || headlines.length === 0) {
-            this.tickerEl.textContent = error ? "News Unavailable" : "No headlines";
+        if (error || articles.length === 0) {
+            this.tickerEl.innerHTML = `<div class="news-widget-headline">${error ? "News Unavailable" : "No headlines"}</div>`;
             this.tickerEl.classList.add("visible");
             return;
         }
 
-        this.headlines = headlines;
+        this.currentArticles = articles;
         this.currentHeadlineIdx = 0;
 
-        // Function to show the current headline
         const showCurrent = () => {
             if (!this.tickerEl) return;
 
-            // 1. Fade Out
             this.tickerEl.classList.remove("visible");
 
-            // 2. Wait for fade out (500ms), then swap text and Fade In
             setTimeout(() => {
                 if (!this.tickerEl) return;
-                // @ts-ignore
-                this.tickerEl.textContent = this.headlines[this.currentHeadlineIdx];
+
+                const art = this.currentArticles[this.currentHeadlineIdx];
+
+                if (art) {
+                    this.tickerEl.innerHTML = `
+                    <div class="news-widget-headline">${art.headline}</div>
+                    <div class="news-widget-meta">${art.source} • ${art.date}</div>
+                `;
+                }
                 this.tickerEl.classList.add("visible");
 
-                // Prepare next index
-                this.currentHeadlineIdx = (this.currentHeadlineIdx + 1) % this.headlines.length;
-            }, 500);
+                this.currentHeadlineIdx = (this.currentHeadlineIdx + 1) % this.currentArticles.length;
+            }, 1000);
         };
 
-        // Show first immediately
         showCurrent();
-
-        // Cycle every 5 seconds
-        this.tickerInterval = window.setInterval(showCurrent, 5000);
+        this.tickerInterval = window.setInterval(showCurrent, 6000);
     }
 }

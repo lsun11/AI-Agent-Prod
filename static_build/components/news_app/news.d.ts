@@ -4,10 +4,12 @@ export declare class NewsGadget {
     private tickerEl;
     private activeCategory;
     private cache;
-    private headlines;
+    private currentArticles;
     private currentHeadlineIdx;
     private tickerInterval;
+    private refreshTimer;
     constructor(root: HTMLElement);
+    private startAutoRefresh;
     private loadCategory;
     private renderList;
     private updateTicker;

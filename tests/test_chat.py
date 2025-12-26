@@ -181,7 +181,7 @@ def test_chat_stream_sends_topic_log_and_final(monkeypatch):
 
 # ---- Integration-style test with the real app factory ----
 
-from src.advanced_agent.api.app import create_app
+from src.api.app import create_app
 
 client = TestClient(create_app())
 

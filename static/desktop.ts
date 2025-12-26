@@ -7,6 +7,7 @@ import {WeatherGadget} from "./components/weather_app/weather.js";
 import {FilesGadget} from "./components/files_app/files.js";
 import {ClockGadget} from "./components/clock_app/clock.js";
 import {StockGadget} from "./components/stock_app/stock.js";
+import {NewsGadget} from "./components/news_app/news.js";
 import {bindStandardGadgetEvents, restoreGadgetPosition, saveGadgetPosition} from "./helpers/gadget-utils.js";
 
 export class Desktop {
@@ -37,6 +38,11 @@ export class Desktop {
   private stockToggleBtn: HTMLButtonElement | null;
   private stock?: StockGadget;
 
+  private newsGadgetEl: HTMLElement | null;
+  private newsHeaderEl: HTMLElement | null;
+  private newsToggleBtn: HTMLButtonElement | null;
+  private news?: NewsGadget;
+
   constructor() {
     this.gadget = document.getElementById("ai-gadget");
     this.header = document.getElementById("ai-gadget-header");
@@ -56,8 +62,12 @@ export class Desktop {
     this.clockToggleBtn = document.getElementById("clock-gadget-toggle") as HTMLButtonElement | null;
 
     this.stockGadgetEl = document.getElementById("stock-gadget");
-      this.stockHeaderEl = document.getElementById("stock-gadget-header");
-      this.stockToggleBtn = document.getElementById("stock-gadget-toggle") as HTMLButtonElement | null;
+    this.stockHeaderEl = document.getElementById("stock-gadget-header");
+    this.stockToggleBtn = document.getElementById("stock-gadget-toggle") as HTMLButtonElement | null;
+
+    this.newsGadgetEl = document.getElementById("news-gadget");
+    this.newsHeaderEl = document.getElementById("news-gadget-header");
+    this.newsToggleBtn = document.getElementById("news-gadget-toggle") as HTMLButtonElement | null;
 
     // Init Logic
     this.initWeatherBehavior();
@@ -67,16 +77,18 @@ export class Desktop {
     this.initGadgetBehavior();
     this.initComponents();
     this.initDraggables();
-      this.initClockBehavior();
+    this.initClockBehavior();
     this.initClockLogic();
     this.initStockBehavior();
     this.initStockLogic();
+    this.initNewsBehavior();
+    this.initNewsLogic();
 
-      restoreGadgetPosition(this.gadget, "ai-gadget");
-      restoreGadgetPosition(this.weatherGadgetEl, "weather-gadget");
-      restoreGadgetPosition(this.filesGadgetEl, "files-gadget");
-      restoreGadgetPosition(this.clockGadgetEl, "clock-gadget");
-      restoreGadgetPosition(this.stockGadgetEl, "stock-gadget");
+    restoreGadgetPosition(this.gadget, "ai-gadget");
+    restoreGadgetPosition(this.weatherGadgetEl, "weather-gadget");
+    restoreGadgetPosition(this.filesGadgetEl, "files-gadget");
+    restoreGadgetPosition(this.clockGadgetEl, "clock-gadget");
+    restoreGadgetPosition(this.stockGadgetEl, "stock-gadget");
   }
 
   private initComponents(): void {
@@ -237,6 +249,13 @@ export class Desktop {
         makePanelResizable(this.stockGadgetEl, {minWidth: 400, minHeight: 300});
         attachSaveListener(this.stockGadgetEl, "stock-gadget");
     }
+
+    // 6. News Gadget
+    if (this.newsGadgetEl && this.newsHeaderEl) {
+            makePanelDraggable(this.newsGadgetEl, this.newsHeaderEl, {mode: "grab-offset", inertia: true});
+            makePanelResizable(this.newsGadgetEl, {minWidth: 300, minHeight: 400});
+            attachSaveListener(this.newsGadgetEl, "news-gadget");
+    }
   }
 
     // --- Logic Inits ---
@@ -252,9 +271,11 @@ export class Desktop {
   private initStockLogic() {
       if (this.stockGadgetEl) this.stock = new StockGadget(this.stockGadgetEl);
   }
+  private initNewsLogic() {
+        if (this.newsGadgetEl) this.news = new NewsGadget(this.newsGadgetEl);
+  }
 
     // --- Behavior Inits (Refactored to use shared helper) ---
-
     private initWeatherBehavior(): void {
         if (this.weatherGadgetEl && this.weatherHeaderEl && this.weatherToggleBtn && this.backdrop) {
             bindStandardGadgetEvents(
@@ -301,6 +322,18 @@ export class Desktop {
                 this.stockToggleBtn,
                 this.backdrop,
                 "stock-gadget"
+            );
+        }
+    }
+
+    private initNewsBehavior() {
+        if (this.newsGadgetEl && this.newsHeaderEl && this.newsToggleBtn && this.backdrop) {
+            bindStandardGadgetEvents(
+                this.newsGadgetEl,
+                this.newsHeaderEl,
+                this.newsToggleBtn,
+                this.backdrop,
+                "news-gadget"
             );
         }
     }

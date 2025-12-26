@@ -5,15 +5,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from .routes import downloads, suggestions, topics, chat, history
+from src.advanced_agent.api.routes import downloads, suggestions, topics, chat, history
 from src.weather.api.routes.weather import router as weather_router
+from src.news_app.api.routes.news import router as news_router
 
 def get_base_dir() -> Path:
     # When running as a PyInstaller bundle
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return Path(sys._MEIPASS)  # type: ignore[attr-defined]
     # Normal dev mode
-    return Path(__file__).resolve().parents[3]
+    return Path(__file__).resolve().parents[2]
 
 
 BASE_DIR = get_base_dir()
@@ -46,5 +47,6 @@ def create_app() -> FastAPI:
     app.include_router(downloads.router, prefix="")
     app.include_router(history.router, prefix="")
     app.include_router(weather_router, prefix="")
+    app.include_router(news_router, prefix="")
 
     return app

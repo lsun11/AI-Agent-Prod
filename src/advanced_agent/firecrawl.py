@@ -22,51 +22,6 @@ class FirecrawlService:
         self.timeout_seconds = timeout_seconds
 
     # ------------------------------------------------------------
-    # 🔍 SEARCH with forced timeout
-    # ------------------------------------------------------------
-    def search_companies(self, query: str, num_results: int = 5):
-        """
-        General web search to find the most relevant pages for a tool / company.
-        Used for:
-          - discovering the official website
-          - getting general docs/marketing content
-
-        Does NOT force 'pricing' into the query.
-        """
-        key = (query, num_results)
-        if key in self._search_cache:
-            return self._search_cache[key]
-
-        print(f"[Firecrawl] Searching web for: {query}")
-
-        def _do_search():
-            res = self.app.search(
-                query=query,  # 👈 use query as-is
-                limit=num_results,
-                scrape_options={"formats": [{"type": "markdown"}]},
-            )
-            return res
-        try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(_do_search)
-                result = future.result(timeout=self.timeout_seconds)
-        except concurrent.futures.TimeoutError:
-            print(f"[TIMEOUT] search took longer than {self.timeout_seconds}s for '{query}'")
-            return []
-        except Exception as e:
-            print(f"[ERROR] search failed for '{query}': {e}")
-            return []
-        finally:
-            executor.shutdown(wait=False, cancel_futures=True)
-
-        if not result:
-            print(f"[WARN] search returned empty result for '{query}'")
-            return []
-
-        self._search_cache[key] = result
-        return result
-
-    # ------------------------------------------------------------
     # 🌐 SCRAPE with forced timeout
     # ------------------------------------------------------------
     def scrape_company_pages(self, url: str):
@@ -99,5 +54,82 @@ class FirecrawlService:
         self._scrape_cache[url] = result
         return result
 
+    # ------------------------------------------------------------
+    # 📰 NEWS SEARCH (Fast, no inline scraping)
+    # ------------------------------------------------------------
+    def search_news(self, query: str, num_results: int = 10):
+        """
+        Optimized for News:
+        - No 'scrape_options' (faster response, just gets SERP).
+        - Higher default limit (to filter out irrelevant results later).
+        - Distinct cache key.
+        """
+        # Cache key distinguishes this from company searches
+        key = (query, num_results, "news")
+        if key in self._search_cache:
+            return self._search_cache[key]
 
+        print(f"[Firecrawl] 📰 Searching NEWS for: {query}")
 
+        def _do_search():
+            # Pure search. Lightweight.
+            print("_do_search", query)
+            return self.app.search(
+                query=query,
+                limit=num_results
+            )
+
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_do_search)
+                print("future", future)
+                # Shorter timeout (30s) because we aren't scraping yet
+                result = future.result(timeout=30.0)
+        except concurrent.futures.TimeoutError:
+            print(f"[TIMEOUT] News search timed out for '{query}'")
+            return []
+        except Exception as e:
+            print(f"[ERROR] News search failed for '{query}': {e}")
+            return []
+        # No 'finally shutdown' strictly needed for context manager, but safe to add if you prefer.
+
+        if not result:
+            print(f"[WARN] News search returned empty for '{query}'")
+            return []
+
+        # Firecrawl v1 sometimes wraps results in a 'data' key or returns a list directly
+        # Normalize it here if needed, or return as is.
+        final_data = result.get('data', result) if isinstance(result, dict) else result
+
+        self._search_cache[key] = final_data
+        return final_data
+
+    # ------------------------------------------------------------
+    # 📄 SCRAPE (Wrapper)
+    # ------------------------------------------------------------
+    def scrape(self, url: str):
+        """
+        Direct wrapper for FirecrawlApp.scrape
+        """
+        # Check cache if you implemented one, otherwise direct call
+        if hasattr(self, "_scrape_cache") and url in self._scrape_cache:
+            return self._scrape_cache[url]
+
+        print(f"[Firecrawl] Scraping URL: {url}")
+
+        try:
+            # Call the underlying SDK
+            result = self.app.scrape_url(url, params={"formats": ["markdown"]})
+
+            # Firecrawl SDK methods might be named 'scrape_url' or 'scrape' depending on version.
+            # If the above fails, try: return self.app.scrape(url)
+
+            if hasattr(self, "_scrape_cache"):
+                self._scrape_cache[url] = result
+            return result
+        except AttributeError:
+            # Fallback for different SDK versions
+            return self.app.scrape(url)
+        except Exception as e:
+            print(f"[Firecrawl] Scrape error for {url}: {e}")
+            raise e

@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import uvicorn
-from src.advanced_agent.api.app import create_app
+from src.api.app import create_app
 
 advanced_agent = create_app()
 

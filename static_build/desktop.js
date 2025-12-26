@@ -7,6 +7,7 @@ import { WeatherGadget } from "./components/weather_app/weather.js";
 import { FilesGadget } from "./components/files_app/files.js";
 import { ClockGadget } from "./components/clock_app/clock.js";
 import { StockGadget } from "./components/stock_app/stock.js";
+import { NewsGadget } from "./components/news_app/news.js";
 import { bindStandardGadgetEvents, restoreGadgetPosition, saveGadgetPosition } from "./helpers/gadget-utils.js";
 export class Desktop {
     constructor() {
@@ -26,6 +27,9 @@ export class Desktop {
         this.stockGadgetEl = document.getElementById("stock-gadget");
         this.stockHeaderEl = document.getElementById("stock-gadget-header");
         this.stockToggleBtn = document.getElementById("stock-gadget-toggle");
+        this.newsGadgetEl = document.getElementById("news-gadget");
+        this.newsHeaderEl = document.getElementById("news-gadget-header");
+        this.newsToggleBtn = document.getElementById("news-gadget-toggle");
         // Init Logic
         this.initWeatherBehavior();
         this.initWeatherLogic();
@@ -38,6 +42,8 @@ export class Desktop {
         this.initClockLogic();
         this.initStockBehavior();
         this.initStockLogic();
+        this.initNewsBehavior();
+        this.initNewsLogic();
         restoreGadgetPosition(this.gadget, "ai-gadget");
         restoreGadgetPosition(this.weatherGadgetEl, "weather-gadget");
         restoreGadgetPosition(this.filesGadgetEl, "files-gadget");
@@ -184,6 +190,12 @@ export class Desktop {
             makePanelResizable(this.stockGadgetEl, { minWidth: 400, minHeight: 300 });
             attachSaveListener(this.stockGadgetEl, "stock-gadget");
         }
+        // 6. News Gadget
+        if (this.newsGadgetEl && this.newsHeaderEl) {
+            makePanelDraggable(this.newsGadgetEl, this.newsHeaderEl, { mode: "grab-offset", inertia: true });
+            makePanelResizable(this.newsGadgetEl, { minWidth: 300, minHeight: 400 });
+            attachSaveListener(this.newsGadgetEl, "news-gadget");
+        }
     }
     // --- Logic Inits ---
     initWeatherLogic() {
@@ -201,6 +213,10 @@ export class Desktop {
     initStockLogic() {
         if (this.stockGadgetEl)
             this.stock = new StockGadget(this.stockGadgetEl);
+    }
+    initNewsLogic() {
+        if (this.newsGadgetEl)
+            this.news = new NewsGadget(this.newsGadgetEl);
     }
     // --- Behavior Inits (Refactored to use shared helper) ---
     initWeatherBehavior() {
@@ -221,6 +237,11 @@ export class Desktop {
     initStockBehavior() {
         if (this.stockGadgetEl && this.stockHeaderEl && this.stockToggleBtn && this.backdrop) {
             bindStandardGadgetEvents(this.stockGadgetEl, this.stockHeaderEl, this.stockToggleBtn, this.backdrop, "stock-gadget");
+        }
+    }
+    initNewsBehavior() {
+        if (this.newsGadgetEl && this.newsHeaderEl && this.newsToggleBtn && this.backdrop) {
+            bindStandardGadgetEvents(this.newsGadgetEl, this.newsHeaderEl, this.newsToggleBtn, this.backdrop, "news-gadget");
         }
     }
 }

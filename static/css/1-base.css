@@ -75,6 +75,13 @@ body.topic-bg-software_engineering::before {
     background-image: url("../../static/assets/backgrounds/software_engineering.png");
 }
 
+body::before {
+    opacity: 0.2;
+
+    /* Transition opacity smoothly when the class changes */
+    transition: opacity 1.5s ease-in-out;
+}
+
 /* Weather Gadget */
 body.topic-bg-weather-gadget::before {
     background-image: url("../../static/assets/backgrounds/weather_app.png");

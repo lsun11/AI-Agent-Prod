@@ -1,4 +1,4 @@
-// static/drag.ts
+// static/helpers/drag.ts
 
 type DragMode = "boundary" | "grab-offset";
 
@@ -36,6 +36,13 @@ export interface DragOptions {
      * Default: 0.02
      */
     inertiaStopSpeed?: number;
+
+    /**
+     * ✅ NEW: How much of the panel can overflow the viewport?
+     * 0.0 = Strict containment (no overflow)
+     * 0.5 = 50% of the panel can slide off-screen (Default)
+     */
+    overflowRatio?: number;
 }
 
 export function makePanelDraggable(
@@ -50,6 +57,7 @@ export function makePanelDraggable(
     const inertiaEnabled = options.inertia ?? true;
     const inertiaFriction = options.inertiaFriction ?? 0.92;
     const inertiaStopSpeed = options.inertiaStopSpeed ?? 0.02;
+    const overflowRatio = options.overflowRatio ?? 0.7;
 
     let isDragging = false;
 
@@ -66,7 +74,11 @@ export function makePanelDraggable(
     let grabOffsetY = 0;
     let panelW = 0;
     let panelH = 0;
+
+    // ✅ Bounds (Now support min values for overflow)
+    let minLeft = 0;
     let maxLeft = 0;
+    let minTop = 0;
     let maxTop = 0;
 
     // boundary mode specific
@@ -121,23 +133,39 @@ export function makePanelDraggable(
         return {left: panelRect.left - boundRect.left, top: panelRect.top - boundRect.top};
     }
 
+    /**
+     * ✅ UPDATED: Compute bounds allowing overflow
+     */
     function computeBoundsForGrabOffset(): void {
-        // viewport clamp
-        maxLeft = Math.max(0, window.innerWidth - panelW);
-        maxTop = Math.max(0, window.innerHeight - panelH);
+        const vpW = window.innerWidth;
+        const vpH = window.innerHeight;
+
+        // Allow sliding Left/Up by overflow ratio
+        // Example: If ratio is 0.5, left can go to -width/2
+        minLeft = -(panelW * overflowRatio);
+
+        // Keep Header Visible: usually strictly 0 for top to avoid losing the handle
+        // If you want top overflow, use: -(panelH * overflowRatio)
+        minTop = 0;
+
+        // Allow sliding Right/Down by overflow ratio
+        // Max Left = Viewport - (Visible Part)
+        maxLeft = vpW - (panelW * (1 - overflowRatio));
+        maxTop = vpH - (panelH * (1 - overflowRatio));
     }
 
-    function computeBoundsForBoundaryMode(panelRect: DOMRect): { maxL: number; maxT: number } {
+    function computeBoundsForBoundaryMode(panelRect: DOMRect): void {
         if (boundaryRect) {
-            return {
-                maxL: Math.max(0, boundaryRect.width - panelRect.width),
-                maxT: Math.max(0, boundaryRect.height - panelRect.height),
-            };
+            minLeft = 0;
+            minTop = 0;
+            maxLeft = Math.max(0, boundaryRect.width - panelRect.width);
+            maxTop = Math.max(0, boundaryRect.height - panelRect.height);
+        } else {
+            minLeft = 0;
+            minTop = 0;
+            maxLeft = Math.max(0, window.innerWidth - panelRect.width);
+            maxTop = Math.max(0, window.innerHeight - panelRect.height);
         }
-        return {
-            maxL: Math.max(0, window.innerWidth - panelRect.width),
-            maxT: Math.max(0, window.innerHeight - panelRect.height),
-        };
     }
 
     function updateVelocity(event: PointerEvent): void {
@@ -183,9 +211,9 @@ export function makePanelDraggable(
             vx *= inertiaFriction;
             vy *= inertiaFriction;
 
-            // clamp
-            x = clamp(x, 0, maxLeft);
-            y = clamp(y, 0, maxTop);
+            // ✅ CLAMP using new Min/Max bounds
+            x = clamp(x, minLeft, maxLeft);
+            y = clamp(y, minTop, maxTop);
 
             panel.style.left = `${x}px`;
             panel.style.top = `${y}px`;
@@ -250,15 +278,17 @@ export function makePanelDraggable(
             const start = getPanelLeftTopInBoundary(rect, boundaryRect);
             startLeft = start.left;
             startTop = start.top;
+
+            // Calculate bounds immediately for boundary mode
+            computeBoundsForBoundaryMode(rect);
         } else {
             // grab-offset mode: compute offset so cursor doesn't jump
             panel.classList.add("is-dragging");
 
             // Clear inset-based constraints (your .gadget--expanded uses inset)
-panel.style.removeProperty("inset");
-panel.style.right = "auto";
-panel.style.bottom = "auto";
-
+            panel.style.removeProperty("inset");
+            panel.style.right = "auto";
+            panel.style.bottom = "auto";
 
             // Lock size to prevent stretching while moving
             panel.style.width = `${rect.width}px`;
@@ -278,10 +308,8 @@ panel.style.bottom = "auto";
             grabOffsetX = event.clientX - rect.left;
             grabOffsetY = event.clientY - rect.top;
 
-  // bounds based on current size
-  panelW = rect.width;
-  panelH = rect.height;
-  computeBoundsForGrabOffset();
+            // bounds based on current size with OVERFLOW support
+            computeBoundsForGrabOffset();
         }
 
         // init velocity tracking
@@ -305,9 +333,9 @@ panel.style.bottom = "auto";
 
         const dxFromStart = event.clientX - startClientX;
         const dyFromStart = event.clientY - startClientY;
-if (!moved && (Math.abs(dxFromStart) > dragThresholdPx || Math.abs(dyFromStart) > dragThresholdPx)) {
-  moved = true;
-}
+        if (!moved && (Math.abs(dxFromStart) > dragThresholdPx || Math.abs(dyFromStart) > dragThresholdPx)) {
+            moved = true;
+        }
 
         if (mode === "boundary") {
             const dx = event.clientX - startClientX;
@@ -316,11 +344,9 @@ if (!moved && (Math.abs(dxFromStart) > dragThresholdPx || Math.abs(dyFromStart) 
             let nextLeft = startLeft + dx;
             let nextTop = startTop + dy;
 
-            const panelRect = panel.getBoundingClientRect();
-            const {maxL, maxT} = computeBoundsForBoundaryMode(panelRect);
-
-            nextLeft = clamp(nextLeft, 0, maxL);
-            nextTop = clamp(nextTop, 0, maxT);
+            // Use pre-calculated min/max from PointerDown
+            nextLeft = clamp(nextLeft, minLeft, maxLeft);
+            nextTop = clamp(nextTop, minTop, maxTop);
 
             panel.style.left = `${nextLeft}px`;
             panel.style.top = `${nextTop}px`;
@@ -331,8 +357,9 @@ if (!moved && (Math.abs(dxFromStart) > dragThresholdPx || Math.abs(dyFromStart) 
             let nextLeft = event.clientX - grabOffsetX;
             let nextTop = event.clientY - grabOffsetY;
 
-            nextLeft = clamp(nextLeft, 0, maxLeft);
-            nextTop = clamp(nextTop, 0, maxTop);
+            // ✅ CLAMP using Overflow bounds
+            nextLeft = clamp(nextLeft, minLeft, maxLeft);
+            nextTop = clamp(nextTop, minTop, maxTop);
 
             panel.style.left = `${nextLeft}px`;
             panel.style.top = `${nextTop}px`;
@@ -362,7 +389,6 @@ if (!moved && (Math.abs(dxFromStart) > dragThresholdPx || Math.abs(dyFromStart) 
             boundaryRect = null;
         } else {
             panel.classList.remove("is-dragging");
-
             startInertiaIfNeeded();
         }
     };

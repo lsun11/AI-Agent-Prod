@@ -1,12 +1,13 @@
-// static/drag.ts
+// static/helpers/drag.ts
 export function makePanelDraggable(panel, handle, options) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     const mode = options.mode;
     const boundarySelector = (_a = options.boundarySelector) !== null && _a !== void 0 ? _a : ".gadget--expanded";
     const dragThresholdPx = (_b = options.dragThresholdPx) !== null && _b !== void 0 ? _b : 6;
     const inertiaEnabled = (_c = options.inertia) !== null && _c !== void 0 ? _c : true;
     const inertiaFriction = (_d = options.inertiaFriction) !== null && _d !== void 0 ? _d : 0.92;
     const inertiaStopSpeed = (_e = options.inertiaStopSpeed) !== null && _e !== void 0 ? _e : 0.02;
+    const overflowRatio = (_f = options.overflowRatio) !== null && _f !== void 0 ? _f : 0.7;
     let isDragging = false;
     // pointer start
     let startClientX = 0;
@@ -19,7 +20,10 @@ export function makePanelDraggable(panel, handle, options) {
     let grabOffsetY = 0;
     let panelW = 0;
     let panelH = 0;
+    // ✅ Bounds (Now support min values for overflow)
+    let minLeft = 0;
     let maxLeft = 0;
+    let minTop = 0;
     let maxTop = 0;
     // boundary mode specific
     let boundaryEl = null;
@@ -66,22 +70,36 @@ export function makePanelDraggable(panel, handle, options) {
             return { left: panelRect.left, top: panelRect.top };
         return { left: panelRect.left - boundRect.left, top: panelRect.top - boundRect.top };
     }
+    /**
+     * ✅ UPDATED: Compute bounds allowing overflow
+     */
     function computeBoundsForGrabOffset() {
-        // viewport clamp
-        maxLeft = Math.max(0, window.innerWidth - panelW);
-        maxTop = Math.max(0, window.innerHeight - panelH);
+        const vpW = window.innerWidth;
+        const vpH = window.innerHeight;
+        // Allow sliding Left/Up by overflow ratio
+        // Example: If ratio is 0.5, left can go to -width/2
+        minLeft = -(panelW * overflowRatio);
+        // Keep Header Visible: usually strictly 0 for top to avoid losing the handle
+        // If you want top overflow, use: -(panelH * overflowRatio)
+        minTop = 0;
+        // Allow sliding Right/Down by overflow ratio
+        // Max Left = Viewport - (Visible Part)
+        maxLeft = vpW - (panelW * (1 - overflowRatio));
+        maxTop = vpH - (panelH * (1 - overflowRatio));
     }
     function computeBoundsForBoundaryMode(panelRect) {
         if (boundaryRect) {
-            return {
-                maxL: Math.max(0, boundaryRect.width - panelRect.width),
-                maxT: Math.max(0, boundaryRect.height - panelRect.height),
-            };
+            minLeft = 0;
+            minTop = 0;
+            maxLeft = Math.max(0, boundaryRect.width - panelRect.width);
+            maxTop = Math.max(0, boundaryRect.height - panelRect.height);
         }
-        return {
-            maxL: Math.max(0, window.innerWidth - panelRect.width),
-            maxT: Math.max(0, window.innerHeight - panelRect.height),
-        };
+        else {
+            minLeft = 0;
+            minTop = 0;
+            maxLeft = Math.max(0, window.innerWidth - panelRect.width);
+            maxTop = Math.max(0, window.innerHeight - panelRect.height);
+        }
     }
     function updateVelocity(event) {
         const now = performance.now();
@@ -122,9 +140,9 @@ export function makePanelDraggable(panel, handle, options) {
             // friction
             vx *= inertiaFriction;
             vy *= inertiaFriction;
-            // clamp
-            x = clamp(x, 0, maxLeft);
-            y = clamp(y, 0, maxTop);
+            // ✅ CLAMP using new Min/Max bounds
+            x = clamp(x, minLeft, maxLeft);
+            y = clamp(y, minTop, maxTop);
             panel.style.left = `${x}px`;
             panel.style.top = `${y}px`;
             const done = Math.abs(vx) < inertiaStopSpeed &&
@@ -172,6 +190,8 @@ export function makePanelDraggable(panel, handle, options) {
             const start = getPanelLeftTopInBoundary(rect, boundaryRect);
             startLeft = start.left;
             startTop = start.top;
+            // Calculate bounds immediately for boundary mode
+            computeBoundsForBoundaryMode(rect);
         }
         else {
             // grab-offset mode: compute offset so cursor doesn't jump
@@ -193,9 +213,7 @@ export function makePanelDraggable(panel, handle, options) {
             panelH = rect.height;
             grabOffsetX = event.clientX - rect.left;
             grabOffsetY = event.clientY - rect.top;
-            // bounds based on current size
-            panelW = rect.width;
-            panelH = rect.height;
+            // bounds based on current size with OVERFLOW support
             computeBoundsForGrabOffset();
         }
         // init velocity tracking
@@ -225,10 +243,9 @@ export function makePanelDraggable(panel, handle, options) {
             const dy = event.clientY - startClientY;
             let nextLeft = startLeft + dx;
             let nextTop = startTop + dy;
-            const panelRect = panel.getBoundingClientRect();
-            const { maxL, maxT } = computeBoundsForBoundaryMode(panelRect);
-            nextLeft = clamp(nextLeft, 0, maxL);
-            nextTop = clamp(nextTop, 0, maxT);
+            // Use pre-calculated min/max from PointerDown
+            nextLeft = clamp(nextLeft, minLeft, maxLeft);
+            nextTop = clamp(nextTop, minTop, maxTop);
             panel.style.left = `${nextLeft}px`;
             panel.style.top = `${nextTop}px`;
         }
@@ -237,8 +254,9 @@ export function makePanelDraggable(panel, handle, options) {
             updateVelocity(event);
             let nextLeft = event.clientX - grabOffsetX;
             let nextTop = event.clientY - grabOffsetY;
-            nextLeft = clamp(nextLeft, 0, maxLeft);
-            nextTop = clamp(nextTop, 0, maxTop);
+            // ✅ CLAMP using Overflow bounds
+            nextLeft = clamp(nextLeft, minLeft, maxLeft);
+            nextTop = clamp(nextTop, minTop, maxTop);
             panel.style.left = `${nextLeft}px`;
             panel.style.top = `${nextTop}px`;
         }

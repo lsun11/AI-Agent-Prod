@@ -7,25 +7,31 @@ import {WeatherGadget} from "./components/weather_app/weather.js";
 import {FilesGadget} from "./components/files_app/files.js";
 import {ClockGadget} from "./components/clock_app/clock.js";
 import {StockGadget} from "./components/stock_app/stock.js";
+import {bindStandardGadgetEvents, restoreGadgetPosition, saveGadgetPosition} from "./helpers/gadget-utils.js";
 
 export class Desktop {
   private gadget: HTMLElement | null;
   private header: HTMLElement | null;
   private toggleBtn: HTMLButtonElement | null;
   private backdrop: HTMLElement | null;
+
   private weatherGadgetEl: HTMLElement | null;
   private weatherHeaderEl: HTMLElement | null;
   private weatherToggleBtn: HTMLButtonElement | null;
   private weather?: WeatherGadget;
+
   private filesGadgetEl: HTMLElement | null;
   private filesHeaderEl: HTMLElement | null;
   private filesToggleBtn: HTMLButtonElement | null;
   private files?: FilesGadget;
+
   private clockGadgetEl: HTMLElement | null;
   private clockHeaderEl: HTMLElement | null;
   private clockToggleBtn: HTMLButtonElement | null;
   private clock?: ClockGadget;
+
   private chatUI?: ChatUI;
+
   private stockGadgetEl: HTMLElement | null;
   private stockHeaderEl: HTMLElement | null;
   private stockToggleBtn: HTMLButtonElement | null;
@@ -36,18 +42,22 @@ export class Desktop {
     this.header = document.getElementById("ai-gadget-header");
     this.toggleBtn = document.getElementById("ai-gadget-toggle") as HTMLButtonElement | null;
     this.backdrop = document.getElementById("gadget-backdrop");
+
     this.weatherGadgetEl = document.getElementById("weather-gadget");
     this.weatherHeaderEl = document.getElementById("weather-gadget-header");
     this.weatherToggleBtn = document.getElementById("weather-gadget-toggle") as HTMLButtonElement | null;
+
     this.filesGadgetEl = document.getElementById("files-gadget");
     this.filesHeaderEl = document.getElementById("files-gadget-header");
     this.filesToggleBtn = document.getElementById("files-gadget-toggle") as HTMLButtonElement | null;
+
     this.clockGadgetEl = document.getElementById("clock-gadget");
     this.clockHeaderEl = document.getElementById("clock-gadget-header");
     this.clockToggleBtn = document.getElementById("clock-gadget-toggle") as HTMLButtonElement | null;
+
     this.stockGadgetEl = document.getElementById("stock-gadget");
-        this.stockHeaderEl = document.getElementById("stock-gadget-header");
-        this.stockToggleBtn = document.getElementById("stock-gadget-toggle") as HTMLButtonElement | null;
+      this.stockHeaderEl = document.getElementById("stock-gadget-header");
+      this.stockToggleBtn = document.getElementById("stock-gadget-toggle") as HTMLButtonElement | null;
 
     // Init Logic
     this.initWeatherBehavior();
@@ -57,76 +67,16 @@ export class Desktop {
     this.initGadgetBehavior();
     this.initComponents();
     this.initDraggables();
-    this.initClockBehavior(); // New Behavior
+      this.initClockBehavior();
     this.initClockLogic();
     this.initStockBehavior();
     this.initStockLogic();
-    this.restorePosition(this.gadget, "ai-gadget");
-    this.restorePosition(this.weatherGadgetEl, "weather-gadget");
-    this.restorePosition(this.filesGadgetEl, "files-gadget");
-    this.restorePosition(this.clockGadgetEl, "clock-gadget");
-    this.restorePosition(this.stockGadgetEl, "stock-gadget");
-  }
 
-    // ========================================================================
-    // 💾 POSITION PERSISTENCE HELPERS
-    // ========================================================================
-
-    /**
-     * Saves the current 'left' and 'top' coordinates to localStorage.
-     */
-    private savePosition(el: HTMLElement | null, id: string) {
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-
-    // Ensure we are saving finite numbers
-    if (Number.isFinite(rect.left) && Number.isFinite(rect.top)) {
-        const pos = { left: rect.left, top: rect.top };
-        localStorage.setItem(`pos-${id}`, JSON.stringify(pos));
-        console.log(`💾 Saved ${id}:`, pos); // Uncomment to debug
-    }
-  }
-
-
-    /**
-     * Restores position from localStorage.
-     * STRICTLY overrides CSS defaults (bottom/right/inset) to prevent jumping.
-     */
-private restorePosition(el: HTMLElement | null, id: string) {
-    if (!el) return;
-
-    const raw = localStorage.getItem(`pos-${id}`);
-    if (!raw) return;
-
-    try {
-        const pos = JSON.parse(raw);
-        let left = parseFloat(pos.left) || 0;
-        let top = parseFloat(pos.top) || 0;
-
-        // Safety: Reset to center if coordinates are corrupt/zero
-        if (!Number.isFinite(left) || !Number.isFinite(top) || (left === 0 && top === 0)) {
-            left = window.innerWidth / 2 - 150;
-            top = window.innerHeight / 2 - 150;
-        }
-
-        setTimeout(() => {
-            el.style.setProperty("inset", "auto", "important");
-            el.style.setProperty("bottom", "auto", "important");
-            el.style.setProperty("right", "auto", "important");
-
-            // Apply specific coordinates
-            el.style.setProperty("position", "fixed", "important");
-            el.style.setProperty("left", `${left}px`, "important");
-            el.style.setProperty("top", `${top}px`, "important");
-            el.style.setProperty("margin", "0", "important");
-
-            // Clear transform so it doesn't double-apply offsets
-            el.style.transform = "none";
-        }, 100);
-
-    } catch (e) {
-        console.error(`Failed to restore position for ${id}`, e);
-    }
+      restoreGadgetPosition(this.gadget, "ai-gadget");
+      restoreGadgetPosition(this.weatherGadgetEl, "weather-gadget");
+      restoreGadgetPosition(this.filesGadgetEl, "files-gadget");
+      restoreGadgetPosition(this.clockGadgetEl, "clock-gadget");
+      restoreGadgetPosition(this.stockGadgetEl, "stock-gadget");
   }
 
   private initComponents(): void {
@@ -134,6 +84,8 @@ private restorePosition(el: HTMLElement | null, id: string) {
     void initHistoryPanel();
   }
 
+    // NOTE: AI Gadget has unique logic (slot, escape key) so we kept most of it here,
+    // but updated it to use the shared position saver.
   private initGadgetBehavior(): void {
     const gadget = this.gadget;
     const header = this.header;
@@ -146,24 +98,20 @@ private restorePosition(el: HTMLElement | null, id: string) {
 
     const setExpanded = (expanded: boolean) => {
       // 1. POSITION NORMALIZATION
-      // Regardless of open/close, freeze the current visual location into explicit Top/Left.
-      // We MUST remove 'inset' and 'transform' so they don't override our manual coordinates.
       const rect = gadget.getBoundingClientRect();
 
-      gadget.style.removeProperty("inset");        // Remove the conflicting property
-      gadget.style.removeProperty("transform");    // Remove drag transforms
-      gadget.style.removeProperty("right");        // Ensure no edge constraints
-      gadget.style.removeProperty("bottom");
+        gadget.style.removeProperty("inset");
+        gadget.style.removeProperty("transform");
+        gadget.style.removeProperty("right");
+        gadget.style.removeProperty("bottom");
 
-      gadget.style.left = `${rect.left}px`;        // Hard-set current pixels
-      gadget.style.top = `${rect.top}px`;
-      gadget.style.position = "fixed";             // Lock it to viewport
+        gadget.style.left = `${rect.left}px`;
+        gadget.style.top = `${rect.top}px`;
+        gadget.style.position = "fixed";
 
-        this.savePosition(gadget, "ai-gadget");
+        saveGadgetPosition(gadget, "ai-gadget"); // ✅ Shared function
 
       if (expanded) {
-        // --- OPENING ---
-        // Restore saved size if it exists
         const raw = localStorage.getItem("ai-gadget-expanded-size");
         if (raw) {
           try {
@@ -179,21 +127,16 @@ private restorePosition(el: HTMLElement | null, id: string) {
 
         if (slot) slot.classList.toggle("is-expanded", expanded);
 
-        // Clear constraints that might limit expansion
         gadget.style.removeProperty("min-width");
         gadget.style.removeProperty("min-height");
 
       } else {
-        // --- CLOSING ---
         if (gadget.classList.contains("gadget--expanded")) {
-            // Save ONLY the dimensions (width/height)
             const rect = gadget.getBoundingClientRect();
             const size = { w: `${rect.width}px`, h: `${rect.height}px` };
             localStorage.setItem("ai-gadget-expanded-size", JSON.stringify(size));
         }
 
-        // Wipe dimensions so CSS class can collapse it.
-        // DO NOT wipe left/top/position - we just set them above to keep it in place.
         gadget.style.removeProperty("width");
         gadget.style.removeProperty("height");
         gadget.style.removeProperty("min-width");
@@ -245,25 +188,17 @@ private restorePosition(el: HTMLElement | null, id: string) {
     });
   }
 
-private initDraggables(): void {
-    // Helper: Detect "Drop" anywhere
+    private initDraggables(): void {
     const attachSaveListener = (gadget: HTMLElement, id: string) => {
-        // We listen for the START of interaction on the gadget...
         const onInteractStart = () => {
-            // ...and wait for the END (drop) anywhere on the window
             const onInteractEnd = () => {
-                // Wait 200ms for inertia to settle, then save
-                setTimeout(() => this.savePosition(gadget, id), 200);
-
-                // Cleanup one-time listeners
+                setTimeout(() => saveGadgetPosition(gadget, id), 200); // ✅ Shared function
                 window.removeEventListener("mouseup", onInteractEnd);
                 window.removeEventListener("touchend", onInteractEnd);
             };
-
             window.addEventListener("mouseup", onInteractEnd);
             window.addEventListener("touchend", onInteractEnd);
         };
-
         gadget.addEventListener("mousedown", onInteractStart);
         gadget.addEventListener("touchstart", onInteractStart);
     };
@@ -298,497 +233,75 @@ private initDraggables(): void {
 
     // 5. Stock Gadget
     if (this.stockGadgetEl && this.stockHeaderEl) {
-        // Need to import/use your draggable helper here
         makePanelDraggable(this.stockGadgetEl, this.stockHeaderEl, {mode: "grab-offset", inertia: true});
         makePanelResizable(this.stockGadgetEl, {minWidth: 400, minHeight: 300});
         attachSaveListener(this.stockGadgetEl, "stock-gadget");
     }
   }
 
+    // --- Logic Inits ---
   private initWeatherLogic(): void {
-    if (this.weatherGadgetEl) {
-      this.weather = new WeatherGadget(this.weatherGadgetEl);
-    }
+      if (this.weatherGadgetEl) this.weather = new WeatherGadget(this.weatherGadgetEl);
   }
-
-private initWeatherBehavior(): void {
-    const gadget = this.weatherGadgetEl;
-    const header = this.weatherHeaderEl;
-    const toggleBtn = this.weatherToggleBtn;
-    const backdrop = this.backdrop;
-
-    if (!gadget || !header || !toggleBtn || !backdrop) return;
-
-    let hoverTimeout: number | undefined;
-    let isPinned = false;
-
-    const setExpanded = (expanded: boolean, pinned: boolean = false) => {
-      // Stop the timer!
-      // If the user clicks (Pin), we must cancel any pending "Peek" timer
-      // so it doesn't overwrite our state 600ms later.
-      clearTimeout(hoverTimeout);
-
-      // 1. FREEZE POSITION LOGIC
-      const rect = gadget.getBoundingClientRect();
-      gadget.style.removeProperty("inset");
-      gadget.style.removeProperty("transform");
-      gadget.style.removeProperty("right");
-      gadget.style.removeProperty("bottom");
-      gadget.style.left = `${rect.left}px`;
-      gadget.style.top = `${rect.top}px`;
-      gadget.style.position = "fixed";
-
-      this.savePosition(gadget, "ai-gadget");
-
-      if (expanded) {
-        // --- OPENING ---
-        isPinned = pinned;
-
-        const raw = localStorage.getItem("weather-gadget-expanded-size");
-        if (raw) {
-          try {
-            const { w, h } = JSON.parse(raw);
-            if (w) gadget.style.width = w;
-            if (h) gadget.style.height = h;
-          } catch {}
-        }
-
-        gadget.classList.add("gadget--expanded");
-        gadget.classList.remove("gadget--collapsed");
-
-        if (isPinned) backdrop.classList.add("visible");
-
-        gadget.style.removeProperty("min-width");
-        gadget.style.removeProperty("min-height");
-
-        void this.weather?.refresh(false);
-
-      } else {
-        // --- CLOSING ---
-        isPinned = false;
-
-        if (gadget.classList.contains("gadget--expanded")) {
-            const rect = gadget.getBoundingClientRect();
-            const size = { w: `${rect.width}px`, h: `${rect.height}px` };
-            localStorage.setItem("weather-gadget-expanded-size", JSON.stringify(size));
-        }
-
-        gadget.style.removeProperty("width");
-        gadget.style.removeProperty("height");
-        gadget.style.removeProperty("min-width");
-        gadget.style.removeProperty("min-height");
-
-        gadget.classList.remove("gadget--expanded");
-        gadget.classList.add("gadget--collapsed");
-        backdrop.classList.remove("visible");
-      }
-
-      gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-      toggleBtn.textContent = expanded ? "Close" : "Open";
-    };
-
-    const toggle = () => {
-      const isExpanded = gadget.classList.contains("gadget--expanded");
-
-      // If currently open AND pinned -> Close
-      if (isExpanded && isPinned) {
-        setExpanded(false);
-      }
-      // If closed OR only peeking -> Open and Pin
-      else {
-        setExpanded(true, true);
-      }
-    };
-
-    header.addEventListener("click", (e) => {
-      if (e.target === toggleBtn) return;
-      toggle();
-    });
-
-    toggleBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggle();
-    });
-
-    backdrop.addEventListener("click", () => setExpanded(false));
-
-    // HOVER LOGIC
-    gadget.addEventListener("mouseenter", () => {
-        if (gadget.classList.contains("is-dragging")) return;
-
-        // Start timer to Peek
-        if (!gadget.classList.contains("gadget--expanded")) {
-            hoverTimeout = window.setTimeout(() => {
-                if (!gadget.classList.contains("is-dragging")) {
-                    setExpanded(true, false); // false = Not Pinned (Peek)
-                }
-            }, 600);
-        }
-    });
-
-    gadget.addEventListener("mouseleave", () => {
-        // Cancel timer if we leave before it fires
-        clearTimeout(hoverTimeout);
-
-        if (gadget.classList.contains("is-dragging")) return;
-
-        // Close ONLY if we are just Peeking (!isPinned)
-        if (gadget.classList.contains("gadget--expanded") && !isPinned) {
-            setExpanded(false);
-        }
-    });
-  }
-
   private initFilesLogic(): void {
-    if (this.filesGadgetEl) {
-        this.files = new FilesGadget(this.filesGadgetEl);
-    }
+      if (this.filesGadgetEl) this.files = new FilesGadget(this.filesGadgetEl);
   }
-
-  private initFilesBehavior(): void {
-    const gadget = this.filesGadgetEl;
-    const header = this.filesHeaderEl;
-    const toggleBtn = this.filesToggleBtn;
-    const backdrop = this.backdrop;
-
-    if (!gadget || !header || !toggleBtn || !backdrop) return;
-
-    let hoverTimeout: number | undefined;
-    let isPinned = false;
-
-    const setExpanded = (expanded: boolean, pinned: boolean = false) => {
-
-        clearTimeout(hoverTimeout);
-        // 1. FREEZE POSITION
-      const rect = gadget.getBoundingClientRect();
-
-      gadget.style.removeProperty("inset");
-      gadget.style.removeProperty("transform");
-      gadget.style.removeProperty("right");
-      gadget.style.removeProperty("bottom");
-
-      gadget.style.left = `${rect.left}px`;
-      gadget.style.top = `${rect.top}px`;
-      gadget.style.position = "fixed";
-
-      this.savePosition(gadget, "files-gadget");
-      if (expanded) {
-        // --- OPENING ---
-        isPinned = pinned;
-
-        // Restore Size
-        const raw = localStorage.getItem("files-gadget-expanded-size");
-        if (raw) {
-          try {
-            const { w, h } = JSON.parse(raw);
-            if (w) gadget.style.width = w;
-            if (h) gadget.style.height = h;
-          } catch {}
-        }
-
-        gadget.classList.add("gadget--expanded");
-        gadget.classList.remove("gadget--collapsed");
-
-        // Show backdrop ONLY if pinned
-        if (isPinned) backdrop.classList.add("visible");
-        else backdrop.classList.remove("visible"); // Ensure hidden if just peeking
-
-        gadget.style.removeProperty("min-width");
-        gadget.style.removeProperty("min-height");
-
-        this.files?.refresh();
-
-      } else {
-        // --- CLOSING ---
-        isPinned = false;
-
-        if (gadget.classList.contains("gadget--expanded")) {
-            const rect = gadget.getBoundingClientRect();
-            const size = { w: `${rect.width}px`, h: `${rect.height}px` };
-            localStorage.setItem("files-gadget-expanded-size", JSON.stringify(size));
-        }
-
-        gadget.style.removeProperty("width");
-        gadget.style.removeProperty("height");
-        gadget.style.removeProperty("min-width");
-        gadget.style.removeProperty("min-height");
-
-        gadget.classList.remove("gadget--expanded");
-        gadget.classList.add("gadget--collapsed");
-        backdrop.classList.remove("visible");
-      }
-
-      gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-      toggleBtn.textContent = expanded ? "Close" : "Open";
-    };
-
-    const toggle = () => {
-      const isExpanded = gadget.classList.contains("gadget--expanded");
-
-      if (isExpanded && isPinned) {
-         // It was fully open/pinned, so close it.
-         setExpanded(false);
-      } else {
-         // It was closed OR it was just peeking (hovered).
-         // In both cases, we want to force it OPEN and PINNED.
-         setExpanded(true, true);
-      }
-    };
-
-    header.addEventListener("click", (e) => {
-      if (e.target === toggleBtn) return;
-      toggle();
-    });
-
-    toggleBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggle();
-    });
-
-    backdrop.addEventListener("click", () => setExpanded(false));
-
-    // Hover (Peek)
-    gadget.addEventListener("mouseenter", () => {
-        if (gadget.classList.contains("is-dragging")) return;
-
-        // Only peek if not already open
-        if (!gadget.classList.contains("gadget--expanded")) {
-            hoverTimeout = window.setTimeout(() => {
-                if (!gadget.classList.contains("is-dragging")) {
-                    setExpanded(true, false); // Peek (not pinned)
-                }
-            }, 1000);
-        }
-    });
-
-    gadget.addEventListener("mouseleave", () => {
-        clearTimeout(hoverTimeout);
-        if (gadget.classList.contains("is-dragging")) return;
-
-        // Close ONLY if it wasn't pinned
-        if (gadget.classList.contains("gadget--expanded") && !isPinned) {
-            setExpanded(false);
-        }
-    });
-  }
-
   private initClockLogic(): void {
-    if (this.clockGadgetEl) {
-        this.clock = new ClockGadget(this.clockGadgetEl);
-    }
+      if (this.clockGadgetEl) this.clock = new ClockGadget(this.clockGadgetEl);
   }
-
-  private initClockBehavior(): void {
-    const gadget = this.clockGadgetEl;
-    const header = this.clockHeaderEl;
-    const toggleBtn = this.clockToggleBtn;
-    const backdrop = this.backdrop;
-
-    if (!gadget || !header || !toggleBtn || !backdrop) return;
-
-    let hoverTimeout: number | undefined;
-    let isPinned = false;
-
-    const setExpanded = (expanded: boolean, pinned: boolean = false) => {
-
-        clearTimeout(hoverTimeout);
-
-        // 1. FREEZE POSITION
-      const rect = gadget.getBoundingClientRect();
-      gadget.style.removeProperty("inset");
-      gadget.style.removeProperty("transform");
-      gadget.style.removeProperty("right");
-      gadget.style.removeProperty("bottom");
-      gadget.style.left = `${rect.left}px`;
-      gadget.style.top = `${rect.top}px`;
-      gadget.style.position = "fixed";
-
-      this.savePosition(gadget, "clock-gadget");
-
-      if (expanded) {
-        // --- OPENING ---
-        isPinned = pinned;
-
-        const raw = localStorage.getItem("clock-gadget-expanded-size");
-        if (raw) {
-          try {
-            const { w, h } = JSON.parse(raw);
-            if (w) gadget.style.width = w;
-            if (h) gadget.style.height = h;
-          } catch {}
-        }
-
-        gadget.classList.add("gadget--expanded");
-        gadget.classList.remove("gadget--collapsed");
-
-        if (isPinned) backdrop.classList.add("visible");
-        else backdrop.classList.remove("visible");
-
-        gadget.style.removeProperty("min-width");
-        gadget.style.removeProperty("min-height");
-
-      } else {
-        // --- CLOSING ---
-        isPinned = false;
-
-        if (gadget.classList.contains("gadget--expanded")) {
-            const rect = gadget.getBoundingClientRect();
-            const size = { w: `${rect.width}px`, h: `${rect.height}px` };
-            localStorage.setItem("clock-gadget-expanded-size", JSON.stringify(size));
-        }
-
-        gadget.style.removeProperty("width");
-        gadget.style.removeProperty("height");
-        gadget.style.removeProperty("min-width");
-        gadget.style.removeProperty("min-height");
-
-        gadget.classList.remove("gadget--expanded");
-        gadget.classList.add("gadget--collapsed");
-        backdrop.classList.remove("visible");
-      }
-
-      gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-      toggleBtn.textContent = expanded ? "Close" : "Open";
-    };
-
-    // Toggle
-    const toggle = () => {
-      const isExpanded = gadget.classList.contains("gadget--expanded");
-      if (isExpanded && isPinned) {
-         setExpanded(false);
-      } else {
-         setExpanded(true, true);
-      }
-    };
-
-    header.addEventListener("click", (e) => {
-      if (e.target === toggleBtn) return;
-      toggle();
-    });
-
-    toggleBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggle();
-    });
-
-    backdrop.addEventListener("click", () => setExpanded(false));
-
-      // HOVER LOGIC
-      gadget.addEventListener("mouseenter", () => {
-          if (gadget.classList.contains("is-dragging")) return;
-
-          // Start timer to Peek
-          if (!gadget.classList.contains("gadget--expanded")) {
-              hoverTimeout = window.setTimeout(() => {
-                  if (!gadget.classList.contains("is-dragging")) {
-                      setExpanded(true, false); // false = Not Pinned (Peek)
-                  }
-              }, 600);
-          }
-      });
-
-    gadget.addEventListener("mouseleave", () => {
-        // Cancel timer if we leave before it fires
-        clearTimeout(hoverTimeout);
-
-        if (gadget.classList.contains("is-dragging")) return;
-
-        // Close ONLY if we are just Peeking (!isPinned)
-        if (gadget.classList.contains("gadget--expanded") && !isPinned) {
-            setExpanded(false);
-        }
-    });
-  }
-
-
   private initStockLogic() {
-        if (this.stockGadgetEl) this.stock = new StockGadget(this.stockGadgetEl);
+      if (this.stockGadgetEl) this.stock = new StockGadget(this.stockGadgetEl);
+  }
+
+    // --- Behavior Inits (Refactored to use shared helper) ---
+
+    private initWeatherBehavior(): void {
+        if (this.weatherGadgetEl && this.weatherHeaderEl && this.weatherToggleBtn && this.backdrop) {
+            bindStandardGadgetEvents(
+                this.weatherGadgetEl,
+                this.weatherHeaderEl,
+                this.weatherToggleBtn,
+                this.backdrop,
+                "weather-gadget",
+                () => void this.weather?.refresh(false)
+            );
+        }
     }
 
-    private initStockBehavior() {
-        const gadget = this.stockGadgetEl;
-        const header = this.stockHeaderEl;
-        const toggleBtn = this.stockToggleBtn;
-        const backdrop = this.backdrop;
-
-        if (!gadget || !header || !toggleBtn || !backdrop) return;
-
-        let hoverTimeout: number | undefined;
-        let isPinned = false;
-
-        const setExpanded = (expanded: boolean, pinned: boolean = false) => {
-            clearTimeout(hoverTimeout);
-
-            const rect = gadget.getBoundingClientRect();
-            gadget.style.removeProperty("inset");
-            gadget.style.removeProperty("transform");
-            gadget.style.removeProperty("right");
-            gadget.style.removeProperty("bottom");
-            gadget.style.left = `${rect.left}px`;
-            gadget.style.top = `${rect.top}px`;
-            gadget.style.position = "fixed";
-
-            this.savePosition(gadget, "stock-gadget");
-
-            if (expanded) {
-                isPinned = pinned;
-                const raw = localStorage.getItem("stock-gadget-expanded-size");
-                if (raw) { try { const { w, h } = JSON.parse(raw); if (w) gadget.style.width = w; if (h) gadget.style.height = h; } catch {} }
-                gadget.classList.add("gadget--expanded"); gadget.classList.remove("gadget--collapsed");
-                if (isPinned) backdrop.classList.add("visible");
-                gadget.style.removeProperty("min-width"); gadget.style.removeProperty("min-height");
-            } else {
-                isPinned = false;
-                if (gadget.classList.contains("gadget--expanded")) {
-                    const rect = gadget.getBoundingClientRect();
-                    const size = { w: `${rect.width}px`, h: `${rect.height}px` };
-                    localStorage.setItem("stock-gadget-expanded-size", JSON.stringify(size));
-                }
-                gadget.style.removeProperty("width"); gadget.style.removeProperty("height");
-                gadget.style.removeProperty("min-width"); gadget.style.removeProperty("min-height");
-                gadget.classList.remove("gadget--expanded"); gadget.classList.add("gadget--collapsed");
-                backdrop.classList.remove("visible");
-            }
-            gadget.setAttribute("aria-expanded", expanded ? "true" : "false");
-            toggleBtn.textContent = expanded ? "Close" : "Open";
-        };
-
-        const toggle = () => {
-            const isExpanded = gadget.classList.contains("gadget--expanded");
-            if (isExpanded && isPinned) setExpanded(false); else setExpanded(true, true);
-        };
-        header.addEventListener("click", (e) => { if (e.target !== toggleBtn) toggle(); });
-        toggleBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggle(); });
-        backdrop.addEventListener("click", () => setExpanded(false));
-
-        // HOVER LOGIC
-        gadget.addEventListener("mouseenter", () => {
-            if (gadget.classList.contains("is-dragging")) return;
-
-            // Start timer to Peek
-            if (!gadget.classList.contains("gadget--expanded")) {
-                hoverTimeout = window.setTimeout(() => {
-                    if (!gadget.classList.contains("is-dragging")) {
-                        setExpanded(true, false); // false = Not Pinned (Peek)
-                    }
-                }, 600);
-            }
-        });
-
-        gadget.addEventListener("mouseleave", () => {
-            // Cancel timer if we leave before it fires
-            clearTimeout(hoverTimeout);
-
-            if (gadget.classList.contains("is-dragging")) return;
-
-            // Close ONLY if we are just Peeking (!isPinned)
-            if (gadget.classList.contains("gadget--expanded") && !isPinned) {
-                setExpanded(false);
-            }
-        });
+    private initFilesBehavior(): void {
+        if (this.filesGadgetEl && this.filesHeaderEl && this.filesToggleBtn && this.backdrop) {
+            bindStandardGadgetEvents(
+                this.filesGadgetEl,
+                this.filesHeaderEl,
+                this.filesToggleBtn,
+                this.backdrop,
+                "files-gadget",
+                () => this.files?.refresh()
+            );
+        }
     }
 
+    private initClockBehavior(): void {
+        if (this.clockGadgetEl && this.clockHeaderEl && this.clockToggleBtn && this.backdrop) {
+            bindStandardGadgetEvents(
+                this.clockGadgetEl,
+                this.clockHeaderEl,
+                this.clockToggleBtn,
+                this.backdrop,
+                "clock-gadget"
+            );
+        }
+    }
+
+    private initStockBehavior(): void {
+        if (this.stockGadgetEl && this.stockHeaderEl && this.stockToggleBtn && this.backdrop) {
+            bindStandardGadgetEvents(
+                this.stockGadgetEl,
+                this.stockHeaderEl,
+                this.stockToggleBtn,
+                this.backdrop,
+                "stock-gadget"
+            );
+        }
+    }
 }

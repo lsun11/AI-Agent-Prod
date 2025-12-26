@@ -28,6 +28,12 @@ export interface DragOptions {
      * Default: 0.02
      */
     inertiaStopSpeed?: number;
+    /**
+     * ✅ NEW: How much of the panel can overflow the viewport?
+     * 0.0 = Strict containment (no overflow)
+     * 0.5 = 50% of the panel can slide off-screen (Default)
+     */
+    overflowRatio?: number;
 }
 export declare function makePanelDraggable(panel: HTMLElement, handle: HTMLElement, options: DragOptions): void;
 export {};

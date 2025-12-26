@@ -7,7 +7,6 @@ export function makePanelDraggable(panel, handle, options) {
     const inertiaEnabled = (_c = options.inertia) !== null && _c !== void 0 ? _c : true;
     const inertiaFriction = (_d = options.inertiaFriction) !== null && _d !== void 0 ? _d : 0.92;
     const inertiaStopSpeed = (_e = options.inertiaStopSpeed) !== null && _e !== void 0 ? _e : 0.02;
-    // ✅ Default to 50% overflow if not specified
     const overflowRatio = (_f = options.overflowRatio) !== null && _f !== void 0 ? _f : 0.7;
     let isDragging = false;
     // pointer start

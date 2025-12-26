@@ -8,6 +8,7 @@ import {FilesGadget} from "./components/files_app/files.js";
 import {ClockGadget} from "./components/clock_app/clock.js";
 import {StockGadget} from "./components/stock_app/stock.js";
 import {NewsGadget} from "./components/news_app/news.js";
+import { attachBackgroundListeners } from "./helpers/background.js";
 import {bindStandardGadgetEvents, restoreGadgetPosition, saveGadgetPosition} from "./helpers/gadget-utils.js";
 
 export class Desktop {
@@ -83,7 +84,11 @@ export class Desktop {
     this.initStockLogic();
     this.initNewsBehavior();
     this.initNewsLogic();
-
+    attachBackgroundListeners(this.weatherGadgetEl, "weather-gadget");
+    attachBackgroundListeners(this.newsGadgetEl, "news-gadget");
+    attachBackgroundListeners(this.filesGadgetEl, "files-gadget");
+    attachBackgroundListeners(this.stockGadgetEl, "stock-gadget");
+    attachBackgroundListeners(this.clockGadgetEl, "clock-gadget");
     restoreGadgetPosition(this.gadget, "ai-gadget");
     restoreGadgetPosition(this.weatherGadgetEl, "weather-gadget");
     restoreGadgetPosition(this.filesGadgetEl, "files-gadget");
@@ -203,6 +208,7 @@ export class Desktop {
     private initDraggables(): void {
     const attachSaveListener = (gadget: HTMLElement, id: string) => {
         const onInteractStart = () => {
+
             const onInteractEnd = () => {
                 setTimeout(() => saveGadgetPosition(gadget, id), 200); // ✅ Shared function
                 window.removeEventListener("mouseup", onInteractEnd);

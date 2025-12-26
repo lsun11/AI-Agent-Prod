@@ -351,7 +351,13 @@ export class WeatherGadget {
             this.forecastEl.innerHTML = "";
             return;
         }
-        // Week range for relative bars
+        // Week range for relative bars    private updateBackground(topicKey: string): void {
+        //         if (this.currentTopicKey) {
+        //             document.body.classList.remove(`topic-bg-${this.currentTopicKey}`);
+        //         }
+        //         document.body.classList.add(`topic-bg-${topicKey}`);
+        //         this.currentTopicKey = topicKey;
+        //     }
         let weekMin = Number.POSITIVE_INFINITY;
         let weekMax = Number.NEGATIVE_INFINITY;
         for (let i = 0; i < n; i++) {

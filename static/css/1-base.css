@@ -32,7 +32,7 @@ body {
     height: 100vh;
 
     /* Background */
-    background-color: #85b8b8;
+    background-color: rgba(133, 184, 184, 0.39);
     background-image: url("../../static/assets/backgrounds/computer_science.gif");
     background-repeat: repeat;
     background-size: auto; /* important for tiling */
@@ -75,6 +75,50 @@ body.topic-bg-software_engineering::before {
     background-image: url("../../static/assets/backgrounds/software_engineering.png");
 }
 
+/* Weather Gadget */
+body.topic-bg-weather-gadget::before {
+    background-image: url("../../static/assets/backgrounds/weather_app.png");
+    opacity: 0.5;
+    background-size:100% auto;
+    background-repeat: repeat;
+    background-position: left top;
+}
+
+/* News Gadget */
+body.topic-bg-news-gadget::before {
+    background-image: url("../../static/assets/backgrounds/news_app.png");
+    opacity: 0.35;
+    background-size:100% auto;
+    background-repeat: repeat;
+    background-position: left top;
+}
+
+/* Files/System Gadget */
+body.topic-bg-files-gadget::before {
+    background-image: url("../../static/assets/backgrounds/files_app.png");
+    opacity: 0.35;
+    background-size:100% auto;
+    background-repeat: repeat;
+    background-position: left top;
+}
+
+/* Stock Gadget */
+body.topic-bg-stock-gadget::before {
+    background-image: url("../../static/assets/backgrounds/stocks_app.png");
+    opacity: 0.35;
+    background-size:100% auto;
+    background-repeat: repeat;
+    background-position: left top;
+}
+
+/* Clock Gadget */
+body.topic-bg-clock-gadget::before {
+    background-image: url("../../static/assets/backgrounds/clock_app.png");
+    opacity: 0.35;
+    background-size:100% auto;
+    background-repeat: repeat;
+    background-position: left top;
+}
 
 .sr-only {
     position: absolute;

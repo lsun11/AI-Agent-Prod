@@ -76,7 +76,7 @@ body.topic-bg-software_engineering::before {
 }
 
 body::before {
-    opacity: 0.2;
+    opacity: 0.02;
 
     /* Transition opacity smoothly when the class changes */
     transition: opacity 1.5s ease-in-out;

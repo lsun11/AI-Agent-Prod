@@ -1,48 +1,4 @@
 {
-  "tech:en": {
-    "value": {
-      "category": "tech",
-      "articles": [
-        {
-          "headline": "Nvidia will license Groq tech, hire its executives",
-          "summary": "Nvidia is set to license technology from AI chip startup Groq and hire its executives, but is stopping short of a formal acquisition.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/business/nvidia-buy-ai-chip-startup-groq-about-20-billion-cnbc-reports-2025-12-24/",
-          "date": "2025-12-24"
-        },
-        {
-          "headline": "China launches venture capital funds to invest in 'hard technology', state media report",
-          "summary": "China has initiated new venture capital funds aimed at investing in hard technology sectors, according to state media reports.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/sustainability/boards-policy-regulation/china-launches-venture-capital-funds-invest-hard-technology-state-media-report-2025-12-26/",
-          "date": "2025-12-25"
-        },
-        {
-          "headline": "The Gloves Are Off in the Fight for Your Right to Repair",
-          "summary": "The right-to-repair movement gained traction this year, driven by big tech and economic factors, as companies resist relinquishing control over repairs.",
-          "source": "WIRED",
-          "url": "https://www.wired.com/story/expired-tired-wired-right-to-repair/",
-          "date": "2025-12-26"
-        },
-        {
-          "headline": "Drone capital of the world? Seattle could be a big winner in the U.S. crackdown on DJI and others",
-          "summary": "New U.S. restrictions on foreign-made drones may benefit Seattle, positioning it as a hub for domestic drone manufacturing.",
-          "source": "GeekWire",
-          "url": "https://www.geekwire.com/2025/drone-capital-of-the-world-seattle-could-be-a-big-winner-in-the-u-s-crackdown-on-dji-and-others/",
-          "date": "2025-12-26"
-        },
-        {
-          "headline": "Waymo explains why its robotaxis got stuck during the SF blackout",
-          "summary": "Waymo has provided an explanation for the malfunction of its robotaxis during a recent blackout in San Francisco.",
-          "source": "TechCrunch",
-          "url": "https://techcrunch.com/2025/12/24/waymo-explains-why-its-robotaxis-got-stuck-during-the-sf-blackout/",
-          "date": "2025-12-24"
-        }
-      ],
-      "updated_at_iso": "2025-12-26T08:13:45.311232+00:00"
-    },
-    "expires_at": 1766751225.311338
-  },
   "science:en": {
     "value": {
       "category": "science",
@@ -130,5 +86,49 @@
       "updated_at_iso": "2025-12-26T08:14:43.162262+00:00"
     },
     "expires_at": 1766751283.1623418
+  },
+  "tech:en": {
+    "value": {
+      "category": "tech",
+      "articles": [
+        {
+          "headline": "Nvidia will license Groq tech, hire its executives",
+          "summary": "Nvidia has decided to license technology from AI chip startup Groq and hire its executives, stopping short of a formal acquisition.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/business/nvidia-buy-ai-chip-startup-groq-about-20-billion-cnbc-reports-2025-12-24/",
+          "date": "2025-12-26"
+        },
+        {
+          "headline": "South Korea charges 10 over alleged chip technology leak to China's CXMT",
+          "summary": "South Korea has charged ten individuals in connection with an alleged leak of chip technology to China's CXMT.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/asia-pacific/south-korea-charges-10-over-alleged-chip-technology-leak-chinas-cxmt-2025-12-26/",
+          "date": "2025-12-26"
+        },
+        {
+          "headline": "New York to require social media platforms to display mental health warnings",
+          "summary": "New York has enacted a law requiring social media platforms to display warnings about the potential mental health impacts of their use.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/legal/litigation/new-york-require-social-media-platforms-display-mental-health-warnings-2025-12-26/",
+          "date": "2025-12-26"
+        },
+        {
+          "headline": "Microsoft CTO to AI startups: Stop waiting for better models and \u2018do the damned experiments\u2019",
+          "summary": "Microsoft's CTO encourages AI startups to leverage existing tools and focus on practical experimentation rather than waiting for ideal conditions.",
+          "source": "GeekWire",
+          "url": "https://www.geekwire.com/2025/microsoft-cto-to-ai-startups-stop-waiting-for-better-models-and-do-the-damned-experiments/",
+          "date": "2025-12-26"
+        },
+        {
+          "headline": "How reality crushed \u0178nsect, the French startup that had raised over $600M for insect farming",
+          "summary": "\u0178nsect, a French startup that raised significant funding for insect farming, faces challenges that have led to its struggles in the market.",
+          "source": "TechCrunch",
+          "url": "https://techcrunch.com/2025/12/26/how-reality-crushed-ynsect-the-french-startup-that-had-raised-over-600m-for-insect-farming/",
+          "date": "2025-12-26"
+        }
+      ],
+      "updated_at_iso": "2025-12-27T02:16:49.966262+00:00"
+    },
+    "expires_at": 1766816209.966368
   }
 }

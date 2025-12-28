@@ -92,43 +92,43 @@
       "category": "tech",
       "articles": [
         {
+          "headline": "Waymo's San Francisco outage raises doubts over robotaxi readiness during crises",
+          "summary": "A widespread power outage in San Francisco that led to Waymo robotaxis stalling and snarling traffic earlier this month has raised concerns about the readiness of autonomous vehicle operators to tackle major emergencies like earthquakes and floods.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/business/autos-transportation/waymos-san-francisco-outage-raises-doubts-over-robotaxi-readiness-during-crises-2025-12-27/",
+          "date": "2025-12-27"
+        },
+        {
+          "headline": "China issues draft rules to regulate AI with human-like interaction",
+          "summary": "China has released draft regulations aimed at overseeing artificial intelligence technologies that engage in human-like interactions, reflecting growing concerns about the implications of AI in society.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/asia-pacific/china-issues-drafts-rules-regulate-ai-with-human-like-interaction-2025-12-27/",
+          "date": "2025-12-27"
+        },
+        {
           "headline": "Nvidia will license Groq tech, hire its executives",
-          "summary": "Nvidia has decided to license technology from AI chip startup Groq and hire its executives, stopping short of a formal acquisition.",
+          "summary": "Nvidia is set to acquire AI chip startup Groq for approximately $20 billion, which includes licensing its technology and hiring its executives to bolster Nvidia's AI capabilities.",
           "source": "Tech News",
           "url": "https://www.reuters.com/business/nvidia-buy-ai-chip-startup-groq-about-20-billion-cnbc-reports-2025-12-24/",
           "date": "2025-12-26"
         },
         {
-          "headline": "South Korea charges 10 over alleged chip technology leak to China's CXMT",
-          "summary": "South Korea has charged ten individuals in connection with an alleged leak of chip technology to China's CXMT.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/asia-pacific/south-korea-charges-10-over-alleged-chip-technology-leak-chinas-cxmt-2025-12-26/",
-          "date": "2025-12-26"
-        },
-        {
-          "headline": "New York to require social media platforms to display mental health warnings",
-          "summary": "New York has enacted a law requiring social media platforms to display warnings about the potential mental health impacts of their use.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/legal/litigation/new-york-require-social-media-platforms-display-mental-health-warnings-2025-12-26/",
-          "date": "2025-12-26"
-        },
-        {
-          "headline": "Microsoft CTO to AI startups: Stop waiting for better models and \u2018do the damned experiments\u2019",
-          "summary": "Microsoft's CTO encourages AI startups to leverage existing tools and focus on practical experimentation rather than waiting for ideal conditions.",
-          "source": "GeekWire",
-          "url": "https://www.geekwire.com/2025/microsoft-cto-to-ai-startups-stop-waiting-for-better-models-and-do-the-damned-experiments/",
-          "date": "2025-12-26"
-        },
-        {
-          "headline": "How reality crushed \u0178nsect, the French startup that had raised over $600M for insect farming",
-          "summary": "\u0178nsect, a French startup that raised significant funding for insect farming, faces challenges that have led to its struggles in the market.",
+          "headline": "NY Governor Hochul signs bill requiring warning labels on \u2018addictive\u2019 social media",
+          "summary": "New York Governor Kathy Hochul has signed a bill mandating warning labels on social media platforms deemed addictive, aiming to address concerns over mental health impacts.",
           "source": "TechCrunch",
-          "url": "https://techcrunch.com/2025/12/26/how-reality-crushed-ynsect-the-french-startup-that-had-raised-over-600m-for-insect-farming/",
-          "date": "2025-12-26"
+          "url": "https://techcrunch.com/2025/12/27/ny-governor-hochul-signs-bill-requiring-warning-labels-on-addictive-social-media/",
+          "date": "2025-12-27"
+        },
+        {
+          "headline": "Meet the team that investigates when journalists and activists get hacked with government spyware",
+          "summary": "A dedicated team has emerged to investigate cases where journalists and activists are targeted by government spyware, highlighting the ongoing battle for digital privacy and security.",
+          "source": "TechCrunch",
+          "url": "https://techcrunch.com/2025/12/27/meet-the-team-that-investigates-when-journalists-and-activists-get-hacked-with-government-spyware/",
+          "date": "2025-12-27"
         }
       ],
-      "updated_at_iso": "2025-12-27T02:16:49.966262+00:00"
+      "updated_at_iso": "2025-12-27T23:24:04.949537+00:00"
     },
-    "expires_at": 1766816209.966368
+    "expires_at": 1766892244.9495769
   }
 }

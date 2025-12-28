@@ -180,7 +180,7 @@ private forecastEl: HTMLElement | null;
             navigator.geolocation.getCurrentPosition(resolve, reject, {
                 enableHighAccuracy: false,
                 timeout: 12000,
-                maximumAge: 10 * 60 * 1000,
+                maximumAge: 0,
             });
         });
         console.log(pos);

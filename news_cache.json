@@ -1,26 +1,134 @@
 {
-  "tech:en": {
+  "sports:en": {
     "value": {
-      "category": "tech",
-      "articles": [],
-      "updated_at_iso": null
+      "category": "sports",
+      "articles": [
+        {
+          "headline": "New England Patriots wide receiver Stefon Diggs denies accusations of assault and strangulation",
+          "summary": "Stefon Diggs faces serious legal allegations but has publicly denied the charges against him.",
+          "source": "CNN",
+          "url": "https://www.cnn.com/2025/12/30/sport/football-nfl-stefon-diggs-faces-strangulation-and-assault-charges",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Father of NASCAR driver Denny Hamlin dies after house fire, mother critically injured",
+          "summary": "Denny Hamlin's family faces tragedy as his father passes away and his mother is left in critical condition following a house fire.",
+          "source": "CNN",
+          "url": "https://www.cnn.com/2025/12/30/sport/racing-denny-hamlin-parents-house-fire-hnk",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Drew Brees, Larry Fitzgerald lead Pro Football Hall of Fame modern-era finalists",
+          "summary": "Former NFL stars Drew Brees and Larry Fitzgerald are among the finalists for the Pro Football Hall of Fame's modern-era class.",
+          "source": "CNN",
+          "url": "https://www.cnn.com/2025/12/30/sport/football-hall-of-fame-finalists-2026",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "USC Trojans defeat TCU Horned Frogs in Alamo Bowl",
+          "summary": "In a thrilling Alamo Bowl matchup, the USC Trojans narrowly lost to the TCU Horned Frogs, ending their season on a high note.",
+          "source": "FOX Sports",
+          "url": "https://www.foxsports.com/college-football/alamo-bowl-usc-trojans-vs-tcu-horned-frogs-dec-30-2025-game-boxscore-42783",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "NFL playoff picture after Week 17: Who\u2019s in and who\u2019s out?",
+          "summary": "As the NFL regular season concludes, teams are finalizing their playoff positions heading into the postseason.",
+          "source": "CNN",
+          "url": "https://www.cnn.com/2025/12/23/sport/football-nfl-playoff-picture-2025-season",
+          "date": "2025-12-23"
+        }
+      ],
+      "updated_at_iso": "2025-12-31T13:36:59.290172+00:00"
     },
-    "expires_at": 1767200132.9311712
+    "expires_at": 1767202619.290209
   },
   "science:en": {
     "value": {
       "category": "science",
-      "articles": [],
-      "updated_at_iso": null
+      "articles": [
+        {
+          "headline": "These fossil finds shed new light on the past in 2025",
+          "summary": "The year's top paleontological wonders ranged from a 540-million-year-old penis worm to a decades-old rodent impression.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/favorite-fossil-finds-2025",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Against the odds, a burbling lava planet retains an atmosphere",
+          "summary": "A newly discovered lava planet, TOI-561b, surprisingly retains an atmosphere despite its extreme conditions.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/lava-planet-toi561b-atmosphere-tess",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Even One Drink a Day May Raise Mouth Cancer Risk",
+          "summary": "New research suggests that even light alcohol use may carry serious risks, linking one standard drink a day to a 50% higher risk of mouth cancer.",
+          "source": "ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2025/12/251228013709.htm",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Scientists Turn Carrot Waste Into Protein People Prefer",
+          "summary": "Researchers have developed a method to convert carrot processing leftovers into a nutritious protein source using edible fungi.",
+          "source": "ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2025/12/251220104557.htm",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Astronomers Find Direct Evidence for Supermassive Stars in Early Universe",
+          "summary": "Astronomers have discovered direct evidence supporting the existence of supermassive stars that formed shortly after the Big Bang.",
+          "source": "Sci.News",
+          "url": "https://www.sci.news/astronomy/primordial-supermassive-stars-14424.html",
+          "date": "2025-12-15"
+        }
+      ],
+      "updated_at_iso": "2025-12-31T13:36:59.290656+00:00"
     },
-    "expires_at": 1767200132.9530282
+    "expires_at": 1767202619.290671
   },
-  "sports:en": {
+  "tech:en": {
     "value": {
-      "category": "sports",
-      "articles": [],
-      "updated_at_iso": null
+      "category": "tech",
+      "articles": [
+        {
+          "headline": "Nvidia sounds out TSMC on new H200 chip order as China demand jumps",
+          "summary": "Nvidia is scrambling to meet strong demand for its H200 artificial intelligence chips from Chinese technology companies and has approached TSMC to ramp up production.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/china/nvidia-sounds-out-tsmc-new-h200-chip-order-china-demand-jumps-sources-say-2025-12-31/",
+          "date": "2025-12-31"
+        },
+        {
+          "headline": "Poland urges Brussels to probe TikTok over AI-generated content",
+          "summary": "Poland has called for an investigation into TikTok regarding the use of AI-generated content, raising concerns about its implications.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/china/poland-urges-brussels-probe-tiktok-over-ai-generated-content-2025-12-30/",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Musk's xAI buys third building to expand AI compute power",
+          "summary": "Elon Musk's xAI has acquired a third building to enhance its AI computing capabilities, signaling growth in the company's ambitions.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/business/musks-xai-buys-third-building-expand-ai-compute-power-2025-12-30/",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "How AI shook the world in 2025 and what comes next",
+          "summary": "A retrospective on the impact of AI throughout 2025, examining its transformative effects and future predictions.",
+          "source": "CNN Business",
+          "url": "https://www.cnn.com/2025/12/30/tech/how-ai-changed-world-predictions-2026-vis",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "How Microsoft is betting on AI agents in Windows, dusting off a winning playbook from the past",
+          "summary": "Microsoft is integrating AI agents into Windows, reviving strategies that once made the OS dominant in an evolving tech landscape.",
+          "source": "GeekWire",
+          "url": "https://www.geekwire.com/2025/how-microsoft-is-betting-on-ai-agents-in-windows-dusting-off-a-winning-playbook-from-the-past/",
+          "date": "2025-12-30"
+        }
+      ],
+      "updated_at_iso": "2025-12-31T13:37:02.991845+00:00"
     },
-    "expires_at": 1767200133.22031
+    "expires_at": 1767202622.9918919
   }
 }

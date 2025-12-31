@@ -3,24 +3,21 @@ from __future__ import annotations
 import json
 import os
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-
-from pydantic import BaseModel
 
 from src.news_app.models import NewsReport, NewsArticle
 from src.advanced_agent.firecrawl import FirecrawlService
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
-# ✅ CONSTANTS
 CACHE_FILE = "news_cache.json"
 
 
 @dataclass
 class CacheItem:
-    value: Dict  # Store as dict for JSON serialization
+    value: Dict
     expires_at: float
 
 
@@ -31,25 +28,20 @@ class PersistentCache:
         self._load_from_disk()
 
     def _load_from_disk(self):
-        """Load cache from JSON file on startup."""
         if not os.path.exists(self.filename):
             return
-
         try:
             with open(self.filename, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 for k, v in data.items():
-                    # Restore items, discard if expired already
                     if v["expires_at"] > time.time():
                         self._store[k] = CacheItem(value=v["value"], expires_at=v["expires_at"])
-            print(f"[Cache] Loaded {len(self._store)} valid items from disk.")
+            print(f"[Cache] Loaded {len(self._store)} items from disk.")
         except Exception as e:
             print(f"[Cache] Failed to load cache: {e}")
 
     def _save_to_disk(self):
-        """Save current in-memory store to JSON file."""
         try:
-            # Convert CacheItems to simple dicts
             serializable = {
                 k: {"value": v.value, "expires_at": v.expires_at}
                 for k, v in self._store.items()
@@ -64,20 +56,32 @@ class PersistentCache:
         if not item:
             return None
 
-        # Check expiry
+        # 1. Check Expiry
         if time.time() > item.expires_at:
             self._store.pop(key, None)
-            self._save_to_disk()  # Cleanup disk
+            self._save_to_disk()
             return None
 
-        # Reconstruct Pydantic model from dict
         try:
-            return NewsReport.model_validate(item.value)
+            report = NewsReport.model_validate(item.value)
+
+            # ✅ FIX: If cache contains 0 articles, treat it as a miss (invalid)
+            if not report.articles:
+                print(f"[Cache] ⚠️ Found empty entry for {key}. Invalidating...")
+                self._store.pop(key, None)
+                self._save_to_disk()
+                return None
+
+            return report
         except:
             return None
 
     def set(self, key: str, value: NewsReport, ttl_seconds: int) -> None:
-        # Store as dict (Pydantic .model_dump()) so it's JSON serializable
+        # ✅ FIX: Never cache empty reports
+        if not value.articles:
+            print(f"[Cache] ⚠️ Refusing to cache empty report for {key}")
+            return
+
         self._store[key] = CacheItem(
             value=value.model_dump(),
             expires_at=time.time() + ttl_seconds
@@ -88,7 +92,7 @@ class PersistentCache:
 class NewsService:
     def __init__(self):
         self.firecrawl = FirecrawlService()
-        self.cache = PersistentCache()  # ✅ Use new persistent cache
+        self.cache = PersistentCache()
 
     def _cache_key(self, category: str, lang: str) -> str:
         return f"{category.lower().strip()}:{lang.lower().strip()}"
@@ -107,7 +111,6 @@ class NewsService:
             if "data" in raw_response: return raw_response["data"]
             return []
 
-        # Object inspection
         if hasattr(raw_response, "news") and raw_response.news:
             return raw_response.news
         if hasattr(raw_response, "web") and raw_response.web:
@@ -137,8 +140,8 @@ class NewsService:
             title = str(title).strip()
             url = str(url).strip()
 
-            if not url: continue
-            if "google.com" in url or "bing.com" in url: continue
+            if not url or "google.com" in url or "bing.com" in url:
+                continue
 
             urls.append((title, url))
             if len(urls) >= limit: break
@@ -197,12 +200,9 @@ class NewsService:
             return NewsReport(category=category, articles=[])
 
     def get_news(self, category: str, lang: str = "en", ttl_seconds: int = 14400) -> NewsReport:
-        """
-        ttl_seconds default: 14400 (4 hours).
-        """
         key = self._cache_key(category, lang)
 
-        # 1. Try persistent cache first
+        # 1. Try Cache
         cached = self.cache.get(key)
         if cached:
             print(f"[NewsService] ✅ Loaded {category} from DISK cache.")
@@ -217,13 +217,9 @@ class NewsService:
             urls = self._pick_urls(web_results, limit=5)
 
             if not urls:
-                print(f"[NewsService] WARN: No URLs. Returning Mock.")
-                return NewsReport(
-                    category=category,
-                    updated_at_iso=datetime.now(timezone.utc).isoformat(),
-                    articles=[NewsArticle(headline="No live news found", summary="Search returned 0 results.",
-                                          source="System", url="#", date=datetime.now().strftime("%Y-%m-%d"))]
-                )
+                print(f"[NewsService] WARN: No URLs found for {category}")
+                # Don't cache this empty result!
+                return NewsReport(category=category, articles=[])
 
             all_content = self._scrape_urls(urls)
             if not all_content:
@@ -231,8 +227,10 @@ class NewsService:
 
             report = self._extract_with_llm(all_content, category, lang)
 
-            # 2. Save to persistent cache
-            self.cache.set(key, report, ttl_seconds)
+            # 2. Save to Cache (Only if valid)
+            if report.articles:
+                self.cache.set(key, report, ttl_seconds)
+
             return report
 
         except Exception as e:

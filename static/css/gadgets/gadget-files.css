@@ -44,7 +44,7 @@
     display: block !important;
 }
 
-/* Hide other elements */
+ /* Hide other elements */
 .gadget--files.gadget--collapsed .gadget-meta,
 .gadget--files.gadget--collapsed .gadget-toggle,
 .gadget--files.gadget--collapsed .gadget-body {

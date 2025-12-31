@@ -2,133 +2,25 @@
   "tech:en": {
     "value": {
       "category": "tech",
-      "articles": [
-        {
-          "headline": "Poland urges Brussels to probe TikTok over AI-generated content",
-          "summary": "Poland has requested an investigation from the European Commission into TikTok for hosting AI-generated content that allegedly includes calls for the country to withdraw from the EU, which officials believe is likely Russian disinformation.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/china/poland-urges-brussels-probe-tiktok-over-ai-generated-content-2025-12-30/",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Musk's xAI buys third building to expand AI compute power",
-          "summary": "Elon Musk's xAI has acquired a third building to enhance its AI computing capabilities, signaling a significant investment in artificial intelligence infrastructure.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/business/musks-xai-buys-third-building-expand-ai-compute-power-2025-12-30/",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "SoftBank completes $41 billion investment in OpenAI, deepening bet on AI",
-          "summary": "SoftBank has finalized its $41 billion investment in OpenAI, marking a substantial commitment to the future of artificial intelligence technology.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/business/media-telecom/softbank-has-fully-funded-its-40-billion-investment-openai-cnbc-reports-2025-12-30/",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "How AI shook the world in 2025 and what comes next",
-          "summary": "A comprehensive analysis of the transformative impact of artificial intelligence throughout 2025 and predictions for its future developments.",
-          "source": "CNN Business",
-          "url": "https://www.cnn.com/2025/12/30/tech/how-ai-changed-world-predictions-2026-vis",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "How Microsoft is betting on AI agents in Windows, dusting off a winning playbook from the past",
-          "summary": "Microsoft is reintegrating AI agents into Windows, reviving a strategy that once made its operating system dominant, as it seeks to adapt to the current tech landscape.",
-          "source": "GeekWire",
-          "url": "https://www.geekwire.com/2025/how-microsoft-is-betting-on-ai-agents-in-windows-dusting-off-a-winning-playbook-from-the-past/",
-          "date": "2025-12-30"
-        }
-      ],
-      "updated_at_iso": "2025-12-31T08:15:55.552272+00:00"
+      "articles": [],
+      "updated_at_iso": null
     },
-    "expires_at": 1767183355.552299
+    "expires_at": 1767200132.9311712
   },
   "science:en": {
     "value": {
       "category": "science",
-      "articles": [
-        {
-          "headline": "Crush explores how gravity shapes life as we know it",
-          "summary": "James Riordan\u2019s new book will help readers wrap their heads around this mysterious, fundamental force of nature.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/crush-book-gravity-impact-on-life",
-          "date": "2025-12-31"
-        },
-        {
-          "headline": "Science taught us a few new tricks about our pets in 2025",
-          "summary": "New insights into pet behavior and care have emerged from recent scientific studies.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/science-pets-cats-dogs-2025",
-          "date": "2025-12-31"
-        },
-        {
-          "headline": "These medical breakthroughs and advances gave patients new hope in 2025",
-          "summary": "A review of significant medical advancements that have improved patient care and treatment options this year.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/medical-miracle-breakthroughs-hope-2025",
-          "date": "2025-12-31"
-        },
-        {
-          "headline": "Even One Drink a Day May Raise Mouth Cancer Risk",
-          "summary": "New research suggests that even light alcohol use may carry serious risks, linking one drink a day to a higher risk of mouth cancer.",
-          "source": "ScienceDaily",
-          "url": "https://sciencedaily.com/releases/2025/12/251228013709.htm",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Scientists Turn Carrot Waste Into Protein People Prefer",
-          "summary": "Researchers have developed a method to convert carrot processing leftovers into a nutritious protein source using edible fungi.",
-          "source": "ScienceDaily",
-          "url": "https://sciencedaily.com/releases/2025/12/251220104557.htm",
-          "date": "2025-12-30"
-        }
-      ],
-      "updated_at_iso": "2025-12-31T08:15:57.218508+00:00"
+      "articles": [],
+      "updated_at_iso": null
     },
-    "expires_at": 1767183357.218525
+    "expires_at": 1767200132.9530282
   },
   "sports:en": {
     "value": {
       "category": "sports",
-      "articles": [
-        {
-          "headline": "New England Patriots wide receiver Stefon Diggs denies accusations of assault and strangulation",
-          "summary": "Stefon Diggs faces serious legal challenges as he denies allegations of assault and strangulation, which have surfaced recently.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/30/sport/football-nfl-stefon-diggs-faces-strangulation-and-assault-charges",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Father of NASCAR driver Denny Hamlin dies after house fire, mother critically injured",
-          "summary": "Tragedy strikes as Denny Hamlin's father passes away in a house fire, while his mother suffers critical injuries.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/30/sport/racing-denny-hamlin-parents-house-fire-hnk",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Drew Brees, Larry Fitzgerald lead Pro Football Hall of Fame modern-era finalists",
-          "summary": "The list of modern-era finalists for the Pro Football Hall of Fame includes notable names like Drew Brees and Larry Fitzgerald.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/30/sport/football-hall-of-fame-finalists-2026",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Chock, Bates go 'all in' for Olympic gold as Milano-Cortina could be last Games",
-          "summary": "Madison Chock and Evan Bates are focusing on winning Olympic gold at the upcoming Milano-Cortina Games, potentially their last Olympics.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/sports/chock-bates-go-all-in-olympic-gold-milano-cortina-could-be-last-games-2025-12-31/",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Egypt's Sobhi sentenced to a year in prison in academic fraud case, media reports",
-          "summary": "Egyptian soccer player Sobhi has been sentenced to a year in prison following an academic fraud case, according to media reports.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/sports/soccer/egypts-sobhi-sentenced-year-prison-academic-fraud-case-media-reports-2025-12-31/",
-          "date": "2025-12-30"
-        }
-      ],
-      "updated_at_iso": "2025-12-31T08:16:07.866553+00:00"
+      "articles": [],
+      "updated_at_iso": null
     },
-    "expires_at": 1767183367.866573
+    "expires_at": 1767200133.22031
   }
 }

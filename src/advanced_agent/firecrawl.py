@@ -22,6 +22,51 @@ class FirecrawlService:
         self.timeout_seconds = timeout_seconds
 
     # ------------------------------------------------------------
+    # 🔍 SEARCH with forced timeout
+    # ------------------------------------------------------------
+    def search_companies(self, query: str, num_results: int = 5):
+        """
+        General web search to find the most relevant pages for a tool / company.
+        Used for:
+          - discovering the official website
+          - getting general docs/marketing content
+
+        Does NOT force 'pricing' into the query.
+        """
+        key = (query, num_results)
+        if key in self._search_cache:
+            return self._search_cache[key]
+
+        print(f"[Firecrawl] Searching web for: {query}")
+
+        def _do_search():
+            return self.app.search(
+                query=query,  # 👈 use query as-is
+                limit=num_results,
+                scrape_options={"formats": ["markdown"]},
+            )
+
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_do_search)
+                result = future.result(timeout=self.timeout_seconds)
+        except concurrent.futures.TimeoutError:
+            print(f"[TIMEOUT] search took longer than {self.timeout_seconds}s for '{query}'")
+            return []
+        except Exception as e:
+            print(f"[ERROR] search failed for '{query}': {e}")
+            return []
+        finally:
+            executor.shutdown(wait=False, cancel_futures=True)
+
+        if not result:
+            print(f"[WARN] search returned empty result for '{query}'")
+            return []
+
+        self._search_cache[key] = result
+        return result
+
+    # ------------------------------------------------------------
     # 🌐 SCRAPE with forced timeout
     # ------------------------------------------------------------
     def scrape_company_pages(self, url: str):

@@ -83,3 +83,10 @@
 .gadget--expanded #history-panel {
     display: block;
 }
+
+#ai-gadget.gadget--expanded {
+    min-width: min(1200px, 92vw);
+    min-height: min(820px, 86vh);
+    max-width: 1800px;
+    background: rgba(46, 236, 255, 0.22);
+}

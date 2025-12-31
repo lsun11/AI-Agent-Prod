@@ -11,7 +11,9 @@ export declare class NewsGadget {
     private refreshTimer;
     constructor(root: HTMLElement);
     private startAutoRefresh;
-    private loadCategory;
+    private refreshAllCategories;
+    private switchTab;
+    private fetchCategoryData;
     private saveLocalData;
     private getLocalData;
     private updateStatus;

@@ -13,19 +13,17 @@ interface NewsResponse {
     articles: Article[];
 }
 
-const REFRESH_MS = 4 * 60 * 60 * 1000;
+const REFRESH_MS = 4 * 60 * 60 * 1000; // 4 Hours
+const CATEGORIES = ["tech", "sports", "science"]; // ✅ Defined categories
 
 export class NewsGadget {
     private root: HTMLElement;
     private listEl: HTMLElement | null;
     private tickerEl: HTMLElement | null;
-    private footerEl: HTMLElement | null; // ✅ To show status
+    private footerEl: HTMLElement | null;
 
     private activeCategory: string = "tech";
-
-    // In-memory cache for switching tabs quickly without disk reads
     private memCache: Record<string, Article[]> = {};
-
     private currentArticles: Article[] = [];
     private currentHeadlineIdx = 0;
     private tickerInterval: number | null = null;
@@ -35,7 +33,7 @@ export class NewsGadget {
         this.root = root;
         this.listEl = root.querySelector("#news-list");
         this.tickerEl = root.querySelector("#news-ticker-text");
-        this.footerEl = root.querySelector(".news-footer"); // Ensure you have this class in HTML
+        this.footerEl = root.querySelector(".news-footer");
 
         const tabs = root.querySelectorAll(".news-tab");
         tabs.forEach(btn => {
@@ -43,96 +41,104 @@ export class NewsGadget {
                 tabs.forEach(t => t.classList.remove("active"));
                 btn.classList.add("active");
                 const cat = btn.getAttribute("data-category");
-                if (cat) this.loadCategory(cat);
+                if (cat) this.switchTab(cat);
             });
         });
 
-        // Initial Load
-        this.loadCategory("tech");
+        // ✅ Initial Load: Fetch ALL categories immediately on startup
+        this.refreshAllCategories();
 
+        // Start the timer
         this.startAutoRefresh();
     }
 
     private startAutoRefresh() {
         if (this.refreshTimer) clearInterval(this.refreshTimer);
         this.refreshTimer = window.setInterval(() => {
-            console.log(`[NewsGadget] Auto-refreshing ${this.activeCategory} news...`);
-            this.loadCategory(this.activeCategory, true);
+            console.log(`[NewsGadget] Auto-refreshing ALL categories...`);
+            this.refreshAllCategories(true);
         }, REFRESH_MS);
     }
 
-    private async loadCategory(category: string, forceRefresh = false) {
+    // ✅ NEW: Refresh logic for ALL tabs
+    private async refreshAllCategories(forceRefresh = false) {
+        this.updateStatus("Updating all news...", true);
+
+        // We use Promise.all to fetch them concurrently (or sequentially if you prefer)
+        await Promise.all(CATEGORIES.map(cat => this.fetchCategoryData(cat, forceRefresh)));
+
+        this.updateStatus("Updated just now", false);
+
+        // After refreshing all, re-render the CURRENT tab to show changes
+        this.renderList(this.memCache[this.activeCategory] || []);
+        this.updateTicker(this.memCache[this.activeCategory] || []);
+    }
+
+    // ✅ Switch Tab: Just renders what we (hopefully) already have
+    private switchTab(category: string) {
         this.activeCategory = category;
-        if (!this.listEl) return;
+        const data = this.memCache[category] || [];
 
-        // 1. Try to load from LocalStorage / Memory FIRST
-        // This ensures the UI is never blank on reload
-        const cachedArticles = this.getLocalData(category);
-
-        if (cachedArticles.length > 0) {
-            // Render cached data immediately
-            this.renderList(cachedArticles);
-            this.updateTicker(cachedArticles);
-
-            // If we have valid data and NOT forcing refresh, stop here.
-            // (Unless you want to always background-refresh on load, remove the second condition)
-            if (!forceRefresh && this.memCache[category]) {
-                return;
-            }
+        // If data is missing (e.g. startup race condition), fetch it specifically
+        if (data.length === 0) {
+            this.fetchCategoryData(category).then(() => {
+                // @ts-ignore
+                this.renderList(this.memCache[category]);
+                // @ts-ignore
+                this.updateTicker(this.memCache[category]);
+            });
         } else {
-            // Only show full loading spinner if we have NOTHING to show
-            this.listEl.innerHTML = `<div class="news-loading">Searching web for ${category} news...</div>`;
-        }
-
-        // 2. Show "Updating" status if we are keeping old data visible
-        this.updateStatus("Updating...", true);
-
-        try {
-            // 3. Fetch Fresh Data
-            const res = await fetch(`/news?category=${category}`);
-            if (!res.ok) throw new Error("Failed to fetch news");
-
-            const data: NewsResponse = await res.json();
-
-            // 4. Update UI & Caches with Fresh Data
-            this.memCache[category] = data.articles;
-            this.saveLocalData(category, data.articles);
-
-            this.renderList(data.articles);
-            this.updateTicker(data.articles);
-            this.updateStatus("Updated just now", false);
-
-        } catch (err) {
-            console.error(err);
-            // If we have no data at all, show error.
-            // If we have stale data, keep showing it but warn in footer.
-            if (this.listEl.childElementCount === 0 || this.listEl.querySelector(".news-loading")) {
-                this.listEl.innerHTML = `<div class="news-loading" style="color:red">Failed to load news.</div>`;
-                this.updateTicker([], true);
-            }
-            this.updateStatus("Update failed (Offline)", false);
+            this.renderList(data);
+            this.updateTicker(data);
         }
     }
 
-    // ✅ HELPER: Save to Browser LocalStorage
+    // ✅ Worker: Fetches data for a specific category without touching the UI directly
+    private async fetchCategoryData(category: string, forceRefresh = false) {
+        // 1. Try LocalStorage if not forcing refresh
+        if (!forceRefresh) {
+            const cached = this.getLocalData(category);
+            if (cached.length > 0) {
+                this.memCache[category] = cached;
+                // If this is the active tab, render immediately so user sees SOMETHING
+                if (this.activeCategory === category) {
+                    this.renderList(cached);
+                    this.updateTicker(cached);
+                }
+                // If we found data and aren't forcing, we can stop here (optional)
+                // But typically on "Restart", you want to fetch fresh anyway?
+                // If you want "Stale-While-Revalidate", continue below.
+            }
+        }
+
+        try {
+            const res = await fetch(`/news?category=${category}`);
+            if (!res.ok) throw new Error(`Failed to fetch ${category}`);
+
+            const data: NewsResponse = await res.json();
+
+            // Update Caches
+            this.memCache[category] = data.articles;
+            this.saveLocalData(category, data.articles);
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     private saveLocalData(category: string, articles: Article[]) {
         try {
             localStorage.setItem(`news-cache-${category}`, JSON.stringify(articles));
         } catch (e) { console.warn("Quota exceeded", e); }
     }
 
-    // ✅ HELPER: Load from Browser LocalStorage
     private getLocalData(category: string): Article[] {
-        // Try memory first
         if (this.memCache[category]) return this.memCache[category];
-
-        // Try disk
         try {
             const raw = localStorage.getItem(`news-cache-${category}`);
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed)) {
-                    this.memCache[category] = parsed; // Sync memory
                     return parsed;
                 }
             }
@@ -141,25 +147,45 @@ export class NewsGadget {
     }
 
     private updateStatus(msg: string, isLoading: boolean) {
-        if (!this.footerEl) return;
-        this.footerEl.textContent = msg;
-        this.footerEl.style.opacity = isLoading ? "0.7" : "0.4";
+        if (this.footerEl) {
+            this.footerEl.textContent = msg;
+            this.footerEl.style.color = isLoading ? "#ff4b2b" : "#adb5bd";
+        }
+        if (isLoading) {
+            this.root.classList.add("is-updating");
+        } else {
+            this.root.classList.remove("is-updating");
+        }
     }
 
     private renderList(articles: Article[]) {
         if (!this.listEl) return;
         this.listEl.innerHTML = "";
 
-        if (articles.length === 0) {
-            this.listEl.innerHTML = `<div class="news-loading">No news found.</div>`;
+        if (!articles || articles.length === 0) {
+            this.listEl.innerHTML = `<div class="news-loading">Searching web...</div>`;
             return;
         }
 
-        articles.forEach(art => {
+        const sorted = [...articles].sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            return (dateB || 0) - (dateA || 0);
+        });
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        sorted.forEach(art => {
+            const isToday = art.date === todayStr;
+            const badgeHtml = isToday ? `<span class="news-badge-new">NEW</span>` : ``;
+
             const item = document.createElement("div");
             item.className = "news-item";
             item.innerHTML = `
-                <a href="${art.url}" target="_blank" class="news-headline">${art.headline}</a>
+                <div class="news-header-row">
+                    ${badgeHtml}
+                    <a href="${art.url}" target="_blank" class="news-headline">${art.headline}</a>
+                </div>
                 <div class="news-summary">${art.summary}</div>
                 <div class="news-meta">
                     <span class="news-source">${art.source}</span>
@@ -173,7 +199,6 @@ export class NewsGadget {
     private updateTicker(articles: Article[], error = false) {
         if (!this.tickerEl) return;
 
-        // Don't reset if the content is exactly the same (prevents jitter)
         if (JSON.stringify(this.currentArticles) === JSON.stringify(articles) && this.tickerInterval) {
             return;
         }
@@ -183,8 +208,8 @@ export class NewsGadget {
             this.tickerInterval = null;
         }
 
-        if (error || articles.length === 0) {
-            this.tickerEl.innerHTML = `<div class="news-widget-headline">${error ? "News Unavailable" : "No headlines"}</div>`;
+        if (error || !articles || articles.length === 0) {
+            this.tickerEl.innerHTML = `<div class="news-widget-headline">${error ? "News Unavailable" : "Loading..."}</div>`;
             this.tickerEl.classList.add("visible");
             return;
         }
@@ -201,7 +226,6 @@ export class NewsGadget {
                 if (!this.tickerEl) return;
 
                 const art = this.currentArticles[this.currentHeadlineIdx];
-
                 if (art) {
                     this.tickerEl.innerHTML = `
                     <div class="news-widget-headline">${art.headline}</div>
@@ -210,7 +234,6 @@ export class NewsGadget {
                 }
 
                 this.tickerEl.classList.add("visible");
-
                 this.currentHeadlineIdx = (this.currentHeadlineIdx + 1) % this.currentArticles.length;
             }, 500);
         };

@@ -61,8 +61,8 @@
 .gadget--files.gadget--expanded {
     position: absolute;
     z-index: 5000;
-    width: 800px !important;
-    height: 500px !important;
+    width: 800px;
+    height: 500px;
     background: #fff;
     color: #333;
 }

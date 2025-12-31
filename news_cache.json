@@ -1,134 +1,134 @@
 {
+  "tech:en": {
+    "value": {
+      "category": "tech",
+      "articles": [
+        {
+          "headline": "Poland urges Brussels to probe TikTok over AI-generated content",
+          "summary": "Poland has requested an investigation from the European Commission into TikTok for hosting AI-generated content that allegedly includes calls for the country to withdraw from the EU, which officials believe is likely Russian disinformation.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/china/poland-urges-brussels-probe-tiktok-over-ai-generated-content-2025-12-30/",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "Musk's xAI buys third building to expand AI compute power",
+          "summary": "Elon Musk's xAI has acquired a third building to enhance its AI computing capabilities, signaling a significant investment in artificial intelligence infrastructure.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/business/musks-xai-buys-third-building-expand-ai-compute-power-2025-12-30/",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "SoftBank completes $41 billion investment in OpenAI, deepening bet on AI",
+          "summary": "SoftBank has finalized its $41 billion investment in OpenAI, marking a substantial commitment to the future of artificial intelligence technology.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/business/media-telecom/softbank-has-fully-funded-its-40-billion-investment-openai-cnbc-reports-2025-12-30/",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "How AI shook the world in 2025 and what comes next",
+          "summary": "A comprehensive analysis of the transformative impact of artificial intelligence throughout 2025 and predictions for its future developments.",
+          "source": "CNN Business",
+          "url": "https://www.cnn.com/2025/12/30/tech/how-ai-changed-world-predictions-2026-vis",
+          "date": "2025-12-30"
+        },
+        {
+          "headline": "How Microsoft is betting on AI agents in Windows, dusting off a winning playbook from the past",
+          "summary": "Microsoft is reintegrating AI agents into Windows, reviving a strategy that once made its operating system dominant, as it seeks to adapt to the current tech landscape.",
+          "source": "GeekWire",
+          "url": "https://www.geekwire.com/2025/how-microsoft-is-betting-on-ai-agents-in-windows-dusting-off-a-winning-playbook-from-the-past/",
+          "date": "2025-12-30"
+        }
+      ],
+      "updated_at_iso": "2025-12-31T08:15:55.552272+00:00"
+    },
+    "expires_at": 1767183355.552299
+  },
   "science:en": {
     "value": {
       "category": "science",
       "articles": [
         {
-          "headline": "Back from the Dead: \u201cExtinct\u201d Fish Rediscovered in a Remote Bolivian Pond After 20 Years",
-          "summary": "A tiny fish long feared lost has resurfaced in Bolivia, offering a rare conservation success story amid widespread habitat destruction.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251225080719.htm",
-          "date": "2025-12-25"
+          "headline": "Crush explores how gravity shapes life as we know it",
+          "summary": "James Riordan\u2019s new book will help readers wrap their heads around this mysterious, fundamental force of nature.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/crush-book-gravity-impact-on-life",
+          "date": "2025-12-31"
         },
         {
-          "headline": "This Popular Painkiller May Do More Harm Than Good",
-          "summary": "Tramadol, often seen as a safer painkiller, may not be as effective as believed, with a large analysis showing modest relief for chronic pain.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251225080723.htm",
-          "date": "2025-12-25"
+          "headline": "Science taught us a few new tricks about our pets in 2025",
+          "summary": "New insights into pet behavior and care have emerged from recent scientific studies.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/science-pets-cats-dogs-2025",
+          "date": "2025-12-31"
         },
         {
-          "headline": "Oceans Are Supercharging Hurricanes Past Category 5",
-          "summary": "Deep ocean hot spots are making the strongest hurricanes and typhoons more likely and dangerous, expanding due to climate change.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251225080725.htm",
-          "date": "2025-12-25"
+          "headline": "These medical breakthroughs and advances gave patients new hope in 2025",
+          "summary": "A review of significant medical advancements that have improved patient care and treatment options this year.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/medical-miracle-breakthroughs-hope-2025",
+          "date": "2025-12-31"
         },
         {
-          "headline": "Astronomers Discover One of the Universe\u2019s Largest Spinning Structures",
-          "summary": "Scientists have found a giant cosmic filament where galaxies spin in sync, revealing new insights into the structure of the universe.",
+          "headline": "Even One Drink a Day May Raise Mouth Cancer Risk",
+          "summary": "New research suggests that even light alcohol use may carry serious risks, linking one drink a day to a higher risk of mouth cancer.",
           "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251225080729.htm",
-          "date": "2025-12-25"
+          "url": "https://sciencedaily.com/releases/2025/12/251228013709.htm",
+          "date": "2025-12-30"
         },
         {
-          "headline": "A Christmas Tree 80 Light-years Wide Appears in Space",
-          "summary": "Astronomers highlight a spectacular region of space resembling a glowing holiday tree, known as NGC 2264, filled with newborn stars.",
+          "headline": "Scientists Turn Carrot Waste Into Protein People Prefer",
+          "summary": "Researchers have developed a method to convert carrot processing leftovers into a nutritious protein source using edible fungi.",
           "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251225085728.htm",
-          "date": "2025-12-25"
+          "url": "https://sciencedaily.com/releases/2025/12/251220104557.htm",
+          "date": "2025-12-30"
         }
       ],
-      "updated_at_iso": "2025-12-26T08:14:37.565963+00:00"
+      "updated_at_iso": "2025-12-31T08:15:57.218508+00:00"
     },
-    "expires_at": 1766751277.5660338
+    "expires_at": 1767183357.218525
   },
   "sports:en": {
     "value": {
       "category": "sports",
       "articles": [
         {
-          "headline": "Steelers\u2019 DK Metcalf suspension over altercation with fan upheld",
-          "summary": "The NFL has upheld the suspension of Pittsburgh Steelers wide receiver DK Metcalf following an altercation with a fan, with lawyers indicating that the fan is now facing threats after the incident.",
+          "headline": "New England Patriots wide receiver Stefon Diggs denies accusations of assault and strangulation",
+          "summary": "Stefon Diggs faces serious legal challenges as he denies allegations of assault and strangulation, which have surfaced recently.",
           "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/22/sport/football-nfl-steelers-dk-metcalf-suspended-fan-altercation",
-          "date": "2025-12-22"
+          "url": "https://www.cnn.com/2025/12/30/sport/football-nfl-stefon-diggs-faces-strangulation-and-assault-charges",
+          "date": "2025-12-30"
         },
         {
-          "headline": "Chiefs announce move across state line from Missouri after Kansas lawmakers approve new domed stadium proposal",
-          "summary": "The Kansas City Chiefs have confirmed their relocation across the state line from Missouri following the approval of a new domed stadium by Kansas lawmakers.",
+          "headline": "Father of NASCAR driver Denny Hamlin dies after house fire, mother critically injured",
+          "summary": "Tragedy strikes as Denny Hamlin's father passes away in a house fire, while his mother suffers critical injuries.",
           "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/22/sport/football-nfl-chiefs-leave-arrowhead-missouri",
-          "date": "2025-12-22"
+          "url": "https://www.cnn.com/2025/12/30/sport/racing-denny-hamlin-parents-house-fire-hnk",
+          "date": "2025-12-30"
         },
         {
-          "headline": "Georgetown head basketball coach Ed Cooley suspended after throwing water bottle that hit child",
-          "summary": "Georgetown Hoyas head coach Ed Cooley has been suspended after an incident where he threw a water bottle that accidentally hit a child during a game.",
+          "headline": "Drew Brees, Larry Fitzgerald lead Pro Football Hall of Fame modern-era finalists",
+          "summary": "The list of modern-era finalists for the Pro Football Hall of Fame includes notable names like Drew Brees and Larry Fitzgerald.",
           "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/21/sport/basketball-ncaa-mens-cooley-georgetown",
-          "date": "2025-12-21"
+          "url": "https://www.cnn.com/2025/12/30/sport/football-hall-of-fame-finalists-2026",
+          "date": "2025-12-30"
         },
         {
-          "headline": "Dallas Cowboys defeat Washington Commanders on Christmas Day",
-          "summary": "In a thrilling Christmas Day matchup, the Dallas Cowboys triumphed over the Washington Commanders with a final score of 30-23.",
-          "source": "FOX Sports",
-          "url": "https://www.foxsports.com/live-blog/nfl/cowboys-vs-commanders-live-updates-score",
-          "date": "2025-12-25"
+          "headline": "Chock, Bates go 'all in' for Olympic gold as Milano-Cortina could be last Games",
+          "summary": "Madison Chock and Evan Bates are focusing on winning Olympic gold at the upcoming Milano-Cortina Games, potentially their last Olympics.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/sports/chock-bates-go-all-in-olympic-gold-milano-cortina-could-be-last-games-2025-12-31/",
+          "date": "2025-12-30"
         },
         {
-          "headline": "Anthony Joshua knocks out Jake Paul in heavyweight bout",
-          "summary": "In a highly anticipated fight, Anthony Joshua secured a knockout victory over Jake Paul, further solidifying his status in the boxing world.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/20/sport/boxing-jake-paul-anthony-joshua",
-          "date": "2025-12-20"
+          "headline": "Egypt's Sobhi sentenced to a year in prison in academic fraud case, media reports",
+          "summary": "Egyptian soccer player Sobhi has been sentenced to a year in prison following an academic fraud case, according to media reports.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/sports/soccer/egypts-sobhi-sentenced-year-prison-academic-fraud-case-media-reports-2025-12-31/",
+          "date": "2025-12-30"
         }
       ],
-      "updated_at_iso": "2025-12-26T08:14:43.162262+00:00"
+      "updated_at_iso": "2025-12-31T08:16:07.866553+00:00"
     },
-    "expires_at": 1766751283.1623418
-  },
-  "tech:en": {
-    "value": {
-      "category": "tech",
-      "articles": [
-        {
-          "headline": "Waymo's San Francisco outage raises doubts over robotaxi readiness during crises",
-          "summary": "A widespread power outage in San Francisco that led to Waymo robotaxis stalling and snarling traffic earlier this month has raised concerns about the readiness of autonomous vehicle operators to tackle major emergencies like earthquakes and floods.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/business/autos-transportation/waymos-san-francisco-outage-raises-doubts-over-robotaxi-readiness-during-crises-2025-12-27/",
-          "date": "2025-12-27"
-        },
-        {
-          "headline": "China issues draft rules to regulate AI with human-like interaction",
-          "summary": "China has released draft regulations aimed at overseeing artificial intelligence technologies that engage in human-like interactions, reflecting growing concerns about the implications of AI in society.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/asia-pacific/china-issues-drafts-rules-regulate-ai-with-human-like-interaction-2025-12-27/",
-          "date": "2025-12-27"
-        },
-        {
-          "headline": "Nvidia will license Groq tech, hire its executives",
-          "summary": "Nvidia is set to acquire AI chip startup Groq for approximately $20 billion, which includes licensing its technology and hiring its executives to bolster Nvidia's AI capabilities.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/business/nvidia-buy-ai-chip-startup-groq-about-20-billion-cnbc-reports-2025-12-24/",
-          "date": "2025-12-26"
-        },
-        {
-          "headline": "NY Governor Hochul signs bill requiring warning labels on \u2018addictive\u2019 social media",
-          "summary": "New York Governor Kathy Hochul has signed a bill mandating warning labels on social media platforms deemed addictive, aiming to address concerns over mental health impacts.",
-          "source": "TechCrunch",
-          "url": "https://techcrunch.com/2025/12/27/ny-governor-hochul-signs-bill-requiring-warning-labels-on-addictive-social-media/",
-          "date": "2025-12-27"
-        },
-        {
-          "headline": "Meet the team that investigates when journalists and activists get hacked with government spyware",
-          "summary": "A dedicated team has emerged to investigate cases where journalists and activists are targeted by government spyware, highlighting the ongoing battle for digital privacy and security.",
-          "source": "TechCrunch",
-          "url": "https://techcrunch.com/2025/12/27/meet-the-team-that-investigates-when-journalists-and-activists-get-hacked-with-government-spyware/",
-          "date": "2025-12-27"
-        }
-      ],
-      "updated_at_iso": "2025-12-27T23:24:04.949537+00:00"
-    },
-    "expires_at": 1766892244.9495769
+    "expires_at": 1767183367.866573
   }
 }

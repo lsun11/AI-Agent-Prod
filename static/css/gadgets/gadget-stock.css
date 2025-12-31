@@ -59,6 +59,8 @@
 .gadget--stock.gadget--expanded {
     width: 640px;
     height: 520px;
+min-width: 640px;
+    min-height: 520px;
     background: #0b0c10;
     color: #c5c6c7;
     display: flex;

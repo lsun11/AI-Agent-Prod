@@ -62,18 +62,15 @@ body.no-scroll {
 .gadget--expanded {
     position: relative;
     z-index: 4000;
-    min-width: min(1200px, 92vw);
-    min-height: min(820px, 86vh);
+    /*min-width: min(1200px, 92vw);*/
+    /*min-height: min(820px, 86vh);*/
     max-width: 1800px;
     background: rgba(46, 236, 255, 0.22);
-
-    /* ✅ FIX 1: Use Flexbox to manage vertical stacking */
     display: flex;
     flex-direction: column;
 }
 
 .gadget--expanded .gadget-body {
-    /* ✅ FIX 2: Stop using calc() height. Use flex-grow instead. */
     flex: 1;              /* Fill all remaining space below header */
     height: auto;         /* Allow it to grow/shrink with parent */
     min-height: 0;        /* Critical for nested scrolling to work */

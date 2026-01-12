@@ -1,134 +1,134 @@
 {
+  "tech:en": {
+    "value": {
+      "category": "tech",
+      "articles": [
+        {
+          "headline": "TSMC Q4 profit poised to soar 27% as AI demand drives growth",
+          "summary": "TSMC, the world's largest manufacturer of advanced AI chips, is expected to report a 27% increase in fourth-quarter net profit, driven by strong demand for AI infrastructure.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/world/china/tsmc-q4-profit-poised-soar-27-ai-demand-drives-growth-2026-01-12/",
+          "date": "2026-01-11"
+        },
+        {
+          "headline": "India proposes forcing smartphone makers to share source code",
+          "summary": "India is considering a proposal that would require smartphone manufacturers to share their source code as part of a security overhaul.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/world/china/india-proposes-forcing-smartphone-makers-give-source-code-security-overhaul-2026-01-11/",
+          "date": "2026-01-11"
+        },
+        {
+          "headline": "Chinese semiconductor firm OmniVision climbs 6.7% in Hong Kong trading debut",
+          "summary": "OmniVision, a Chinese semiconductor company, saw a 6.7% increase in its stock price during its debut on the Hong Kong stock exchange.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/world/asia-pacific/chinas-omnivision-open-slightly-higher-hong-kong-trading-debut-2026-01-12/",
+          "date": "2026-01-11"
+        },
+        {
+          "headline": "OpenAI Is Asking Contractors to Upload Work From Past Jobs to Evaluate the Performance of AI Agents",
+          "summary": "OpenAI is requesting contractors to upload past work projects to help assess the performance of AI agents, while ensuring confidentiality.",
+          "source": "Wired",
+          "url": "https://www.wired.com/story/openai-contractor-upload-real-work-documents-ai-agents/",
+          "date": "2026-01-11"
+        },
+        {
+          "headline": "Seattle-area nuclear company TerraPower signs deal with Meta for up to 8 reactors",
+          "summary": "TerraPower, backed by Bill Gates, has signed an agreement with Meta to build up to eight small modular reactors in the U.S., with the first expected to be operational by 2032.",
+          "source": "GeekWire",
+          "url": "https://www.geekwire.com/2026/seattle-area-nuclear-company-terrapower-signs-deal-with-meta-for-up-to-8-reactors/",
+          "date": "2026-01-11"
+        }
+      ],
+      "updated_at_iso": "2026-01-12T05:42:16.308937+00:00"
+    },
+    "expires_at": 1768210936.308992
+  },
   "sports:en": {
     "value": {
       "category": "sports",
       "articles": [
         {
-          "headline": "New England Patriots wide receiver Stefon Diggs denies accusations of assault and strangulation",
-          "summary": "Stefon Diggs faces serious legal allegations but has publicly denied the charges against him.",
+          "headline": "Buffalo Bills beat Jacksonville Jaguars in exciting comeback",
+          "summary": "The Buffalo Bills secured a thrilling victory over the Jacksonville Jaguars in the AFC Wild Card Playoff game, showcasing a remarkable comeback performance.",
           "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/30/sport/football-nfl-stefon-diggs-faces-strangulation-and-assault-charges",
-          "date": "2025-12-30"
+          "url": "https://www.cnn.com/sport/live-news/nfl-playoffs-bills-jaguars-49ers-eagles-chargers-patriots",
+          "date": "2026-01-11"
         },
         {
-          "headline": "Father of NASCAR driver Denny Hamlin dies after house fire, mother critically injured",
-          "summary": "Denny Hamlin's family faces tragedy as his father passes away and his mother is left in critical condition following a house fire.",
+          "headline": "Chicago Bears and Los Angeles Rams advance in NFL playoffs",
+          "summary": "The first day of NFL playoffs concluded with the Chicago Bears and Los Angeles Rams moving on to the next round after intense matchups.",
           "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/30/sport/racing-denny-hamlin-parents-house-fire-hnk",
-          "date": "2025-12-30"
+          "url": "https://www.cnn.com/sport/live-news/nfl-playoffs-rams-panthers-packers-bears",
+          "date": "2026-01-10"
         },
         {
-          "headline": "Drew Brees, Larry Fitzgerald lead Pro Football Hall of Fame modern-era finalists",
-          "summary": "Former NFL stars Drew Brees and Larry Fitzgerald are among the finalists for the Pro Football Hall of Fame's modern-era class.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/30/sport/football-hall-of-fame-finalists-2026",
-          "date": "2025-12-30"
+          "headline": "San Francisco 49ers defeat Philadelphia Eagles in Wild Card game",
+          "summary": "The San Francisco 49ers triumphed over the Philadelphia Eagles, securing their spot in the next round of the NFL playoffs.",
+          "source": "Yahoo Sports",
+          "url": "https://sports.yahoo.com/nfl/san-francisco-49ers-philadelphia-eagles-20260111021/",
+          "date": "2026-01-11"
         },
         {
-          "headline": "USC Trojans defeat TCU Horned Frogs in Alamo Bowl",
-          "summary": "In a thrilling Alamo Bowl matchup, the USC Trojans narrowly lost to the TCU Horned Frogs, ending their season on a high note.",
+          "headline": "Indiana Hoosiers dominate in College Football Playoff Semifinal",
+          "summary": "The Indiana Hoosiers made a statement by defeating Alabama and Oregon, showcasing their strength and determination in the College Football Playoff.",
+          "source": "CNN",
+          "url": "https://www.cnn.com/2026/01/10/sport/football-indiana-college-football-playoff-analysis",
+          "date": "2026-01-10"
+        },
+        {
+          "headline": "NCAA Men's Basketball: Illinois edges Iowa in close matchup",
+          "summary": "In a tightly contested game, Illinois managed to secure a narrow victory over Iowa, highlighting the competitive nature of NCAA Men's Basketball.",
           "source": "FOX Sports",
-          "url": "https://www.foxsports.com/college-football/alamo-bowl-usc-trojans-vs-tcu-horned-frogs-dec-30-2025-game-boxscore-42783",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "NFL playoff picture after Week 17: Who\u2019s in and who\u2019s out?",
-          "summary": "As the NFL regular season concludes, teams are finalizing their playoff positions heading into the postseason.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2025/12/23/sport/football-nfl-playoff-picture-2025-season",
-          "date": "2025-12-23"
+          "url": "https://www.foxsports.com/college-basketball/illinois-fighting-illini-vs-iowa-hawkeyes-jan-11-2026-game-boxscore-262551",
+          "date": "2026-01-11"
         }
       ],
-      "updated_at_iso": "2025-12-31T13:36:59.290172+00:00"
+      "updated_at_iso": "2026-01-12T05:42:19.994094+00:00"
     },
-    "expires_at": 1767202619.290209
+    "expires_at": 1768210939.994121
   },
   "science:en": {
     "value": {
       "category": "science",
       "articles": [
         {
-          "headline": "These fossil finds shed new light on the past in 2025",
-          "summary": "The year's top paleontological wonders ranged from a 540-million-year-old penis worm to a decades-old rodent impression.",
+          "headline": "An all-female wasp is rapidly spreading across North America\u2019s elms",
+          "summary": "The elm zigzag sawfly has spread to 15 states in five years, now attacking trees planted to replace those lost to Dutch elm disease.",
           "source": "Science News",
-          "url": "https://www.sciencenews.org/article/favorite-fossil-finds-2025",
-          "date": "2025-12-30"
+          "url": "https://www.sciencenews.org/article/elm-zigzag-sawfly-wasp-infestation",
+          "date": "2026-01-09"
         },
         {
-          "headline": "Against the odds, a burbling lava planet retains an atmosphere",
-          "summary": "A newly discovered lava planet, TOI-561b, surprisingly retains an atmosphere despite its extreme conditions.",
+          "headline": "A newly spotted asteroid spins faster than any of its size ever seen",
+          "summary": "A newly discovered asteroid has been observed spinning at an unprecedented speed, raising questions about its formation and stability.",
           "source": "Science News",
-          "url": "https://www.sciencenews.org/article/lava-planet-toi561b-atmosphere-tess",
-          "date": "2025-12-30"
+          "url": "https://www.sciencenews.org/article/rubin-fastest-spinning-asteroid",
+          "date": "2026-01-09"
         },
         {
-          "headline": "Even One Drink a Day May Raise Mouth Cancer Risk",
-          "summary": "New research suggests that even light alcohol use may carry serious risks, linking one standard drink a day to a 50% higher risk of mouth cancer.",
+          "headline": "A double cosmic explosion could be the first known \u2018superkilonova\u2019",
+          "summary": "Astronomers have detected a double explosion from a star that may represent a new class of cosmic events known as superkilonovae.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/double-explosion-by-star-superkilonova",
+          "date": "2026-01-09"
+        },
+        {
+          "headline": "A Massive Gene Hunt Reveals How Brain Cells Are Made",
+          "summary": "A large genetic screen has identified hundreds of genes involved in the transformation of stem cells into brain cells, shedding light on neurodevelopmental disorders.",
           "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251228013709.htm",
-          "date": "2025-12-30"
+          "url": "https://www.sciencedaily.com/releases/2026/01/260111214444.htm",
+          "date": "2026-01-11"
         },
         {
-          "headline": "Scientists Turn Carrot Waste Into Protein People Prefer",
-          "summary": "Researchers have developed a method to convert carrot processing leftovers into a nutritious protein source using edible fungi.",
+          "headline": "Newly Discovered Coffee Compounds Beat Diabetes Drug in Lab Tests",
+          "summary": "Researchers have found new compounds in roasted coffee that can inhibit a key enzyme linked to type 2 diabetes, showing potential as a treatment.",
           "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2025/12/251220104557.htm",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Astronomers Find Direct Evidence for Supermassive Stars in Early Universe",
-          "summary": "Astronomers have discovered direct evidence supporting the existence of supermassive stars that formed shortly after the Big Bang.",
-          "source": "Sci.News",
-          "url": "https://www.sci.news/astronomy/primordial-supermassive-stars-14424.html",
-          "date": "2025-12-15"
+          "url": "https://www.sciencedaily.com/releases/2026/01/260110211224.htm",
+          "date": "2026-01-11"
         }
       ],
-      "updated_at_iso": "2025-12-31T13:36:59.290656+00:00"
+      "updated_at_iso": "2026-01-12T05:44:29.313116+00:00"
     },
-    "expires_at": 1767202619.290671
-  },
-  "tech:en": {
-    "value": {
-      "category": "tech",
-      "articles": [
-        {
-          "headline": "Nvidia sounds out TSMC on new H200 chip order as China demand jumps",
-          "summary": "Nvidia is scrambling to meet strong demand for its H200 artificial intelligence chips from Chinese technology companies and has approached TSMC to ramp up production.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/china/nvidia-sounds-out-tsmc-new-h200-chip-order-china-demand-jumps-sources-say-2025-12-31/",
-          "date": "2025-12-31"
-        },
-        {
-          "headline": "Poland urges Brussels to probe TikTok over AI-generated content",
-          "summary": "Poland has called for an investigation into TikTok regarding the use of AI-generated content, raising concerns about its implications.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/china/poland-urges-brussels-probe-tiktok-over-ai-generated-content-2025-12-30/",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "Musk's xAI buys third building to expand AI compute power",
-          "summary": "Elon Musk's xAI has acquired a third building to enhance its AI computing capabilities, signaling growth in the company's ambitions.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/business/musks-xai-buys-third-building-expand-ai-compute-power-2025-12-30/",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "How AI shook the world in 2025 and what comes next",
-          "summary": "A retrospective on the impact of AI throughout 2025, examining its transformative effects and future predictions.",
-          "source": "CNN Business",
-          "url": "https://www.cnn.com/2025/12/30/tech/how-ai-changed-world-predictions-2026-vis",
-          "date": "2025-12-30"
-        },
-        {
-          "headline": "How Microsoft is betting on AI agents in Windows, dusting off a winning playbook from the past",
-          "summary": "Microsoft is integrating AI agents into Windows, reviving strategies that once made the OS dominant in an evolving tech landscape.",
-          "source": "GeekWire",
-          "url": "https://www.geekwire.com/2025/how-microsoft-is-betting-on-ai-agents-in-windows-dusting-off-a-winning-playbook-from-the-past/",
-          "date": "2025-12-30"
-        }
-      ],
-      "updated_at_iso": "2025-12-31T13:37:02.991845+00:00"
-    },
-    "expires_at": 1767202622.9918919
+    "expires_at": 1768211069.313369
   }
 }

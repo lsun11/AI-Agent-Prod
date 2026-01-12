@@ -100,6 +100,8 @@ export class StockGadget {
     private activeSymbol: string = "SPY";
     private activeRange: string = "1D";
     private timer: number | null = null;
+    private isHovered = false;
+    private observer: MutationObserver | null = null;
     private marketOpen: boolean = false;
 
     constructor(root: HTMLElement) {
@@ -134,6 +136,7 @@ export class StockGadget {
                 const sym = btn.getAttribute("data-symbol");
                 if (sym) {
                     this.activeSymbol = sym;
+                    this.fetchHistory(this.activeSymbol, this.activeRange);
                     this.drawChart();
                     this.updateUI();
                 }
@@ -149,8 +152,9 @@ export class StockGadget {
                 const rng = btn.getAttribute("data-range");
                 if (rng) {
                     this.activeRange = rng;
-                    Object.values(this.tickers).forEach(t => t.generate(this.activeRange));
-                    this.drawChart();
+                    // Object.values(this.tickers).forEach(t => t.generate(this.activeRange));
+                    // this.drawChart();
+                    this.fetchHistory(this.activeSymbol, this.activeRange);
                 }
             });
         });
@@ -158,7 +162,8 @@ export class StockGadget {
         const observer = new ResizeObserver(() => this.resizeCanvas());
         if (this.canvas) observer.observe(this.canvas);
 
-        this.timer = window.setInterval(() => this.update(), 1000);
+        this.initPollingTriggers();
+        this.update();
         requestAnimationFrame(() => this.resizeCanvas());
     }
 
@@ -183,14 +188,69 @@ export class StockGadget {
         }
     }
 
-    private update() {
-        // @ts-ignore
-        this.tickers[this.activeSymbol].tick(this.activeRange, this.marketOpen);
-        this.updateUI();
+    private initPollingTriggers() {
+        // 1. Mouse Hover Listeners
+        this.root.addEventListener("mouseenter", () => {
+            this.isHovered = true;
+            this.checkPolling();
+        });
 
-        // Only redraw chart if market is open OR data changed
-        // For UI responsiveness, we usually just draw.
-        this.drawChart();
+        this.root.addEventListener("mouseleave", () => {
+            this.isHovered = false;
+            this.checkPolling();
+        });
+
+        // 2. Expansion Listener (MutationObserver)
+        // Watch for class changes (gadget--expanded)
+        this.observer = new MutationObserver(() => {
+            this.checkPolling();
+            // Optional: Resize canvas immediately when expanding
+            if (this.isExpanded()) {
+                requestAnimationFrame(() => this.resizeCanvas());
+            }
+        });
+
+        this.observer.observe(this.root, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
+    }
+
+    // Helper to check CSS class
+    private isExpanded(): boolean {
+        return this.root.classList.contains("gadget--expanded");
+    }
+
+    private checkPolling() {
+        // Poll if: Hovering OR Expanded
+        const shouldPoll = this.isHovered || this.isExpanded();
+
+        if (shouldPoll && !this.timer) {
+            console.log("[Stock] Starting polling & fetching history...");
+
+            // 1. Immediate History Fetch (Fixes the "Wrong Data" issue)
+            this.fetchHistory(this.activeSymbol, this.activeRange);
+
+            // 2. Start Live Updates (Current Price)
+            this.update();
+            this.timer = window.setInterval(() => this.update(), 5000);
+        } else if (!shouldPoll && this.timer) {
+            console.log("[Stock] Stopping polling.");
+            window.clearInterval(this.timer);
+            this.timer = null;
+        }
+    }
+
+    private update() {
+        // // @ts-ignore
+        // this.tickers[this.activeSymbol].tick(this.activeRange, this.marketOpen);
+        // this.updateUI();
+        //
+        // // Only redraw chart if market is open OR data changed
+        // // For UI responsiveness, we usually just draw.
+        // this.drawChart();
+        this.updateStock("SPY");
+        this.updateStock("QQQ");
     }
 
     private updateUI() {
@@ -207,9 +267,13 @@ export class StockGadget {
         if (this.heroPrice) this.heroPrice.textContent = data.currentPrice.toFixed(2);
 
         // @ts-ignore
-        const startPrice = data.history[0].price;
-        const diff = data.currentPrice - startPrice;
-        const pct = (diff / startPrice) * 100;
+        // const startPrice = data.history[0].price;
+        // const diff = data.currentPrice - startPrice;
+        // const pct = (diff / startPrice) * 100;
+        // const sign = diff >= 0 ? "+" : "";
+
+        const diff = (data as any).realChange || 0;
+        const pct = (data as any).realPercent || 0;
         const sign = diff >= 0 ? "+" : "";
 
         if (this.heroChange) {
@@ -230,6 +294,76 @@ export class StockGadget {
              this.volEl.textContent = this.formatBigNumber(totalVol);
         }
     }
+
+    private async updateStock(ticker: string) {
+        try {
+            const res = await fetch(`/stock/${ticker}`); // Adjust URL if needed
+            if (!res.ok) return;
+
+            const apiData = await res.json(); // { price: 682.50, change: 5.20, percent: 0.76 ... }
+
+            const stockObj = this.tickers[ticker];
+            if (stockObj) {
+                // 1. Update Current Price
+                stockObj.currentPrice = apiData.price;
+
+                // 2. Store real daily change (Attach to object dynamically)
+                // We store this so updateUI can use the REAL daily change, not just "change since app started"
+                (stockObj as any).realChange = apiData.change;
+                (stockObj as any).realPercent = apiData.percent;
+
+                // 3. Update Chart History
+                // We add the new price point to the history array so the line moves
+                stockObj.history.push({
+                    price: apiData.price,
+                    vol: Math.random() * 100000, // Mock volume (or get from API if available)
+                    time: Date.now()
+                });
+
+                // Keep array size manageable (e.g., max 300 points)
+                if (stockObj.history.length > 300) {
+                    stockObj.history.shift();
+                }
+            }
+
+            // 4. Refresh UI if this is the active stock
+            if (ticker === this.activeSymbol) {
+                this.updateUI();
+                this.drawChart();
+            }
+
+        } catch (e) {
+            console.error(`[Stock] Fetch failed for ${ticker}`, e);
+        }
+    }
+
+    private async fetchHistory(ticker: string, range: string) {
+        // Optional: Show loading state (e.g. clear chart)
+        // @ts-ignore
+        this.tickers[ticker].history = [];
+        this.drawChart();
+
+        try {
+            const res = await fetch(`/stock/${ticker}/history?range=${range}`);
+            if (!res.ok) return;
+
+            const data = await res.json();
+
+            // ✅ OVERWRITE the mock history with real history
+            if (this.tickers[ticker] && data.history.length > 0) {
+                this.tickers[ticker].history = data.history;
+
+                // If this is the active view, redraw immediately
+                if (ticker === this.activeSymbol) {
+                    this.drawChart();
+                    this.updateUI(); // Update prices to match latest history point
+                }
+            }
+        } catch (e) {
+            console.error("History fetch failed", e);
+        }
+    }
+
 
     private renderMini(el: HTMLElement, data: TickerData) {
         el.textContent = data.currentPrice.toFixed(2);

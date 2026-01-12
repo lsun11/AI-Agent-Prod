@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from src.advanced_agent.api.routes import downloads, suggestions, topics, chat, history
 from src.weather.api.routes.weather import router as weather_router
 from src.news_app.api.routes.news import router as news_router
+from src.stock_app.api.routes.stocks import router as stocks_router
 
 def get_base_dir() -> Path:
     # When running as a PyInstaller bundle
@@ -48,5 +49,6 @@ def create_app() -> FastAPI:
     app.include_router(history.router, prefix="")
     app.include_router(weather_router, prefix="")
     app.include_router(news_router, prefix="")
+    app.include_router(stocks_router, prefix="")
 
     return app

@@ -11,11 +11,18 @@ export declare class StockGadget {
     private activeSymbol;
     private activeRange;
     private timer;
+    private isHovered;
+    private observer;
     private marketOpen;
     constructor(root: HTMLElement);
     private checkMarketStatus;
+    private initPollingTriggers;
+    private isExpanded;
+    private checkPolling;
     private update;
     private updateUI;
+    private updateStock;
+    private fetchHistory;
     private renderMini;
     private resizeCanvas;
     private drawChart;

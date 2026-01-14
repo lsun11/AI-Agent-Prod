@@ -24,3 +24,5 @@ saved_slides/
 .uv-cache/
 
 *.zip
+
+.news_cache.json

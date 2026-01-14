@@ -1,6 +1,11 @@
 // static/components/news_app/news.ts
 const REFRESH_MS = 4 * 60 * 60 * 1000; // 4 Hours
 const CATEGORIES = ["tech", "sports", "science"]; // ✅ Defined categories
+const CATEGORIES_COMPLEX = {
+    "tech": ["AI", "industry", "others"],
+    "sports": ["soccer", "basketball", "tennis", "football", "others"],
+    "science": ["physics", "biology", "astronomy", "geography", "others"],
+};
 export class NewsGadget {
     constructor(root) {
         this.activeCategory = "tech";
@@ -66,7 +71,8 @@ export class NewsGadget {
     }
     // ✅ Worker: Fetches data for a specific category without touching the UI directly
     async fetchCategoryData(category, forceRefresh = false) {
-        // 1. Try LocalStorage if not forcing refresh
+        // 1. Try LocalStorage if not forcing refres
+        console.log("fetching category:", category);
         if (!forceRefresh) {
             const cached = this.getLocalData(category);
             if (cached.length > 0) {

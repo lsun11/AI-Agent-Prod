@@ -1,134 +1,134 @@
 {
-  "tech:en": {
+  "science:en": {
     "value": {
-      "category": "tech",
+      "category": "science",
       "articles": [
         {
-          "headline": "TSMC Q4 profit poised to soar 27% as AI demand drives growth",
-          "summary": "TSMC, the world's largest manufacturer of advanced AI chips, is expected to report a 27% increase in fourth-quarter net profit, driven by strong demand for AI infrastructure.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/world/china/tsmc-q4-profit-poised-soar-27-ai-demand-drives-growth-2026-01-12/",
-          "date": "2026-01-11"
+          "headline": "Earth\u2019s last 3 years were its hottest on record",
+          "summary": "An analysis of global climate data shows sustained warming even as El Ni\u00f1o faded.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/last-3-years-hottest-on-record-temp",
+          "date": "2026-01-14"
         },
         {
-          "headline": "India proposes forcing smartphone makers to share source code",
-          "summary": "India is considering a proposal that would require smartphone manufacturers to share their source code as part of a security overhaul.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/world/china/india-proposes-forcing-smartphone-makers-give-source-code-security-overhaul-2026-01-11/",
-          "date": "2026-01-11"
+          "headline": "This ancient pottery holds the earliest evidence of humans doing math",
+          "summary": "Researchers have uncovered ancient pottery that provides the earliest evidence of mathematical practices among humans.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/ancient-pottery-math-earliest-evidence",
+          "date": "2026-01-14"
         },
         {
-          "headline": "Chinese semiconductor firm OmniVision climbs 6.7% in Hong Kong trading debut",
-          "summary": "OmniVision, a Chinese semiconductor company, saw a 6.7% increase in its stock price during its debut on the Hong Kong stock exchange.",
-          "source": "Reuters",
-          "url": "https://www.reuters.com/world/asia-pacific/chinas-omnivision-open-slightly-higher-hong-kong-trading-debut-2026-01-12/",
-          "date": "2026-01-11"
+          "headline": "Botox could be used to fight snakebite",
+          "summary": "New research suggests that Botox may be effective in combating the effects of snake venom.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/botox-fight-snakebite-viper-venom",
+          "date": "2026-01-14"
         },
         {
-          "headline": "OpenAI Is Asking Contractors to Upload Work From Past Jobs to Evaluate the Performance of AI Agents",
-          "summary": "OpenAI is requesting contractors to upload past work projects to help assess the performance of AI agents, while ensuring confidentiality.",
-          "source": "Wired",
-          "url": "https://www.wired.com/story/openai-contractor-upload-real-work-documents-ai-agents/",
-          "date": "2026-01-11"
+          "headline": "Doctors Discover the Source of Mysterious Intoxication",
+          "summary": "Researchers have identified gut bacteria that produce alcohol from food, causing some individuals to experience intoxication without drinking.",
+          "source": "ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260113220920.htm",
+          "date": "2026-01-13"
         },
         {
-          "headline": "Seattle-area nuclear company TerraPower signs deal with Meta for up to 8 reactors",
-          "summary": "TerraPower, backed by Bill Gates, has signed an agreement with Meta to build up to eight small modular reactors in the U.S., with the first expected to be operational by 2032.",
-          "source": "GeekWire",
-          "url": "https://www.geekwire.com/2026/seattle-area-nuclear-company-terrapower-signs-deal-with-meta-for-up-to-8-reactors/",
-          "date": "2026-01-11"
+          "headline": "A Devastating Cotton Virus Lurked Undetected in U.S. Fields for Nearly 20 Years",
+          "summary": "Research reveals that the cotton leafroll dwarf virus has been present in U.S. fields since at least 2006, contrary to previous beliefs.",
+          "source": "ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260112214319.htm",
+          "date": "2026-01-13"
         }
       ],
-      "updated_at_iso": "2026-01-12T05:42:16.308937+00:00"
+      "updated_at_iso": "2026-01-14T06:22:22.319892+00:00"
     },
-    "expires_at": 1768210936.308992
+    "expires_at": 1768386142.319917
   },
   "sports:en": {
     "value": {
       "category": "sports",
       "articles": [
         {
-          "headline": "Buffalo Bills beat Jacksonville Jaguars in exciting comeback",
-          "summary": "The Buffalo Bills secured a thrilling victory over the Jacksonville Jaguars in the AFC Wild Card Playoff game, showcasing a remarkable comeback performance.",
+          "headline": "Canadian women\u2019s skeleton team faces criticism, accusations of competition manipulation from rivals after event",
+          "summary": "The Canadian women's skeleton team is under scrutiny after allegations of manipulating competition rules during the recent event.",
           "source": "CNN",
-          "url": "https://www.cnn.com/sport/live-news/nfl-playoffs-bills-jaguars-49ers-eagles-chargers-patriots",
-          "date": "2026-01-11"
+          "url": "https://www.cnn.com/2026/01/13/sport/olympics-2026-katie-uhlaender-canada-womens-skeleton",
+          "date": "2026-01-13"
         },
         {
-          "headline": "Chicago Bears and Los Angeles Rams advance in NFL playoffs",
-          "summary": "The first day of NFL playoffs concluded with the Chicago Bears and Los Angeles Rams moving on to the next round after intense matchups.",
+          "headline": "Texans defense overwhelms Steelers in potential Aaron Rodgers finale",
+          "summary": "The Houston Texans' defense dominated the Pittsburgh Steelers, possibly marking the end of Aaron Rodgers' career with the team.",
           "source": "CNN",
-          "url": "https://www.cnn.com/sport/live-news/nfl-playoffs-rams-panthers-packers-bears",
-          "date": "2026-01-10"
+          "url": "https://www.cnn.com/2026/01/12/sport/football-nfl-wild-card-texans-steelers",
+          "date": "2026-01-12"
         },
         {
-          "headline": "San Francisco 49ers defeat Philadelphia Eagles in Wild Card game",
-          "summary": "The San Francisco 49ers triumphed over the Philadelphia Eagles, securing their spot in the next round of the NFL playoffs.",
-          "source": "Yahoo Sports",
-          "url": "https://sports.yahoo.com/nfl/san-francisco-49ers-philadelphia-eagles-20260111021/",
-          "date": "2026-01-11"
-        },
-        {
-          "headline": "Indiana Hoosiers dominate in College Football Playoff Semifinal",
-          "summary": "The Indiana Hoosiers made a statement by defeating Alabama and Oregon, showcasing their strength and determination in the College Football Playoff.",
+          "headline": "Real Madrid replaces coach Xabi Alonso with B team manager \u00c1lvaro Arbeloa",
+          "summary": "In a surprising move, Real Madrid has appointed \u00c1lvaro Arbeloa as the new head coach, replacing Xabi Alonso.",
           "source": "CNN",
-          "url": "https://www.cnn.com/2026/01/10/sport/football-indiana-college-football-playoff-analysis",
-          "date": "2026-01-10"
+          "url": "https://www.cnn.com/2026/01/12/sport/soccer-la-liga-real-madrid-says-xabi-alonso-no-longer-coach",
+          "date": "2026-01-12"
         },
         {
-          "headline": "NCAA Men's Basketball: Illinois edges Iowa in close matchup",
-          "summary": "In a tightly contested game, Illinois managed to secure a narrow victory over Iowa, highlighting the competitive nature of NCAA Men's Basketball.",
-          "source": "FOX Sports",
-          "url": "https://www.foxsports.com/college-basketball/illinois-fighting-illini-vs-iowa-hawkeyes-jan-11-2026-game-boxscore-262551",
-          "date": "2026-01-11"
+          "headline": "Brooks Koepka returns to PGA Tour under stiff financial penalty just 5 weeks after leaving LIV",
+          "summary": "Golfer Brooks Koepka makes his return to the PGA Tour, facing significant financial penalties following his departure from LIV Golf.",
+          "source": "CNN",
+          "url": "https://www.cnn.com/2026/01/12/sport/golf-pga-tour-brooks-koepka-return-penalty",
+          "date": "2026-01-12"
+        },
+        {
+          "headline": "Four teams Mike Tomlin could coach in 2026",
+          "summary": "As speculation grows about Mike Tomlin's future, we explore four potential teams he could coach in the upcoming season.",
+          "source": "USA TODAY",
+          "url": "https://www.usatoday.com/story/sports/nfl/2026/01/13/mike-tomlin-landing-spots-giants-titans-falcons-dolphins/88162995007/",
+          "date": "2026-01-13"
         }
       ],
-      "updated_at_iso": "2026-01-12T05:42:19.994094+00:00"
+      "updated_at_iso": "2026-01-14T06:22:25.909096+00:00"
     },
-    "expires_at": 1768210939.994121
+    "expires_at": 1768386145.909177
   },
-  "science:en": {
+  "tech:en": {
     "value": {
-      "category": "science",
+      "category": "tech",
       "articles": [
         {
-          "headline": "An all-female wasp is rapidly spreading across North America\u2019s elms",
-          "summary": "The elm zigzag sawfly has spread to 15 states in five years, now attacking trees planted to replace those lost to Dutch elm disease.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/elm-zigzag-sawfly-wasp-infestation",
-          "date": "2026-01-09"
+          "headline": "Taiwan seeks arrest of Chinese smartphone maker OnePlus CEO over illegal hires",
+          "summary": "Taiwan prosecutors have issued an arrest warrant for the chief executive officer of Chinese smartphone maker OnePlus, alleging he was involved in illegal business and recruitment activities in Taiwan.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/asia-pacific/taiwan-seeks-arrest-chinese-smartphone-maker-oneplus-ceo-over-illegal-hires-2026-01-14/",
+          "date": "2026-01-14"
         },
         {
-          "headline": "A newly spotted asteroid spins faster than any of its size ever seen",
-          "summary": "A newly discovered asteroid has been observed spinning at an unprecedented speed, raising questions about its formation and stability.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/rubin-fastest-spinning-asteroid",
-          "date": "2026-01-09"
+          "headline": "Chipmaker Nexperia and Chinese owner Wingtech fight for control in Dutch court",
+          "summary": "Nexperia, a chipmaker, and its Chinese owner Wingtech are embroiled in a legal battle over control in a Dutch court.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/china/chipmaker-nexperia-chinese-owner-wingtech-fight-control-dutch-court-2026-01-14/",
+          "date": "2026-01-14"
         },
         {
-          "headline": "A double cosmic explosion could be the first known \u2018superkilonova\u2019",
-          "summary": "Astronomers have detected a double explosion from a star that may represent a new class of cosmic events known as superkilonovae.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/double-explosion-by-star-superkilonova",
-          "date": "2026-01-09"
+          "headline": "\u2018Are you dead?\u2019 Chinese app for single living goes viral",
+          "summary": "A Chinese app designed to check on individuals living alone has gone viral, raising questions about its implications for safety and social interaction.",
+          "source": "Tech News",
+          "url": "https://www.reuters.com/world/asia-pacific/are-you-dead-chinese-app-single-living-goes-viral-2026-01-14/",
+          "date": "2026-01-14"
         },
         {
-          "headline": "A Massive Gene Hunt Reveals How Brain Cells Are Made",
-          "summary": "A large genetic screen has identified hundreds of genes involved in the transformation of stem cells into brain cells, shedding light on neurodevelopmental disorders.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2026/01/260111214444.htm",
-          "date": "2026-01-11"
+          "headline": "Big Tech is poaching energy talent to fuel its AI ambitions",
+          "summary": "Major tech companies like Google and Microsoft are hiring talent from the energy sector to advance their artificial intelligence initiatives.",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/01/14/big-tech-google-microsoft-energy-hiring-ai.html",
+          "date": "2026-01-14"
         },
         {
-          "headline": "Newly Discovered Coffee Compounds Beat Diabetes Drug in Lab Tests",
-          "summary": "Researchers have found new compounds in roasted coffee that can inhibit a key enzyme linked to type 2 diabetes, showing potential as a treatment.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2026/01/260110211224.htm",
-          "date": "2026-01-11"
+          "headline": "Meta\u2019s VR layoffs, studio closures underscore Zuckerberg\u2019s massive pivot to AI",
+          "summary": "Meta has announced layoffs in its virtual reality division and the closure of studios, highlighting CEO Mark Zuckerberg's shift in focus towards artificial intelligence.",
+          "source": "CNBC",
+          "url": "https://www.cnbc.com/2026/01/13/meta-lays-off-vr-employees-underscoring-zuckerbergs-pivot-to-ai.html",
+          "date": "2026-01-13"
         }
       ],
-      "updated_at_iso": "2026-01-12T05:44:29.313116+00:00"
+      "updated_at_iso": "2026-01-14T06:22:27.868390+00:00"
     },
-    "expires_at": 1768211069.313369
+    "expires_at": 1768386147.868463
   }
 }

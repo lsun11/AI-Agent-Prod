@@ -15,7 +15,11 @@ interface NewsResponse {
 
 const REFRESH_MS = 4 * 60 * 60 * 1000; // 4 Hours
 const CATEGORIES = ["tech", "sports", "science"]; // ✅ Defined categories
-
+const CATEGORIES_COMPLEX = {
+    "tech": ["AI", "industry", "others"],
+    "sports": ["soccer", "basketball", "tennis", "football", "others"],
+    "science": ["physics", "biology", "astronomy", "geography", "others"],
+}
 export class NewsGadget {
     private root: HTMLElement;
     private listEl: HTMLElement | null;
@@ -65,7 +69,8 @@ export class NewsGadget {
         this.updateStatus("Updating all news...", true);
 
         // We use Promise.all to fetch them concurrently (or sequentially if you prefer)
-        await Promise.all(CATEGORIES.map(cat => this.fetchCategoryData(cat, forceRefresh)));
+        await Promise.all(CATEGORIES.map(cat =>
+            this.fetchCategoryData(cat, forceRefresh)));
 
         this.updateStatus("Updated just now", false);
 
@@ -95,7 +100,8 @@ export class NewsGadget {
 
     // ✅ Worker: Fetches data for a specific category without touching the UI directly
     private async fetchCategoryData(category: string, forceRefresh = false) {
-        // 1. Try LocalStorage if not forcing refresh
+        // 1. Try LocalStorage if not forcing refres
+        console.log("fetching category:", category);
         if (!forceRefresh) {
             const cached = this.getLocalData(category);
             if (cached.length > 0) {

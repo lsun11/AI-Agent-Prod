@@ -1,134 +1,398 @@
 {
-  "science:en": {
+  "sports soccer:en": {
     "value": {
-      "category": "science",
+      "category": "sports soccer",
       "articles": [
         {
-          "headline": "Earth\u2019s last 3 years were its hottest on record",
-          "summary": "An analysis of global climate data shows sustained warming even as El Ni\u00f1o faded.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/last-3-years-hottest-on-record-temp",
-          "date": "2026-01-14"
+          "headline": "Carrick takes the reins as Manchester United host Manchester City",
+          "summary": "Michael Carrick steps in as interim manager for Manchester United as they prepare for a crucial derby against Manchester City.",
+          "source": "CBS Sports",
+          "url": "https://www.cbssports.com/soccer/news/michael-carrick-takes-charge-as-interim-boss-and-aims-for-improvement-ahead-of-derby-with-manchester-city/",
+          "date": "2026-01-16"
         },
         {
-          "headline": "This ancient pottery holds the earliest evidence of humans doing math",
-          "summary": "Researchers have uncovered ancient pottery that provides the earliest evidence of mathematical practices among humans.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/ancient-pottery-math-earliest-evidence",
-          "date": "2026-01-14"
+          "headline": "Seattle Reign sign 17-year-old GK Evan O'Steen",
+          "summary": "Seventeen-year-old Evan O'Steen becomes the youngest goalkeeper signee in Seattle Reign FC's history with a one-year contract.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/sports/soccer/seattle-reign-sign-17-year-old-gk-evan-osteen--flm-2026-01-17/",
+          "date": "2026-01-17"
         },
         {
-          "headline": "Botox could be used to fight snakebite",
-          "summary": "New research suggests that Botox may be effective in combating the effects of snake venom.",
-          "source": "Science News",
-          "url": "https://www.sciencenews.org/article/botox-fight-snakebite-viper-venom",
-          "date": "2026-01-14"
+          "headline": "Arbeloa calls on Bernabeu faithful to rally behind Real Madrid after rocky week",
+          "summary": "Former player \u00c1lvaro Arbeloa urges Real Madrid fans to support the team following a challenging period.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/sports/soccer/arbeloa-calls-bernabeu-faithful-rally-behind-real-madrid-after-rocky-week-2026-01-16/",
+          "date": "2026-01-16"
         },
         {
-          "headline": "Doctors Discover the Source of Mysterious Intoxication",
-          "summary": "Researchers have identified gut bacteria that produce alcohol from food, causing some individuals to experience intoxication without drinking.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2026/01/260113220920.htm",
+          "headline": "Is the era of the manager over at the top of European soccer?",
+          "summary": "A discussion on the changing landscape of managerial roles in European soccer, questioning the future of traditional management.",
+          "source": "CBS Sports",
+          "url": "https://www.cbssports.com/soccer/news/xabi-alonso-ruben-amorim-enzo-maresca-future-for-managers/",
           "date": "2026-01-13"
         },
         {
-          "headline": "A Devastating Cotton Virus Lurked Undetected in U.S. Fields for Nearly 20 Years",
-          "summary": "Research reveals that the cotton leafroll dwarf virus has been present in U.S. fields since at least 2006, contrary to previous beliefs.",
-          "source": "ScienceDaily",
-          "url": "https://www.sciencedaily.com/releases/2026/01/260112214319.htm",
-          "date": "2026-01-13"
+          "headline": "Transfer news: Manchester City close on \u00a320m deal to sign Gu\u00e9hi from Palace",
+          "summary": "Manchester City is nearing a \u00a320 million deal to acquire defender Marc Gu\u00e9hi from Crystal Palace.",
+          "source": "The Guardian",
+          "url": "https://www.theguardian.com/football/2026/jan/16/manchester-city-marc-guehi-crystal-palace-close-deal-sign",
+          "date": "2026-01-16"
         }
       ],
-      "updated_at_iso": "2026-01-14T06:22:22.319892+00:00"
+      "updated_at_iso": "2026-01-17T03:59:34.820071+00:00"
     },
-    "expires_at": 1768386142.319917
+    "expires_at": 1768636774.8202062
   },
-  "sports:en": {
+  "science physics:en": {
     "value": {
-      "category": "sports",
+      "category": "science physics",
       "articles": [
         {
-          "headline": "Canadian women\u2019s skeleton team faces criticism, accusations of competition manipulation from rivals after event",
-          "summary": "The Canadian women's skeleton team is under scrutiny after allegations of manipulating competition rules during the recent event.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2026/01/13/sport/olympics-2026-katie-uhlaender-canada-womens-skeleton",
-          "date": "2026-01-13"
+          "headline": "Imaging technique captures ultrafast electron and atom dynamics in chemical reactions",
+          "summary": "Researchers have developed an imaging technique that allows for the observation of ultrafast movements of electrons and atoms during chemical reactions, providing insights into the fundamental processes of bond breaking and formation.",
+          "source": "Physics News - Phys.org",
+          "url": "https://phys.org/news/2026-01-imaging-technique-captures-ultrafast-electron.html",
+          "date": "2026-01-17"
         },
         {
-          "headline": "Texans defense overwhelms Steelers in potential Aaron Rodgers finale",
-          "summary": "The Houston Texans' defense dominated the Pittsburgh Steelers, possibly marking the end of Aaron Rodgers' career with the team.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2026/01/12/sport/football-nfl-wild-card-texans-steelers",
-          "date": "2026-01-12"
+          "headline": "Honeycomb lattice sweetens quantum materials development",
+          "summary": "Scientists at Oak Ridge National Laboratory are advancing the design and synthesis of quantum materials through the innovative use of honeycomb lattice structures, enhancing their properties for future applications.",
+          "source": "Physics News - Phys.org",
+          "url": "https://phys.org/news/2026-01-honeycomb-lattice-sweetens-quantum-materials.html",
+          "date": "2026-01-17"
         },
         {
-          "headline": "Real Madrid replaces coach Xabi Alonso with B team manager \u00c1lvaro Arbeloa",
-          "summary": "In a surprising move, Real Madrid has appointed \u00c1lvaro Arbeloa as the new head coach, replacing Xabi Alonso.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2026/01/12/sport/soccer-la-liga-real-madrid-says-xabi-alonso-no-longer-coach",
-          "date": "2026-01-12"
+          "headline": "A New Crystal Makes Magnetism Twist in Surprising Ways",
+          "summary": "Researchers at Florida State University have engineered a novel crystal that causes atomic magnets to form complex swirling patterns, revealing new insights into magnetic interactions.",
+          "source": "Physics News - ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260112001039.htm",
+          "date": "2026-01-16"
         },
         {
-          "headline": "Brooks Koepka returns to PGA Tour under stiff financial penalty just 5 weeks after leaving LIV",
-          "summary": "Golfer Brooks Koepka makes his return to the PGA Tour, facing significant financial penalties following his departure from LIV Golf.",
-          "source": "CNN",
-          "url": "https://www.cnn.com/2026/01/12/sport/golf-pga-tour-brooks-koepka-return-penalty",
-          "date": "2026-01-12"
+          "headline": "String Theory Can Now Describe a Universe That Has Dark Energy",
+          "summary": "In a groundbreaking development, researchers have created a detailed model of string theory that aligns with the observed accelerated expansion of the universe, incorporating the effects of dark energy.",
+          "source": "Quanta Magazine",
+          "url": "https://www.quantamagazine.org/string-theory-can-now-describe-a-universe-that-has-dark-energy-20260114/",
+          "date": "2026-01-14"
         },
         {
-          "headline": "Four teams Mike Tomlin could coach in 2026",
-          "summary": "As speculation grows about Mike Tomlin's future, we explore four potential teams he could coach in the upcoming season.",
-          "source": "USA TODAY",
-          "url": "https://www.usatoday.com/story/sports/nfl/2026/01/13/mike-tomlin-landing-spots-giants-titans-falcons-dolphins/88162995007/",
-          "date": "2026-01-13"
+          "headline": "An Old Jeweler\u2019s Trick Could Change Nuclear Timekeeping",
+          "summary": "Physicists have discovered a method to construct nuclear clocks using electroplated thorium, achieving results comparable to previous complex methods but with significantly simpler techniques.",
+          "source": "Physics News - ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260107225542.htm",
+          "date": "2026-01-08"
         }
       ],
-      "updated_at_iso": "2026-01-14T06:22:25.909096+00:00"
+      "updated_at_iso": "2026-01-17T03:59:35.086122+00:00"
     },
-    "expires_at": 1768386145.909177
+    "expires_at": 1768636775.0861702
   },
-  "tech:en": {
+  "science others:en": {
     "value": {
-      "category": "tech",
+      "category": "science others",
       "articles": [
         {
-          "headline": "Taiwan seeks arrest of Chinese smartphone maker OnePlus CEO over illegal hires",
-          "summary": "Taiwan prosecutors have issued an arrest warrant for the chief executive officer of Chinese smartphone maker OnePlus, alleging he was involved in illegal business and recruitment activities in Taiwan.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/asia-pacific/taiwan-seeks-arrest-chinese-smartphone-maker-oneplus-ceo-over-illegal-hires-2026-01-14/",
-          "date": "2026-01-14"
+          "headline": "This fish may play a hole in its head like a drum",
+          "summary": "The rockhead poacher is a little fish with a big pit in its head. The divot may be like a drum, making sound that rises above a chaotic, nearshore din.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/rockhead-poacher-fish-play-hole-drum",
+          "date": "2026-01-17"
         },
         {
-          "headline": "Chipmaker Nexperia and Chinese owner Wingtech fight for control in Dutch court",
-          "summary": "Nexperia, a chipmaker, and its Chinese owner Wingtech are embroiled in a legal battle over control in a Dutch court.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/china/chipmaker-nexperia-chinese-owner-wingtech-fight-control-dutch-court-2026-01-14/",
-          "date": "2026-01-14"
+          "headline": "A long-lost tectonic fragment may be shaking Northern California",
+          "summary": "A hidden tectonic plate boundary may have been the source of seismic activity in Northern California, suggesting a long-lost tectonic fragment.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/lost-tectonic-california-earthquake",
+          "date": "2026-01-17"
         },
         {
-          "headline": "\u2018Are you dead?\u2019 Chinese app for single living goes viral",
-          "summary": "A Chinese app designed to check on individuals living alone has gone viral, raising questions about its implications for safety and social interaction.",
-          "source": "Tech News",
-          "url": "https://www.reuters.com/world/asia-pacific/are-you-dead-chinese-app-single-living-goes-viral-2026-01-14/",
-          "date": "2026-01-14"
+          "headline": "Animal personalities can play a big role in saving species",
+          "summary": "Research indicates that understanding animal personalities may be crucial for conservation efforts and saving endangered species.",
+          "source": "Science News",
+          "url": "https://www.sciencenews.org/article/animals-personalities-saving-species",
+          "date": "2026-01-15"
         },
         {
-          "headline": "Big Tech is poaching energy talent to fuel its AI ambitions",
-          "summary": "Major tech companies like Google and Microsoft are hiring talent from the energy sector to advance their artificial intelligence initiatives.",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/01/14/big-tech-google-microsoft-energy-hiring-ai.html",
-          "date": "2026-01-14"
+          "headline": "Researchers Found a Tipping Point for Video Gaming and Health",
+          "summary": "A study reveals that while moderate video gaming is harmless, excessive gaming can negatively impact young people's health, leading to poorer diets and sleep.",
+          "source": "ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260116035311.htm",
+          "date": "2026-01-16"
         },
         {
-          "headline": "Meta\u2019s VR layoffs, studio closures underscore Zuckerberg\u2019s massive pivot to AI",
-          "summary": "Meta has announced layoffs in its virtual reality division and the closure of studios, highlighting CEO Mark Zuckerberg's shift in focus towards artificial intelligence.",
-          "source": "CNBC",
-          "url": "https://www.cnbc.com/2026/01/13/meta-lays-off-vr-employees-underscoring-zuckerbergs-pivot-to-ai.html",
-          "date": "2026-01-13"
+          "headline": "NASA Brings Crew-11 Home Early in Rare Medical Evacuation",
+          "summary": "NASA's Crew-11 astronauts returned safely to Earth after a medical evacuation from the International Space Station, completing over 140 experiments.",
+          "source": "ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260116045344.htm",
+          "date": "2026-01-16"
         }
       ],
-      "updated_at_iso": "2026-01-14T06:22:27.868390+00:00"
+      "updated_at_iso": "2026-01-17T03:59:43.191427+00:00"
     },
-    "expires_at": 1768386147.868463
+    "expires_at": 1768636783.191446
+  },
+  "tech ai:en": {
+    "value": {
+      "category": "tech AI",
+      "articles": [
+        {
+          "headline": "AI cloud startup Runpod hits $120M in ARR \u2014 and it started with a Reddit post",
+          "summary": "Runpod, an AI cloud startup, has achieved an annual recurring revenue of $120 million, originating from a post on Reddit.",
+          "source": "AI News & Artificial Intelligence",
+          "url": "https://techcrunch.com/2026/01/16/ai-cloud-startup-runpod-hits-120m-in-arr-and-it-started-with-a-reddit-post/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "California AG sends Musk\u2019s xAI a cease-and-desist order over sexual deepfakes",
+          "summary": "California's Attorney General has issued a cease-and-desist order to Elon Musk's xAI, demanding it halt the creation of nonconsensual sexualized imagery.",
+          "source": "AI News & Artificial Intelligence",
+          "url": "https://techcrunch.com/2026/01/16/california-ag-sends-musks-xai-a-cease-and-desist-order-over-sexual-deepfakes/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "From OpenAI\u2019s offices to a deal with Eli Lilly \u2014 how Chai Discovery became one of the flashiest names in AI drug development",
+          "summary": "Chai Discovery has rapidly gained recognition in AI drug development, securing a deal with Eli Lilly after its origins at OpenAI.",
+          "source": "AI News & Artificial Intelligence",
+          "url": "https://techcrunch.com/2026/01/16/from-openais-offices-to-a-deal-with-eli-lilly-how-chai-discovery-became-one-of-the-flashiest-names-in-ai-drug-development/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "ChatGPT users are about to get hit with targeted ads",
+          "summary": "OpenAI is set to introduce targeted advertisements to users of ChatGPT, marking a significant shift in its monetization strategy.",
+          "source": "AI News & Artificial Intelligence",
+          "url": "https://techcrunch.com/2026/01/16/chatgpt-users-are-about-to-get-hit-with-targeted-ads/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "The Global Memory-Chip Shortage Will Cost Us All",
+          "summary": "A shortage of a specific type of microchip crucial for AI companies threatens to increase prices of electronics and limit data-center capabilities.",
+          "source": "Artificial Intelligence - Latest AI News and Analysis",
+          "url": "https://www.wsj.com/tech/ai/memory-ram-shortage-2026-f55324b0?mod=ai_lead_story",
+          "date": "2026-01-17"
+        }
+      ],
+      "updated_at_iso": "2026-01-17T03:59:55.987143+00:00"
+    },
+    "expires_at": 1768636795.987167
+  },
+  "sports tennis:en": {
+    "value": {
+      "category": "sports tennis",
+      "articles": [
+        {
+          "headline": "Era-defining rivalries continue as the Australian Open starts",
+          "summary": "The Australian Open kicks off with key questions surrounding rivalries and potential career Grand Slams for top players.",
+          "source": "BBC Sport",
+          "url": "https://www.bbc.com/sport/tennis/articles/cpv7j1xvd4do",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "Alcaraz reflects on 'a chapter of life' ending after Ferrero split",
+          "summary": "Carlos Alcaraz discusses his emotional split from coach Juan Carlos Ferrero ahead of the Australian Open.",
+          "source": "BBC Sport",
+          "url": "https://www.bbc.com/sport/tennis/articles/c2lg7y0dj02o",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "Players divided on Grand Slam demands as Australian Open approaches",
+          "summary": "Tennis players express differing views on the demands of Grand Slam tournaments as the Australian Open nears.",
+          "source": "BBC Sport",
+          "url": "https://www.bbc.com/sport/tennis/articles/cx20qkgv08go",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "Rune criticizes expanded Masters 1000 events for being overly demanding",
+          "summary": "Danish tennis star Holger Rune voices concerns about the physical demands of the expanded Masters 1000 events.",
+          "source": "Sky Sports",
+          "url": "https://www.skysports.com/tennis/news/12028/13493846/holger-rune-tennis-has-become-more-physically-and-unnecessarily-demanding-due-to-expanded-masters-1000-events",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "Gauff calls for increased prize money at Grand Slams",
+          "summary": "Coco Gauff advocates for higher prize money at Grand Slam events, stating that current amounts are insufficient.",
+          "source": "Sky Sports",
+          "url": "https://www.skysports.com/tennis/news/12040/13494904/australian-open-coco-gauff-says-grand-slam-prize-money-not-where-we-would-like-it-ahead-of-first-major-of-2026",
+          "date": "2026-01-16"
+        }
+      ],
+      "updated_at_iso": "2026-01-17T04:01:00.247666+00:00"
+    },
+    "expires_at": 1768636860.247723
+  },
+  "science geography:en": {
+    "value": {
+      "category": "science geography",
+      "articles": [
+        {
+          "headline": "Forest Loss Is Driving Mosquitoes\u2019 Thirst for Human Blood",
+          "summary": "In the rapidly disappearing Atlantic Forest, mosquitoes are adapting to a human-dominated landscape, preferring to feed on people rather than wildlife, raising public health concerns.",
+          "source": "Geography News - ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260115022754.htm",
+          "date": "2026-01-15"
+        },
+        {
+          "headline": "A 3,000-year High: Alaska\u2019s Arctic Is Entering a Dangerous New Fire Era",
+          "summary": "Wildfires in Alaska's North Slope, once rare, are becoming more frequent due to climate change, with warming temperatures drying soils and increasing shrub growth.",
+          "source": "Geography News - ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260114084119.htm",
+          "date": "2026-01-14"
+        },
+        {
+          "headline": "\u201cMarine Darkwaves\u201d: Hidden Ocean Blackouts Are Putting Sealife at Risk",
+          "summary": "Scientists have identified underwater darkness episodes, caused by various environmental factors, that threaten marine life by disrupting ecosystems.",
+          "source": "Geography News - ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260114084115.htm",
+          "date": "2026-01-14"
+        },
+        {
+          "headline": "The Ocean Absorbed a Stunning Amount of Heat in 2025",
+          "summary": "Earth's oceans reached record heat levels in 2025, absorbing excess energy and contributing to more intense storms and rising sea levels.",
+          "source": "Geography News - ScienceDaily",
+          "url": "https://www.sciencedaily.com/releases/2026/01/260114080328.htm",
+          "date": "2026-01-14"
+        },
+        {
+          "headline": "Landscape beneath Antarctica's icy surface revealed in unprecedented detail",
+          "summary": "A new map of Antarctica's landscape could provide insights into how the ice sheet will respond to climate change, influencing global sea levels.",
+          "source": "BBC",
+          "url": "https://www.bbc.com/news/articles/c9qpx2qqeq7o",
+          "date": "2026-01-16"
+        }
+      ],
+      "updated_at_iso": "2026-01-17T04:01:00.248375+00:00"
+    },
+    "expires_at": 1768636860.248405
+  },
+  "tech industry:en": {
+    "value": {
+      "category": "tech industry",
+      "articles": [
+        {
+          "headline": "Nvidia H200 chip parts suppliers halt output after China blocks shipments, FT reports",
+          "summary": "Suppliers of parts for Nvidia's H200 have paused production after Chinese customs officials blocked shipments of the newly approved artificial intelligence processors from entering China.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/world/china/nvidia-suppliers-halt-h200-output-after-china-blocks-chip-shipments-ft-reports-2026-01-17/",
+          "date": "2026-01-17"
+        },
+        {
+          "headline": "OpenAI to test ads in ChatGPT in bid to boost revenue",
+          "summary": "OpenAI is set to begin testing advertisements in ChatGPT's free and pro tiers as part of its strategy to increase revenue.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/business/openai-begin-testing-ads-chatgpts-free-go-tiers-2026-01-16/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "California demands Elon Musk's xAI stop producing sexual deepfake content",
+          "summary": "The California Attorney General has sent a letter demanding that xAI, founded by Elon Musk, cease the production of sexual deepfake content.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/sustainability/society-equity/california-ag-sends-letter-demanding-xai-stop-producing-deekfake-content-2026-01-16/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "How a hacking campaign targeted high-profile Gmail and WhatsApp users across the Middle East",
+          "summary": "A new report reveals a hacking campaign that specifically targeted high-profile users of Gmail and WhatsApp in the Middle East.",
+          "source": "TechCrunch",
+          "url": "https://techcrunch.com/2026/01/16/how-a-hacking-campaign-targeted-high-profile-gmail-and-whatsapp-users-across-the-middle-east/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "AI research boost: University of Washington expands infrastructure with $10M in federal funding",
+          "summary": "The University of Washington is set to expand its AI research infrastructure with a $10 million federal funding boost aimed at balancing AI development driven by private capital.",
+          "source": "GeekWire",
+          "url": "https://www.geekwire.com/2026/ai-research-boost-university-of-washington-expands-infrastructure-with-10m-in-federal-funding/",
+          "date": "2026-01-16"
+        }
+      ],
+      "updated_at_iso": "2026-01-17T04:02:17.208336+00:00"
+    },
+    "expires_at": 1768636937.208389
+  },
+  "tech others:en": {
+    "value": {
+      "category": "tech others",
+      "articles": [
+        {
+          "headline": "Nvidia H200 chip parts suppliers halt output after China blocks shipments, FT reports",
+          "summary": "Suppliers of parts for Nvidia's H200 have paused production after Chinese customs officials blocked shipments of the newly approved artificial intelligence processors from entering China.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/world/china/nvidia-suppliers-halt-h200-output-after-china-blocks-chip-shipments-ft-reports-2026-01-17/",
+          "date": "2026-01-17"
+        },
+        {
+          "headline": "OpenAI to test ads in ChatGPT in bid to boost revenue",
+          "summary": "OpenAI is set to begin testing advertisements in its ChatGPT service as part of an effort to increase revenue.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/business/openai-begin-testing-ads-chatgpts-free-go-tiers-2026-01-16/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "California demands Elon Musk's xAI stop producing sexual deepfake content",
+          "summary": "The California Attorney General has sent a letter to Elon Musk's xAI demanding that the company cease the production of sexual deepfake content.",
+          "source": "Reuters",
+          "url": "https://www.reuters.com/sustainability/society-equity/california-ag-sends-letter-demanding-xai-stop-producing-deekfake-content-2026-01-16/",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "AI research boost: University of Washington expands infrastructure with $10M in federal funding",
+          "summary": "The University of Washington is set to expand its AI research infrastructure with a $10 million federal funding boost aimed at countering private capital-driven AI development.",
+          "source": "GeekWire",
+          "url": "https://www.geekwire.com/2026/ai-research-boost-university-of-washington-expands-infrastructure-with-10m-in-federal-funding/",
+          "date": "2026-01-17"
+        },
+        {
+          "headline": "Mother of Elon Musk\u2019s son sues his xAI over AI-deepfake images",
+          "summary": "The mother of Elon Musk's son has filed a lawsuit against xAI, alleging the company is responsible for the creation of AI-generated deepfake images.",
+          "source": "CNN Business",
+          "url": "https://www.cnn.com/2026/01/15/business/elon-musk-son-mom-sues-grok-images?utm_source=business_ribbon",
+          "date": "2026-01-15"
+        }
+      ],
+      "updated_at_iso": "2026-01-17T04:02:20.043545+00:00"
+    },
+    "expires_at": 1768636940.043626
+  },
+  "sports basketball:en": {
+    "value": {
+      "category": "sports basketball",
+      "articles": [
+        {
+          "headline": "NBA and FIBA Push for New European League",
+          "summary": "Commissioner Adam Silver announced that the NBA and FIBA are advancing plans for a new basketball league in Europe, with discussions involving teams from Berlin and Real Madrid.",
+          "source": "NBA News - Latest team, player and league news | NBA.com",
+          "url": "https://www.nba.com/news/commissioner-silver-nba-fiba-europe-league-berlin-game",
+          "date": "2026-01-15"
+        },
+        {
+          "headline": "NBA Midseason On-Off Leaders Revealed",
+          "summary": "As the NBA season reaches its midpoint, the league has released a list of the top players based on their on-off statistics, showcasing their impact on the court.",
+          "source": "NBA News - Latest team, player and league news | NBA.com",
+          "url": "https://www.nba.com/news/nba-midseason-on-off-leaders-2025-26",
+          "date": "2026-01-15"
+        },
+        {
+          "headline": "Spurs' Wembanyama and Johnson Have Fun Shaving Heads",
+          "summary": "In a light-hearted moment, Spurs players Victor Wembanyama and Keldon Johnson were seen shaving each other\u2019s heads, showcasing team camaraderie.",
+          "source": "NBA News - Latest team, player and league news | NBA.com",
+          "url": "https://www.nba.com/news/the-athletic-victor-wembanyama-keldon-johnson-shave-heads",
+          "date": "2026-01-15"
+        },
+        {
+          "headline": "NBA Discusses 'NBA Europe' with Real Madrid and Berlin",
+          "summary": "The NBA is in talks about its vision for a proposed European basketball league, involving discussions with clubs like Real Madrid and teams in Berlin.",
+          "source": "BBC Sport",
+          "url": "https://www.bbc.com/sport/basketball/articles/ce9y35287l8o",
+          "date": "2026-01-16"
+        },
+        {
+          "headline": "Kevin Durant Surpasses Wilt Chamberlain on All-Time Scoring List",
+          "summary": "Kevin Durant has officially passed NBA legend Wilt Chamberlain on the all-time scoring list, marking a significant milestone in his career.",
+          "source": "BBC Sport",
+          "url": "https://www.bbc.com/sport/basketball/articles/cvgrqe2eggjo",
+          "date": "2026-01-10"
+        }
+      ],
+      "updated_at_iso": "2026-01-17T04:02:34.852799+00:00"
+    },
+    "expires_at": 1768636954.8528771
   }
 }

@@ -171,6 +171,48 @@
     border-bottom: 2px solid #ff4b2b;
 }
 
+/* Container for the sub-category pills */
+.news-sub-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    overflow-x: auto; /* Allow scrolling if many tags */
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    white-space: nowrap;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.news-sub-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome */
+}
+
+/* Individual Pill Style */
+.news-sub-tab {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6c757d;
+    background: #e9ecef;
+    padding: 4px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-transform: capitalize;
+}
+
+.news-sub-tab:hover {
+    background: #dee2e6;
+    color: #212529;
+}
+
+/* Active Sub-tab State */
+.news-sub-tab.active {
+    background: #212529;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+
 /* List Container */
 .news-container {
     flex: 1;

@@ -3,7 +3,9 @@ export declare class NewsGadget {
     private listEl;
     private tickerEl;
     private footerEl;
-    private activeCategory;
+    private subTabsContainer;
+    private activeMain;
+    private activeSub;
     private memCache;
     private currentArticles;
     private currentHeadlineIdx;
@@ -11,13 +13,14 @@ export declare class NewsGadget {
     private refreshTimer;
     constructor(root: HTMLElement);
     private startAutoRefresh;
-    private refreshAllCategories;
-    private switchTab;
+    private switchMainTab;
+    private switchSubTab;
     private fetchCategoryData;
+    private refreshAllCategories;
     private saveLocalData;
     private getLocalData;
-    private updateStatus;
     private renderList;
     private updateTicker;
+    private updateStatus;
 }
 //# sourceMappingURL=news.d.ts.map
